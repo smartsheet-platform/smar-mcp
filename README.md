@@ -6,7 +6,6 @@ A Model Context Protocol (MCP) server for interacting with the Smartsheet API. T
 
 - Search for sheets in Smartsheet
 - Get detailed information about a specific sheet
-- Update sheet properties
 - Formatted responses optimized for AI consumption
 
 ## Installation

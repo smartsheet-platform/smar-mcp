@@ -1,0 +1,31 @@
+{
+  "name": "smar-mcp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "smartsheet": "./bin/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js",
+    "start": "node -r dotenv/config build/index.js",
+    "dev": "npm run build && npm run start"
+  },
+  "keywords": [],
+  "author": "Smartsheet",
+  "license": "UNLICENSED",
+  "description": "",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "dotenv": "^16.4.7",
+    "smartsheet": "^4.2.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  },
+  "files": [
+    "build"
+  ]
+}

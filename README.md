@@ -1,6 +1,6 @@
 # Smartsheet MCP Server
 
-A Model Context Protocol (MCP) server for interacting with the Smartsheet API. This server provides tools for searching, retrieving, and updating Smartsheet sheets through the MCP protocol.
+A Model Context Protocol[https://modelcontextprotocol.io/] (MCP) server for interacting with the Smartsheet API. This server provides tools for searching, retrieving, and updating Smartsheet sheets through the MCP protocol.
 
 ## Features
 

@@ -138,6 +138,7 @@ npm run build
 
 - `src/index.ts`: Main entry point and MCP tool definitions
 - `src/smartsheet-utils.ts`: Smartsheet client initialization
+- `src/smartsheet-types`: Classes representing Smartsheet API objects
 - `.env`: Environment variables
 - `.env.example`: Template for environment variables
 -  `claude_desktop_config-example.json`: Example claude desktop config to connect with the tool - Set your Smartsheet key in the env setting. 
@@ -147,7 +148,15 @@ npm run build
 Follow the steps at https://modelcontextprotocol.io/quickstart/server under "Testing your server with Claude for Desktop
 "
 
-See claude_desktop_config-example.json as an example config to use 
+See claude_desktop_config-example.json as an example config to use
+
+Roo:
+Run `npm run dev` and make sure your MCP is running locally.
+
+In the Roo Code plug-in, click on the MCP Servers button then Edit MCP Settings. Copy over the text in the `claude_desktop_config-example.json` file over (it should be the same) and make the necessary changes to match your environment.
+
+You should see the MCP Service listed above the Edit MCP Settings button. If not, check that your config is correct and your API key is properly set. If it is, try restarting VS Code.
+
 ## License
 
 Smartsheet Internal for now 

@@ -7,43 +7,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { smartsheetClient } from "./smartsheet-utils.js";
+import { SmartsheetCell, SmartsheetColumn, SmartsheetRow, SmartsheetSheet } from "./smartsheet-types/index.js";
 
 const server = new McpServer({
   name: "smartsheet",
   version: "1.0.0",
 });
-
-// Define types for Smartsheet API responses
-interface SmartsheetColumn {
-  id: number;
-  title: string;
-  type: string;
-  index: number;
-  primary?: boolean;
-}
-
-interface SmartsheetCell {
-  columnId: number;
-  value?: any;
-  displayValue?: string;
-}
-
-interface SmartsheetRow {
-  id: number;
-  rowNumber: number;
-  cells: SmartsheetCell[];
-}
-
-interface SmartsheetSheet {
-  id: number;
-  name: string;
-  permalink: string;
-  totalRowCount: number;
-  createdAt: string;
-  modifiedAt: string;
-  columns: SmartsheetColumn[];
-  rows: SmartsheetRow[];
-}
 
 interface FormattedSheet {
   id: number;
@@ -272,6 +241,87 @@ server.tool(
           {
             type: "text",
             text: `Failed to fetch sheet: ${(error as Error).message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "write-row-to-sheet",
+  "Adds a new row to a Smartsheet sheet",
+  {
+    sheetId: z.string().describe("The ID of the sheet to add the row to"),
+    cells: z.array(
+      z.object({
+        columnId: z.number().describe("The ID of the column for this cell"),
+        value: z.any().describe("The value to set for this cell")
+      })
+    ).describe("Array of cells with column IDs and values"),
+    toTop: z.boolean().optional().describe("If true, the row will be added to the top of the sheet. Default is false (add to bottom)."),
+    toBottom: z.boolean().optional().describe("If true, the row will be added to the bottom of the sheet. Default is true."),
+    siblingId: z.number().optional().describe("The row ID to position this row relative to"),
+    above: z.boolean().optional().describe("If true and siblingId is specified, the row will be added above the sibling row"),
+  },
+  async ({ sheetId, cells, toTop, toBottom, siblingId, above }) => {
+    try {
+      console.log(`Adding row to sheet with ID: ${sheetId}`);
+      
+      // Convert sheetId to a number if it's a string
+      const id = Number(sheetId);
+      if (isNaN(id)) {
+        throw new Error(`Invalid sheet ID: ${sheetId}`);
+      }
+      
+      // Prepare the row to add with all possible properties
+      const rowToAdd: {
+        toTop: boolean;
+        toBottom: boolean;
+        cells: { columnId: number; value: any }[];
+        siblingId?: number;
+        above?: boolean;
+      } = {
+        toTop: toTop || false,
+        toBottom: toBottom !== false, // Default to true if not specified
+        cells: cells.map(cell => ({
+          columnId: cell.columnId,
+          value: cell.value
+        })),
+        // Add optional properties if they exist
+        ...(siblingId ? { siblingId } : {}),
+        ...(above !== undefined ? { above } : {})
+      };
+      
+      // Add the row to the sheet
+      const response = await smartsheetClient.sheets.addRows({
+        sheetId: id,
+        body: [rowToAdd]
+      });
+      
+      console.log(`Successfully added row to sheet: ${response.result[0].id}`);
+      
+      // Return the response
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              message: "Row added successfully",
+              rowId: response.result[0].id,
+              rowNumber: response.result[0].rowNumber
+            }, null, 2)
+          }
+        ]
+      };
+    } catch (error) {
+      console.error("Error in write-row-to-sheet:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to add row to sheet: ${(error as Error).message}`
           }
         ],
         isError: true

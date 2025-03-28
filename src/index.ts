@@ -6,192 +6,46 @@ config();
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { smartsheetClient } from "./smartsheet-utils.js";
-import { SmartsheetCell, SmartsheetColumn, SmartsheetRow, SmartsheetSheet } from "./smartsheet-types/index.js";
+import { createSmartsheetDirectAPI } from "./smartsheet-direct-api.js";
+import { createVersionBackup } from "./smartsheet-workflows.js";
 
+// Initialize the MCP server
 const server = new McpServer({
   name: "smartsheet",
   version: "1.0.0",
 });
 
-interface FormattedSheet {
-  id: number;
-  name: string;
-  permalink: string;
-  totalRowCount: number;
-  createdAt: string;
-  modifiedAt: string;
-  columns: {
-    id: number;
-    title: string;
-    type: string;
-    index: number;
-    primary: boolean;
-  }[];
-  rows: {
-    id: number;
-    rowNumber: number;
-    cells: Record<string, any>;
-  }[];
-}
+// Initialize the direct API client
+const api = createSmartsheetDirectAPI();
 
-/**
- * Formats a Smartsheet sheet response to be more readable and concise for Claude
- * @param sheet The sheet response from the Smartsheet API
- * @param smartsheetClient The Smartsheet client instance
- * @returns A formatted version of the sheet
- */
-export function formatSheet(sheet: SmartsheetSheet, smartsheetClient: any): FormattedSheet {
-  // Extract basic sheet information
-  const formattedSheet: FormattedSheet = {
-    id: sheet.id,
-    name: sheet.name,
-    permalink: sheet.permalink,
-    totalRowCount: sheet.totalRowCount,
-    createdAt: sheet.createdAt,
-    modifiedAt: sheet.modifiedAt,
-    
-    // Format columns to be more concise
-    columns: sheet.columns.map((column: SmartsheetColumn) => ({
-      id: column.id,
-      title: column.title,
-      type: column.type,
-      index: column.index,
-      primary: column.primary || false
-    })),
-    
-    // Format rows to be more readable
-    rows: sheet.rows.map((row: SmartsheetRow) => {
-      // Create a map of column titles to cell values for easier reading
-      const cellMap: Record<string, any> = {};
-      
-      row.cells.forEach((cell: SmartsheetCell) => {
-        // Find the column for this cell
-        const column = sheet.columns.find(col => col.id === cell.columnId);
-        if (column && column.title) {
-          // Use the display value if available, otherwise use the raw value
-          cellMap[column.title] = cell.displayValue || cell.value || null;
-        }
-      });
-      
-      return {
-        id: row.id,
-        rowNumber: row.rowNumber,
-        cells: cellMap
-      };
-    })
-  };
-  
-  return formattedSheet;
-}
-
-/**
- * Formats a Smartsheet sheet response as a CSV string
- * @param sheet The sheet response from the Smartsheet API
- * @param smartsheetClient The Smartsheet client instance
- * @returns The sheet data as a CSV string
- */
-function formatSheetAsCSV(sheet: SmartsheetSheet, smartsheetClient: any): string {
-  // Get the column titles
-  const columnTitles = sheet.columns.map(col => col.title);
-
-  // Build the CSV rows
-  const csvRows = [columnTitles.join(',')];
-  sheet.rows.forEach(row => {
-    const cellValues = row.cells.map(cell => {
-      const column = sheet.columns.find(col => col.id === cell.columnId);
-      return column ? (cell.displayValue || cell.value || '').toString() : '';
-    });
-    csvRows.push(cellValues.join(','));
-  });
-
-  return csvRows.join('\n');
-}
-
+// Tool 1: Get Sheet
 server.tool(
-  "search-sheets",
-  "Searches for sheets in Smartsheet",
-  {
-    query: z.string().describe("Search criteria"),
-    options: z.object({
-      page: z.number().optional(),
-      size: z.number().optional(),
-      sortBy: z.string().optional(),
-    }).optional().describe("Optional parameters for pagination and sorting"),
-  },
-  async ({ query, options }) => {
-    try {
-      const response = await smartsheetClient.sheets.listSheets({
-        query,
-        ...(options || {}),
-      });
-      
-      // Format the response to only include name and permalink
-      const formattedResponse = {
-        totalCount: response.totalCount,
-        sheets: response.data.map((sheet: any) => ({
-          name: sheet.name,
-          permalink: sheet.permalink
-        }))
-      };
-      
-      // Convert to the expected MCP response format
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(formattedResponse, null, 2)
-          }
-        ]
-      };
-    } catch (error) {
-      console.error("Error in search-sheets:", error);
-      throw new Error(`Failed to search sheets: ${(error as Error).message}`);
-    }
-  }
-);
-
-server.tool(
-  "get-sheet",
-  "Gets a sheet from Smartsheet by its ID",
+  "get_sheet",
+  "Retrieves the current state of a sheet, including rows, columns, and cells",
   {
     sheetId: z.string().describe("The ID of the sheet to retrieve"),
+    include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'format,formulas')"),
   },
-  async ({ sheetId }) => {
+  async ({ sheetId, include }) => {
     try {
-      console.log(`Fetching sheet with ID: ${sheetId}`);
+      console.error(`[Tool] Getting sheet with ID: ${sheetId}`);
+      const sheet = await api.getSheet(sheetId, include);
       
-      // Convert sheetId to a number if it's a string
-      const id = Number(sheetId);
-      if (isNaN(id)) {
-        throw new Error(`Invalid sheet ID: ${sheetId}`);
-      }
-      
-      const sheet = await smartsheetClient.sheets.getSheet({
-        id
-      });
-      
-      console.log(`Successfully fetched sheet: ${sheet.name}`);
-      
-      // Format the sheet to be more readable for Claude
-      const formattedSheet = formatSheet(sheet, smartsheetClient);
-      
-      // Convert to the expected MCP response format
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify(formattedSheet, null, 2)
+            text: JSON.stringify(sheet, null, 2)
           }
         ]
       };
-    } catch (error) {
-      console.error("Error in get-sheet:", error);
+    } catch (error: any) {
+      console.error("[Error] in get_sheet:", error);
       return {
         content: [
           {
             type: "text",
-            text: `Failed to fetch sheet: ${(error as Error).message}`
+            text: `Failed to get sheet: ${error.message}`
           }
         ],
         isError: true
@@ -200,47 +54,33 @@ server.tool(
   }
 );
 
+// Tool 2: Get Sheet Version
 server.tool(
-  "get-sheet-as-csv",
-  "Gets a sheet from Smartsheet by its ID and returns it as a CSV",
+  "get_sheet_version",
+  "Gets the current version number of a sheet",
   {
-    sheetId: z.string().describe("The ID of the sheet to retrieve"),
+    sheetId: z.string().describe("The ID of the sheet"),
   },
   async ({ sheetId }) => {
     try {
-      console.log(`Fetching sheet with ID: ${sheetId}`);
+      console.error(`[Tool] Getting version for sheet with ID: ${sheetId}`);
+      const version = await api.getSheetVersion(sheetId);
       
-      // Convert sheetId to a number if it's a string
-      const id = Number(sheetId);
-      if (isNaN(id)) {
-        throw new Error(`Invalid sheet ID: ${sheetId}`);
-      }
-      
-      const sheet = await smartsheetClient.sheets.getSheet({
-        id
-      });
-      
-      console.log(`Successfully fetched sheet: ${sheet.name}`);
-      
-      // Format the sheet as a CSV string
-      const csvData = formatSheetAsCSV(sheet, smartsheetClient);
-      
-      // Convert to the expected MCP response format
       return {
         content: [
           {
             type: "text",
-            text: csvData
+            text: JSON.stringify(version, null, 2)
           }
         ]
       };
-    } catch (error) {
-      console.error("Error in get-sheet-as-csv:", error);
+    } catch (error: any) {
+      console.error("[Error] in get_sheet_version:", error);
       return {
         content: [
           {
             type: "text",
-            text: `Failed to fetch sheet: ${(error as Error).message}`
+            text: `Failed to get sheet version: ${error.message}`
           }
         ],
         isError: true
@@ -249,79 +89,86 @@ server.tool(
   }
 );
 
+// Tool 3: Get Cell History
 server.tool(
-  "write-row-to-sheet",
-  "Adds a new row to a Smartsheet sheet",
+  "get_cell_history",
+  "Retrieves the history of changes for a specific cell",
   {
-    sheetId: z.string().describe("The ID of the sheet to add the row to"),
-    cells: z.array(
+    sheetId: z.string().describe("The ID of the sheet"),
+    rowId: z.string().describe("The ID of the row"),
+    columnId: z.string().describe("The ID of the column"),
+    include: z.string().optional().describe("Optional parameter to include additional information"),
+    pageSize: z.number().optional().describe("Number of history entries to return per page"),
+    page: z.number().optional().describe("Page number to return"),
+  },
+  async ({ sheetId, rowId, columnId, include, pageSize, page }) => {
+    try {
+      console.error(`[Tool] Getting history for cell at row ${rowId}, column ${columnId} in sheet ${sheetId}`);
+      const history = await api.getCellHistory(sheetId, rowId, columnId, include, pageSize, page);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(history, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in get_cell_history:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to get cell history: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
+// Tool 4: Update Rows
+server.tool(
+  "update_rows",
+  "Updates rows in a sheet, including cell values, formatting, and formulae",
+  {
+    sheetId: z.string().describe("The ID of the sheet"),
+    rows: z.array(
       z.object({
-        columnId: z.number().describe("The ID of the column for this cell"),
-        value: z.any().describe("The value to set for this cell")
+        id: z.string().describe("Row ID"),
+        cells: z.array(
+          z.object({
+            columnId: z.number().or(z.string()).describe("Column ID"),
+            value: z.any().optional().describe("Cell value"),
+            formula: z.string().optional().describe("Cell formula"),
+            format: z.string().optional().describe("Cell format"),
+          })
+        ).describe("Array of cell objects"),
       })
-    ).describe("Array of cells with column IDs and values"),
-    toTop: z.boolean().optional().describe("If true, the row will be added to the top of the sheet. Default is false (add to bottom)."),
-    toBottom: z.boolean().optional().describe("If true, the row will be added to the bottom of the sheet. Default is true."),
-    siblingId: z.number().optional().describe("The row ID to position this row relative to"),
-    above: z.boolean().optional().describe("If true and siblingId is specified, the row will be added above the sibling row"),
+    ).describe("Array of row objects to update"),
   },
-  async ({ sheetId, cells, toTop, toBottom, siblingId, above }) => {
+  async ({ sheetId, rows }) => {
     try {
-      console.log(`Adding row to sheet with ID: ${sheetId}`);
+      console.error(`[Tool] Updating ${rows.length} rows in sheet ${sheetId}`);
+      const result = await api.updateRows(sheetId, rows);
       
-      // Convert sheetId to a number if it's a string
-      const id = Number(sheetId);
-      if (isNaN(id)) {
-        throw new Error(`Invalid sheet ID: ${sheetId}`);
-      }
-      
-      // Prepare the row to add with all possible properties
-      const rowToAdd: {
-        toTop: boolean;
-        toBottom: boolean;
-        cells: { columnId: number; value: any }[];
-        siblingId?: number;
-        above?: boolean;
-      } = {
-        toTop: toTop || false,
-        toBottom: toBottom !== false, // Default to true if not specified
-        cells: cells.map(cell => ({
-          columnId: cell.columnId,
-          value: cell.value
-        })),
-        // Add optional properties if they exist
-        ...(siblingId ? { siblingId } : {}),
-        ...(above !== undefined ? { above } : {})
-      };
-      
-      // Add the row to the sheet
-      const response = await smartsheetClient.sheets.addRows({
-        sheetId: id,
-        body: [rowToAdd]
-      });
-      
-      console.log(`Successfully added row to sheet: ${response.result[0].id}`);
-      
-      // Return the response
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify({
-              message: "Row added successfully",
-              rowId: response.result[0].id,
-              rowNumber: response.result[0].rowNumber
-            }, null, 2)
+            text: JSON.stringify(result, null, 2)
           }
         ]
       };
-    } catch (error) {
-      console.error("Error in write-row-to-sheet:", error);
+    } catch (error: any) {
+      console.error("[Error] in update_rows:", error);
       return {
         content: [
           {
             type: "text",
-            text: `Failed to add row to sheet: ${(error as Error).message}`
+            text: `Failed to update rows: ${error.message}`
           }
         ],
         isError: true
@@ -330,7 +177,261 @@ server.tool(
   }
 );
 
+// Tool 5: Add Rows
+server.tool(
+  "add_rows",
+  "Adds new rows to a sheet",
+  {
+    sheetId: z.string().describe("The ID of the sheet"),
+    rows: z.array(
+      z.object({
+        toTop: z.boolean().optional().describe("Add row to the top of the sheet"),
+        toBottom: z.boolean().optional().describe("Add row to the bottom of the sheet"),
+        cells: z.array(
+          z.object({
+            columnId: z.number().or(z.string()).describe("Column ID"),
+            value: z.any().optional().describe("Cell value"),
+            formula: z.string().optional().describe("Cell formula"),
+            format: z.string().optional().describe("Cell format"),
+          })
+        ).describe("Array of cell objects"),
+      })
+    ).describe("Array of row objects to add"),
+  },
+  async ({ sheetId, rows }) => {
+    try {
+      console.error(`[Tool] Adding ${rows.length} rows to sheet ${sheetId}`);
+      const result = await api.addRows(sheetId, rows);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in add_rows:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to add rows: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
 
+// Tool 6: Delete Rows
+server.tool(
+  "delete_rows",
+  "Deletes rows from a sheet",
+  {
+    sheetId: z.string().describe("The ID of the sheet"),
+    rowIds: z.array(z.string()).describe("Array of row IDs to delete"),
+    ignoreRowsNotFound: z.boolean().optional().describe("If true, don't throw an error if rows are not found"),
+  },
+  async ({ sheetId, rowIds, ignoreRowsNotFound }) => {
+    try {
+      console.error(`[Tool] Deleting ${rowIds.length} rows from sheet ${sheetId}`);
+      const result = await api.deleteRows(sheetId, rowIds, ignoreRowsNotFound);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in delete_rows:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to delete rows: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
+// Tool 7: Get Sheet Location
+server.tool(
+  "get_sheet_location",
+  "Gets the folder ID where a sheet is located",
+  {
+    sheetId: z.string().describe("The ID of the sheet"),
+  },
+  async ({ sheetId }) => {
+    try {
+      console.error(`[Tool] Getting location for sheet ${sheetId}`);
+      const location = await api.getSheetLocation(sheetId);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(location, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in get_sheet_location:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to get sheet location: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
+// Tool 8: Copy Sheet
+server.tool(
+  "copy_sheet",
+  "Creates a copy of the specified sheet in the same folder",
+  {
+    sheetId: z.string().describe("The ID of the sheet to copy"),
+    destinationName: z.string().describe("Name for the sheet copy"),
+    destinationFolderId: z.string().optional().describe("ID of the destination folder (same as source if not specified)"),
+  },
+  async ({ sheetId, destinationName, destinationFolderId }) => {
+    try {
+      console.error(`[Tool] Copying sheet ${sheetId} to "${destinationName}"`);
+      
+      // If no destination folder is specified, get the current folder
+      if (!destinationFolderId) {
+        try {
+          const location = await api.getSheetLocation(sheetId);
+          destinationFolderId = location.folderId;
+        } catch (error) {
+          console.error("[Warning] Failed to get sheet location, using default folder:", error);
+        }
+      }
+      
+      const result = await api.copySheet(sheetId, destinationName, destinationFolderId);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in copy_sheet:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to copy sheet: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
+// Tool 9: Create Sheet
+server.tool(
+  "create_sheet",
+  "Creates a new sheet",
+  {
+    name: z.string().describe("Name for the new sheet"),
+    columns: z.array(
+      z.object({
+        title: z.string().describe("Column title"),
+        type: z.string().describe("Column type"),
+        primary: z.boolean().optional().describe("Whether this is the primary column"),
+      })
+    ).describe("Array of column objects"),
+    folderId: z.string().optional().describe("ID of the folder where the sheet should be created"),
+  },
+  async ({ name, columns, folderId }) => {
+    try {
+      console.error(`[Tool] Creating new sheet "${name}"`);
+      const result = await api.createSheet(name, columns, folderId);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in create_sheet:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to create sheet: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
+// Tool 10: Create Version Backup (Workflow)
+server.tool(
+  "create_version_backup",
+  "Creates a backup sheet with data from a specific timestamp",
+  {
+    sheetId: z.string().describe("The ID of the source sheet"),
+    timestamp: z.string().describe("The ISO 8601 timestamp to use for historical data (e.g., '2025-03-27T13:00:00Z')"),
+    archiveName: z.string().optional().describe("Name for the archive sheet (defaults to 'Original Sheet Name - Archive YYYY-MM-DD')"),
+    createBackup: z.boolean().default(false).describe("Not used for archive sheet, but required by the interface"),
+    includeFormulas: z.boolean().default(true).describe("Whether to include formulas in the archive"),
+    includeFormatting: z.boolean().default(true).describe("Whether to include formatting in the archive"),
+    batchSize: z.number().default(100).describe("Number of rows to process in each batch"),
+    maxConcurrentRequests: z.number().default(5).describe("Maximum number of concurrent API requests"),
+  },
+  async (options) => {
+    try {
+      console.error(`[Tool] Creating version backup for ${options.sheetId} at timestamp ${options.timestamp}`);
+      const result = await createVersionBackup(api, options);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in create_version_backup:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to create version backup: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
+// Start the server
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);

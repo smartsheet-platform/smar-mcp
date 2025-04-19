@@ -1,4 +1,16 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx --no -- commitlint --edit $1
+# Check if commitlint is installed
+if command -v npx >/dev/null 2>&1; then
+  if npx --no-install commitlint --version >/dev/null 2>&1; then
+    npx --no -- commitlint --edit $1
+  else
+    echo "commitlint is not installed. Skipping commit message validation."
+    echo "Run 'npm install' to install dependencies."
+    exit 0
+  fi
+else
+  echo "npx is not available. Skipping commit message validation."
+  exit 0
+fi

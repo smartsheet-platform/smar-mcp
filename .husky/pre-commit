@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Check if lint-staged is installed
+if command -v npx >/dev/null 2>&1; then
+  if npx --no-install lint-staged --version >/dev/null 2>&1; then
+    npx lint-staged
+  else
+    echo "lint-staged is not installed. Skipping pre-commit hooks."
+    echo "Run 'npm install' to install dependencies."
+    exit 0
+  fi
+else
+  echo "npx is not available. Skipping pre-commit hooks."
+  exit 0
+fi

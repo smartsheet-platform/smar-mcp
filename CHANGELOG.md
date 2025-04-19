@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/smar-imran-khawaja/smar-mcp/compare/v1.0.0...v1.0.1) (2025-04-19)
+
+
+### Bug Fixes
+
+* remove asset ref ([3d40bbd](https://github.com/smar-imran-khawaja/smar-mcp/commit/3d40bbd3d10ff8c4daa9404f99c5979d4dffc6cb))
+
 # 1.0.0 (2025-04-19)
 
 

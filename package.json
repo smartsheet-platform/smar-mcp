@@ -11,7 +11,8 @@
     "start": "node -r dotenv/config build/index.js",
     "dev": "npm run build && npm run start",
     "test": "node -r dotenv/config tests/test-direct-api.js",
-    "setup-claude": "node -r dotenv/config scripts/setup-claude-config.sh"
+    "setup-claude": "node -r dotenv/config scripts/setup-claude-config.sh",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "Smartsheet",
@@ -25,7 +26,14 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.8.1",
+    "@commitlint/config-conventional": "^17.8.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/node": "^22.13.10",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "semantic-release": "^22.0.12",
     "typescript": "^5.8.2"
   },
   "files": [

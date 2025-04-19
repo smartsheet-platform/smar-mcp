@@ -1,0 +1,8 @@
+{
+  "*.{js,ts}": [
+    "echo 'Linting would run here'"
+  ],
+  "*.{json,md}": [
+    "echo 'Formatting would run here'"
+  ]
+}

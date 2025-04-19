@@ -13,8 +13,8 @@ A [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server for in
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/smartsheet-mcp.git
-   cd smartsheet-mcp
+   git clone https://github.com/smar-imran-khawaja/smar-mcp.git
+   cd smar-mcp
    ```
 
 2. Install dependencies:
@@ -252,8 +252,58 @@ Smartsheet Internal for now
 
 ## Contributing
 
+This project uses [Semantic Release](https://github.com/semantic-release/semantic-release) for automated versioning and changelog generation based on commit messages.
+
+### Commit Message Format
+
+We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification for commit messages:
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+#### Types
+
+- `feat`: A new feature (minor version bump)
+- `fix`: A bug fix (patch version bump)
+- `docs`: Documentation only changes
+- `style`: Changes that do not affect the meaning of the code
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `perf`: A code change that improves performance
+- `test`: Adding missing tests or correcting existing tests
+- `chore`: Changes to the build process or auxiliary tools
+
+#### Breaking Changes
+
+Breaking changes should be indicated by adding `BREAKING CHANGE:` in the commit message body or by appending a `!` after the type/scope:
+
+```
+feat!: remove deprecated API
+```
+
+or
+
+```
+feat: allow provided config object to extend other configs
+
+BREAKING CHANGE: `extends` key in config file is now used for extending other config files
+```
+
+### Development Workflow
+
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Make your changes
+4. Commit your changes using the conventional commit format
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+When your PR is merged to the main branch, semantic-release will automatically:
+1. Determine the next version number based on commit messages
+2. Generate release notes
+3. Create a GitHub release
+4. Update the CHANGELOG.md file

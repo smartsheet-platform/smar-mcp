@@ -3,6 +3,10 @@ import { config } from "dotenv";
 // Load environment variables from .env file
 config();
 
+// Control whether deletion operations are enabled
+const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
+console.error(`[Config] Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -226,42 +230,46 @@ server.tool(
   }
 );
 
-// Tool 6: Delete Rows
-server.tool(
-  "delete_rows",
-  "Deletes rows from a sheet",
-  {
-    sheetId: z.string().describe("The ID of the sheet"),
-    rowIds: z.array(z.string()).describe("Array of row IDs to delete"),
-    ignoreRowsNotFound: z.boolean().optional().describe("If true, don't throw an error if rows are not found"),
-  },
-  async ({ sheetId, rowIds, ignoreRowsNotFound }) => {
-    try {
-      console.error(`[Tool] Deleting ${rowIds.length} rows from sheet ${sheetId}`);
-      const result = await api.deleteRows(sheetId, rowIds, ignoreRowsNotFound);
-      
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2)
-          }
-        ]
-      };
-    } catch (error: any) {
-      console.error("[Error] in delete_rows:", error);
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Failed to delete rows: ${error.message}`
-          }
-        ],
-        isError: true
-      };
+// Tool 6: Delete Rows (conditionally registered)
+if (allowDeleteTools) {
+  server.tool(
+    "delete_rows",
+    "Deletes rows from a sheet",
+    {
+      sheetId: z.string().describe("The ID of the sheet"),
+      rowIds: z.array(z.string()).describe("Array of row IDs to delete"),
+      ignoreRowsNotFound: z.boolean().optional().describe("If true, don't throw an error if rows are not found"),
+    },
+    async ({ sheetId, rowIds, ignoreRowsNotFound }) => {
+      try {
+        console.error(`[Tool] Deleting ${rowIds.length} rows from sheet ${sheetId}`);
+        const result = await api.deleteRows(sheetId, rowIds, ignoreRowsNotFound);
+        
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(result, null, 2)
+            }
+          ]
+        };
+      } catch (error: any) {
+        console.error("[Error] in delete_rows:", error);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to delete rows: ${error.message}`
+            }
+          ],
+          isError: true
+        };
+      }
     }
-  }
-);
+  );
+} else {
+  console.error("[Config] Delete operations are disabled. Set ALLOW_DELETE_TOOLS=true to enable them.");
+}
 
 // Tool 7: Get Sheet Location
 server.tool(

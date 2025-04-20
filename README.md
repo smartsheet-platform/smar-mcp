@@ -121,7 +121,7 @@ Adds new rows to a sheet.
 
 ### delete_rows
 
-Deletes rows from a sheet.
+Deletes rows from a sheet. This tool is only available when the ALLOW_DELETE_TOOLS environment variable is set to 'true'.
 
 **Parameters:**
 - `sheetId` (string, required): The ID of the sheet
@@ -205,6 +205,7 @@ const result = await use_mcp_tool({
 ## Environment Variables
 
 - `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
+- `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
 
 ## Development
 

@@ -36,7 +36,7 @@ jobs:
         
       - name: Test
         # Skip tests for now as they need to be updated for TypeScript
-        run: echo "Tests are broken, temporarily skipped"
+        run: echo "Tests temporarily skipped"
         
       - name: Release
         env:

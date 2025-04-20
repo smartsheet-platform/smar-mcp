@@ -268,7 +268,7 @@ if (allowDeleteTools) {
     }
   );
 } else {
-  console.error("[Config] Delete operations are disabled. Set ALLOW_DELETE_TOOLS=true to enable them.");
+  console.info("[Config] Delete operations are disabled. Set ALLOW_DELETE_TOOLS=true to enable them.");
 }
 
 // Tool 7: Get Sheet Location

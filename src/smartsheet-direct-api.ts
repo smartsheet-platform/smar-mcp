@@ -64,7 +64,7 @@ export class SmartsheetDirectAPI {
           headers: {
             'Authorization': `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json',
-            'x-smar-external-client': 'mcp',
+            'User-Agent': 'mcp',
           }
         });
         

@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/smar-imran-khawaja/smar-mcp/compare/v1.0.1...v1.1.0) (2025-04-20)
+
+
+### Bug Fixes
+
+* better log level ([01e9ada](https://github.com/smar-imran-khawaja/smar-mcp/commit/01e9adaa006d68f35e25b37b790c916f5f2f9ba3))
+
+
+### Features
+
+* adds ability to enable delete tools. disabled by default ([7a8ef75](https://github.com/smar-imran-khawaja/smar-mcp/commit/7a8ef75e0af26fc57232470872ac21ab1973b080))
+
 ## [1.0.1](https://github.com/smar-imran-khawaja/smar-mcp/compare/v1.0.0...v1.0.1) (2025-04-19)
 
 

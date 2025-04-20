@@ -252,9 +252,6 @@ In the Roo Code plug-in, click on the MCP Servers button then Edit MCP Settings.
 
 You should see the MCP Service listed above the Edit MCP Settings button. If not, check that your config is correct and your API key is properly set. If it is, try restarting VS Code.
 
-## License
-
-MIT
 
 ## Contributing
 

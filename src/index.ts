@@ -5,7 +5,7 @@ config();
 
 // Control whether deletion operations are enabled
 const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
-console.error(`[Config] Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
+console.info(`[Config] Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";

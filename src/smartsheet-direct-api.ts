@@ -280,6 +280,72 @@ export class SmartsheetDirectAPI {
     
     return this.request('POST', `/workspaces/${workspaceId}/folders`, data);
   }
+  
+  /**
+   * Gets discussions for a sheet
+   * @param sheetId Sheet ID
+   * @param include Optional parameter to include additional information (e.g., 'attachments')
+   * @param pageSize Number of discussions to return per page
+   * @param page Page number to return
+   * @param includeAll Whether to include all results
+   * @returns Sheet discussions
+   */
+  async getSheetDiscussions(
+    sheetId: string,
+    include?: string,
+    pageSize?: number,
+    page?: number,
+    includeAll?: boolean
+  ): Promise<any> {
+    return this.request('GET', `/sheets/${sheetId}/discussions`, undefined, {
+      include,
+      pageSize,
+      page,
+      includeAll
+  }
+  
+  /**
+   * Creates a discussion on a row
+   * @param sheetId Sheet ID
+   * @param rowId Row ID
+   * @param commentText Text of the comment to add
+   * @returns Created discussion data
+   */
+  async createRowDiscussion(
+    sheetId: string,
+    rowId: string,
+    commentText: string
+  ): Promise<any> {
+    const data = {
+      comment: {
+        text: commentText
+      }
+    };
+    
+    return this.request('POST', `/sheets/${sheetId}/rows/${rowId}/discussions`, data);
+  }
+  
+  /**
+   * Creates an update request for a sheet
+   * @param sheetId Sheet ID
+   * @param options Update request options
+   * @returns Created update request data
+   */
+  async createUpdateRequest(
+    sheetId: string,
+    options: {
+      rowIds?: number[];
+      columnIds?: number[];
+      includeAttachments?: boolean;
+      includeDiscussions?: boolean;
+      message?: string;
+      sendTo: { email: string }[];
+      subject?: string;
+      ccMe?: boolean;
+    }
+  ): Promise<any> {
+    return this.request('POST', `/sheets/${sheetId}/updaterequests`, options);
+  }
 }
 
 /**

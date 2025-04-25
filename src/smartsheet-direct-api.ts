@@ -16,8 +16,8 @@ export class SmartsheetDirectAPI {
    * @param accessToken Smartsheet API access token (defaults to SMARTSHEET_API_KEY env variable)
    * @param baseUrl Smartsheet API base URL (defaults to https://api.smartsheet.com/2.0)
    */
-  constructor(accessToken?: string, baseUrl: string = 'https://api.smartsheet.com/2.0') {
-    this.baseUrl = baseUrl;
+  constructor(accessToken?: string, baseUrl?: string) {
+    this.baseUrl = baseUrl || process.env.SMARTSHEET_ENDPOINT || 'https://api.smartsheet.com/2.0';
     this.accessToken = accessToken || process.env.SMARTSHEET_API_KEY || '';
     
     if (!this.accessToken) {
@@ -354,5 +354,5 @@ export class SmartsheetDirectAPI {
  * @returns SmartsheetDirectAPI instance
  */
 export function createSmartsheetDirectAPI(accessToken?: string): SmartsheetDirectAPI {
-  return new SmartsheetDirectAPI(accessToken);
+  return new SmartsheetDirectAPI(accessToken, process.env.SMARTSHEET_ENDPOINT);
 }

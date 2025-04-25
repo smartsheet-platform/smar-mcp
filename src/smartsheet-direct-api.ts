@@ -301,7 +301,8 @@ export class SmartsheetDirectAPI {
       include,
       pageSize,
       page,
-      includeAll
+      includeAll,
+    });
   }
   
   /**
@@ -311,7 +312,7 @@ export class SmartsheetDirectAPI {
    * @param commentText Text of the comment to add
    * @returns Created discussion data
    */
-  async createRowDiscussion(
+ async createRowDiscussion(
     sheetId: string,
     rowId: string,
     commentText: string

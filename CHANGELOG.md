@@ -1,3 +1,16 @@
+# [1.2.0](https://github.com/smar-imran-khawaja/smar-mcp/compare/v1.1.1...v1.2.0) (2025-04-25)
+
+
+### Bug Fixes
+
+* dont convert to string ([7fd4c29](https://github.com/smar-imran-khawaja/smar-mcp/commit/7fd4c29b1abffcf88c89768785f26d423eb0f2e9))
+* fix the bad code suggestion ([27d64cd](https://github.com/smar-imran-khawaja/smar-mcp/commit/27d64cd699ee4005dda62e60191272f59114cd1c))
+
+
+### Features
+
+* adds the ability to send update requests and discussions ([d6a1834](https://github.com/smar-imran-khawaja/smar-mcp/commit/d6a1834ef733bc2948c12d74ab00a8db3ba76da5))
+
 ## [1.1.1](https://github.com/smar-imran-khawaja/smar-mcp/compare/v1.1.0...v1.1.1) (2025-04-20)
 
 

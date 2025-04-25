@@ -301,8 +301,7 @@ export class SmartsheetDirectAPI {
       include,
       pageSize,
       page,
-      includeAll: includeAll?.toString()
-    });
+      includeAll
   }
   
   /**

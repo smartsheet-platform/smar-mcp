@@ -439,6 +439,138 @@ server.tool(
   }
 );
 
+// Tool 11: Get Sheet Discussions
+server.tool(
+  "get_sheet_discussions",
+  "Retrieves the discussions for a sheet",
+  {
+    sheetId: z.string().describe("The ID of the sheet"),
+    include: z.string().optional().describe("Optional parameter to include additional information (e.g., 'attachments')"),
+    pageSize: z.number().optional().describe("Number of discussions to return per page"),
+    page: z.number().optional().describe("Page number to return"),
+    includeAll: z.boolean().optional().describe("Whether to include all results"),
+  },
+  async ({ sheetId, include, pageSize, page, includeAll }) => {
+    try {
+      console.error(`[Tool] Getting discussions for sheet ${sheetId}`);
+      const discussions = await api.getSheetDiscussions(sheetId, include, pageSize, page, includeAll);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(discussions, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in get_sheet_discussions:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to get sheet discussions: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
+// Tool 12: Create Row Discussion
+server.tool(
+  "create_row_discussion",
+  "Creates a discussion on a specific row",
+  {
+    sheetId: z.string().describe("The ID of the sheet"),
+    rowId: z.string().describe("The ID of the row"),
+    commentText: z.string().describe("Text of the comment to add"),
+  },
+  async ({ sheetId, rowId, commentText }) => {
+    try {
+      console.error(`[Tool] Creating discussion on row ${rowId} in sheet ${sheetId}`);
+      const result = await api.createRowDiscussion(sheetId, rowId, commentText);
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in create_row_discussion:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to create row discussion: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
+// Tool 13: Create Update Request
+server.tool(
+  "create_update_request",
+  "Creates an update request for a sheet",
+  {
+    sheetId: z.string().describe("The ID of the sheet"),
+    rowIds: z.array(z.number()).optional().describe("Array of row IDs to include in the update request"),
+    columnIds: z.array(z.number()).optional().describe("Array of column IDs to include in the update request"),
+    includeAttachments: z.boolean().optional().describe("Whether to include attachments in the update request"),
+    includeDiscussions: z.boolean().optional().describe("Whether to include discussions in the update request"),
+    message: z.string().optional().describe("Message to include in the update request email"),
+    subject: z.string().optional().describe("Subject line for the update request email"),
+    ccMe: z.boolean().optional().describe("Whether to CC the sender on the update request email"),
+    sendTo: z.array(
+      z.object({
+        email: z.string().describe("Email address of the recipient")
+      })
+    ).describe("Array of recipients for the update request"),
+  },
+  async ({ sheetId, rowIds, columnIds, includeAttachments, includeDiscussions, message, subject, ccMe, sendTo }) => {
+    try {
+      console.error(`[Tool] Creating update request for sheet ${sheetId}`);
+      const result = await api.createUpdateRequest(sheetId, {
+        rowIds,
+        columnIds,
+        includeAttachments,
+        includeDiscussions,
+        message,
+        subject,
+        ccMe,
+        sendTo
+      });
+      
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(result, null, 2)
+          }
+        ]
+      };
+    } catch (error: any) {
+      console.error("[Error] in create_update_request:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to create update request: ${error.message}`
+          }
+        ],
+        isError: true
+      };
+    }
+  }
+);
+
 // Start the server
 async function main() {
   const transport = new StdioServerTransport();

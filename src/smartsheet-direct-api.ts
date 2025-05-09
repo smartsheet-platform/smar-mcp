@@ -368,8 +368,8 @@ export class SmartsheetDirectAPI {
 
   /**
    * Creates a workspace
-   * @param workspaceName Name of the folder to workspace
-   * @returns Created folder data
+   * @param workspaceName Name of the workspace to create
+   * @returns Created workspace data
    */
   async createWorkspace(workspaceName: string): Promise<any> {
     const data = {

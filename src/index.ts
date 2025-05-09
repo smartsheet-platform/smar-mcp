@@ -607,7 +607,7 @@ server.tool(
 // Tool: Get Workspace
 server.tool(
     "get_workspace",
-    "Retrieves the current state of a Workspace, including it's contents which can be sheets, reports, or other folders",
+    "Retrieves the current state of a Workspace, including its contents which can be sheets, reports, or other folders",
     {
       workspaceId: z.string().describe("The ID of the workspace to retrieve")
     },
@@ -677,7 +677,7 @@ server.tool(
 // Tool: Get Folder
 server.tool(
     "get_folder",
-    "Retrieves the current state of a folder, including it's contents which can be sheets, reports, or other folders",
+    "Retrieves the current state of a folder, including its contents which can be sheets, reports, or other folders",
     {
       folderId: z.string().describe("The ID of the folder to retrieve")
     },

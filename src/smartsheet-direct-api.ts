@@ -347,6 +347,61 @@ export class SmartsheetDirectAPI {
   ): Promise<any> {
     return this.request('POST', `/sheets/${sheetId}/updaterequests`, options);
   }
+
+
+  /**
+   * Gets workspaces
+   * @returns workspaces data
+   */
+  async getWorkspaces(): Promise<any[]> {
+    return this.request('GET', `/workspaces`);
+  }
+
+  /**
+   * Gets a workspace by ID
+   * @param workspaceId workspace ID
+   * @returns workspace data
+   */
+  async getWorkspace(workspaceId: string): Promise<any> {
+    return this.request('GET', `/workspaces/${workspaceId}`);
+  }
+
+  /**
+   * Creates a workspace
+   * @param workspaceName Name of the workspace to create
+   * @returns Created workspace data
+   */
+  async createWorkspace(workspaceName: string): Promise<any> {
+    const data = {
+      name: workspaceName
+    };
+
+    return this.request('POST', `/workspaces`, data);
+  }
+
+  /**
+   * Creates a new folder in a folder
+   * @param folderId folder ID
+   * @param folderName Name of the folder to create
+   * @returns Created folder data
+   */
+  async createFolder(folderId: string, folderName: string): Promise<any> {
+    const data = {
+      name: folderName
+    };
+
+    return this.request('POST', `/folders/${folderId}/folders`, data);
+  }
+
+  /**
+   * Gets a folder by ID
+   * @param folderId Folder ID
+   * @returns Folder data
+   */
+  async getFolder(folderId: string): Promise<any> {
+    return this.request('GET', `/folders/${folderId}`);
+  }
+
 }
 
 /**

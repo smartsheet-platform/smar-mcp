@@ -8,11 +8,12 @@
   },
   "scripts": {
     "build": "tsc && chmod 755 build/index.js",
-    "start": "node -r dotenv/config build/index.js",
-    "dev": "npm run build && npm run start",
+    "start": "wrangler dev",
+    "dev": "wrangler dev",
     "test": "node -r dotenv/config tests/test-direct-api.js",
     "setup-claude": "node -r dotenv/config scripts/setup-claude-config.sh",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "cf-typegen": "wrangler types"
   },
   "keywords": [],
   "author": "Smartsheet",
@@ -21,6 +22,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@modelcontextprotocol/sdk": "^1.7.0",
+    "agents": "^0.0.65",
     "axios": "^1.8.4",
     "dotenv": "^16.4.7",
     "zod": "^3.24.2"
@@ -34,7 +36,8 @@
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0",
     "semantic-release": "^22.0.12",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "wrangler": "^4.14.1"
   },
   "files": [
     "build"

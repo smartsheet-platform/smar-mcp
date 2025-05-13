@@ -408,6 +408,6 @@ export class SmartsheetDirectAPI {
  * Creates a Smartsheet API client using the access token from environment variables
  * @returns SmartsheetDirectAPI instance
  */
-export function createSmartsheetDirectAPI(accessToken?: string): SmartsheetDirectAPI {
-  return new SmartsheetDirectAPI(accessToken, process.env.SMARTSHEET_ENDPOINT);
+export function createSmartsheetDirectAPI(accessToken?: string | null, smartsheetEndpoint?: string | null): SmartsheetDirectAPI {
+  return new SmartsheetDirectAPI(accessToken?.toString(), smartsheetEndpoint?.toString());
 }

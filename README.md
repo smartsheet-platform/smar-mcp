@@ -31,12 +31,18 @@ MCP is a new technology. This integration relies on a SMARTSHEET API token allow
 
 There are several ways to run the MCP server with the `.env` file loaded:
 
-### Using wrangler (recommended)
+### Run locally using wrangler (recommended)
 
 Start the server with environment variables loaded from the `.env` file:
 
 ```bash
 npm run dev
+```
+
+### Deploy to Cloudflare
+
+```bash
+npm run deploy
 ```
 
 ## Available MCP Tools

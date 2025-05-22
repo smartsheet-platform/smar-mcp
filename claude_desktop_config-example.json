@@ -1,11 +1,22 @@
 {
-    "mcpServers": {
-      "smartsheet": {
-        "command": "ABSOLUTE_PATH_TO_NODE", // e.g., "/Users/imkhawaja/.volta/bin/node"
-        "args": ["-r", "/Users/imkhawaja/repos/learnmcp/node/smar-mcp/node_modules/dotenv/config", "/Users/imkhawaja/repos/learnmcp/node/smar-mcp/build/index.js"],
-        "env": {
-          "SMARTSHEET_API_KEY": "YOUR_SMARTSHEET_API_KEY"
-        }
-      }
+  "mcpServers": {
+    "smartsheet": {
+      "transport": "stdio",
+      "enabled": true,
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://localhost:8787/sse",
+        "--header",
+        "authToken: ${AUTH_TOKEN}",
+        "--header",
+        "baseUrl: ${BASE_URL}"
+      ],
+      "env": {
+        "AUTH_TOKEN": "YOUR_SMARTSHEET_API_KEY",
+        "BASE_URL": "https://api.smartsheet.com/2.0"
+      },
+      "url": null
     }
   }
+}

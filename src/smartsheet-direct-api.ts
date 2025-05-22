@@ -1,15 +1,11 @@
 import axios from 'axios';
-import { config } from 'dotenv';
-
-// Load environment variables
-config();
 
 /**
  * Direct Smartsheet API client that doesn't rely on the SDK
  */
 export class SmartsheetDirectAPI {
-  private baseUrl: string;
-  private accessToken: string;
+  private readonly baseUrl: string;
+  private readonly accessToken: string;
 
   /**
    * Creates a new SmartsheetDirectAPI instance
@@ -19,7 +15,7 @@ export class SmartsheetDirectAPI {
   constructor(accessToken?: string, baseUrl?: string) {
     this.baseUrl = baseUrl || process.env.SMARTSHEET_ENDPOINT || 'https://api.smartsheet.com/2.0';
     this.accessToken = accessToken || process.env.SMARTSHEET_API_KEY || '';
-    
+
     if (!this.accessToken) {
       throw new Error('SMARTSHEET_API_KEY environment variable is not set');
     }
@@ -34,18 +30,18 @@ export class SmartsheetDirectAPI {
    * @returns API response
    */
   async request<T>(
-    method: string, 
-    endpoint: string, 
-    data?: any, 
+    method: string,
+    endpoint: string,
+    data?: any,
     queryParams?: Record<string, any>
   ): Promise<T> {
     const maxRetries = 3;
     let retries = 0;
-    
+
     while (retries <= maxRetries) {
       try {
         const url = new URL(`${this.baseUrl}${endpoint}`);
-        
+
         // Add query parameters if provided
         if (queryParams) {
           Object.entries(queryParams).forEach(([key, value]) => {
@@ -54,9 +50,9 @@ export class SmartsheetDirectAPI {
             }
           });
         }
-        
+
         console.error(`[API] ${method} ${url.toString()}`);
-        
+
         const response = await axios({
           method,
           url: url.toString(),
@@ -67,7 +63,7 @@ export class SmartsheetDirectAPI {
             'User-Agent': 'mcp',
           }
         });
-        
+
         return response.data;
       } catch (error: any) {
         // Check if rate limited
@@ -86,10 +82,10 @@ export class SmartsheetDirectAPI {
         }
       }
     }
-    
+
     throw new Error('Maximum retries exceeded');
   }
-  
+
   /**
    * Formats an error for consistent error handling
    * @param error Error to format
@@ -98,15 +94,15 @@ export class SmartsheetDirectAPI {
   private formatError(error: any): Error {
     const errorMessage = error.response?.data?.message || error.message;
     const formattedError = new Error(errorMessage);
-    
+
     // Add additional properties
     (formattedError as any).statusCode = error.response?.status;
     (formattedError as any).errorCode = error.response?.data?.errorCode;
     (formattedError as any).detail = error.response?.data?.detail;
-    
+
     return formattedError;
   }
-  
+
   /**
    * Gets a sheet by ID
    * @param sheetId Sheet ID
@@ -116,7 +112,7 @@ export class SmartsheetDirectAPI {
   async getSheet(sheetId: string, include?: string): Promise<any> {
     return this.request('GET', `/sheets/${sheetId}`, undefined, { include });
   }
-  
+
   /**
    * Gets the version of a sheet
    * @param sheetId Sheet ID
@@ -125,7 +121,7 @@ export class SmartsheetDirectAPI {
   async getSheetVersion(sheetId: string): Promise<any> {
     return this.request('GET', `/sheets/${sheetId}/version`);
   }
-  
+
   /**
    * Gets the history of a specific cell
    * @param sheetId Sheet ID
@@ -137,11 +133,11 @@ export class SmartsheetDirectAPI {
    * @returns Cell history
    */
   async getCellHistory(
-    sheetId: string, 
-    rowId: string, 
-    columnId: string, 
-    include?: string, 
-    pageSize?: number, 
+    sheetId: string,
+    rowId: string,
+    columnId: string,
+    include?: string,
+    pageSize?: number,
     page?: number
   ): Promise<any> {
     return this.request('GET', `/sheets/${sheetId}/rows/${rowId}/columns/${columnId}/history`, undefined, {
@@ -150,7 +146,7 @@ export class SmartsheetDirectAPI {
       page
     });
   }
-  
+
   /**
    * Updates rows in a sheet
    * @param sheetId Sheet ID
@@ -160,7 +156,7 @@ export class SmartsheetDirectAPI {
   async updateRows(sheetId: string, rows: any[]): Promise<any> {
     return this.request('PUT', `/sheets/${sheetId}/rows`, rows);
   }
-  
+
   /**
    * Adds rows to a sheet
    * @param sheetId Sheet ID
@@ -170,7 +166,7 @@ export class SmartsheetDirectAPI {
   async addRows(sheetId: string, rows: any[]): Promise<any> {
     return this.request('POST', `/sheets/${sheetId}/rows`, rows);
   }
-  
+
   /**
    * Deletes rows from a sheet
    * @param sheetId Sheet ID
@@ -184,7 +180,7 @@ export class SmartsheetDirectAPI {
       ignoreRowsNotFound: ignoreRowsNotFound.toString()
     });
   }
-  
+
   /**
    * Gets the location information for a sheet
    * @param sheetId Sheet ID
@@ -198,7 +194,7 @@ export class SmartsheetDirectAPI {
       workspaceId: sheet.workspaceId
     };
   }
-  
+
   /**
    * Creates a copy of a sheet
    * @param sheetId Sheet ID to copy
@@ -216,7 +212,7 @@ export class SmartsheetDirectAPI {
     const data: any = {
       newName: destinationName
     };
-    
+
     if (destinationFolderId) {
       data.destinationType = 'folder';
       data.destinationId = destinationFolderId;
@@ -230,12 +226,12 @@ export class SmartsheetDirectAPI {
       data.destinationType = 'home';
       console.error(`[API] Copying sheet to home`);
     }
-    
+
     const result = await this.request('POST', `/sheets/${sheetId}/copy`, data);
     console.error(`[API] Copy sheet result: ${JSON.stringify((result as any).result?.id)}`);
     return result;
   }
-  
+
   /**
    * Creates a new sheet
    * @param name Name for the new sheet
@@ -248,14 +244,14 @@ export class SmartsheetDirectAPI {
       name,
       columns
     };
-    
+
     let endpoint = '/sheets';
-    
+
     // If folder ID is provided, create in that folder
     if (folderId) {
       endpoint = `/folders/${folderId}/sheets`;
     }
-    
+
     return this.request('POST', endpoint, data);
   }
   /**
@@ -277,10 +273,10 @@ export class SmartsheetDirectAPI {
     const data = {
       name: folderName
     };
-    
+
     return this.request('POST', `/workspaces/${workspaceId}/folders`, data);
   }
-  
+
   /**
    * Gets discussions for a sheet
    * @param sheetId Sheet ID
@@ -304,7 +300,7 @@ export class SmartsheetDirectAPI {
       includeAll,
     });
   }
-  
+
   /**
    * Creates a discussion on a row
    * @param sheetId Sheet ID
@@ -322,10 +318,10 @@ export class SmartsheetDirectAPI {
         text: commentText
       }
     };
-    
+
     return this.request('POST', `/sheets/${sheetId}/rows/${rowId}/discussions`, data);
   }
-  
+
   /**
    * Creates an update request for a sheet
    * @param sheetId Sheet ID
@@ -408,6 +404,6 @@ export class SmartsheetDirectAPI {
  * Creates a Smartsheet API client using the access token from environment variables
  * @returns SmartsheetDirectAPI instance
  */
-export function createSmartsheetDirectAPI(accessToken?: string): SmartsheetDirectAPI {
-  return new SmartsheetDirectAPI(accessToken, process.env.SMARTSHEET_ENDPOINT);
+export function createSmartsheetDirectAPI(accessToken: string, smartsheetEndpoint: string): SmartsheetDirectAPI {
+  return new SmartsheetDirectAPI(accessToken, smartsheetEndpoint);
 }

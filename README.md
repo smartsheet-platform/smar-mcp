@@ -26,58 +26,18 @@ MCP is a new technology. This integration relies on a SMARTSHEET API token allow
    ```bash
    npm install
    ```
-
-3. Create a `.env` file in the project root with your Smartsheet API token:
-   ```
-   SMARTSHEET_API_KEY=your_smartsheet_api_token
-   ```
-
-   You can obtain a Smartsheet API token from the [Smartsheet Developer Portal](https://developers.smartsheet.com/).
-
-4. Build the project:
-   ```bash
-   npm run build
-   ```
-
+   
 ## Usage
 
 There are several ways to run the MCP server with the `.env` file loaded:
 
-### Using npm scripts (recommended)
+### Using wrangler (recommended)
 
 Start the server with environment variables loaded from the `.env` file:
 
 ```bash
-npm run start
-```
-
-This uses the `-r dotenv/config` flag to ensure dotenv is loaded before the application code runs.
-
-Or build and start in one command:
-
-```bash
 npm run dev
 ```
-
-### Using node directly
-
-You can also run the server directly with Node.js and the `-r` flag:
-
-```bash
-node -r dotenv/config build/index.js
-```
-
-This ensures that dotenv is loaded before the application code runs.
-
-Alternatively, you can run without the `-r` flag:
-
-```bash
-node build/index.js
-```
-
-In this case, the application code will load dotenv itself (we've included `import { config } from "dotenv"; config();` at the top of the entry file).
-
-The server will start and display: "Smartsheet MCP Server running on stdio"
 
 ## Available MCP Tools
 
@@ -171,6 +131,43 @@ Creates a backup sheet with data from a specific timestamp.
 - `batchSize` (number, optional, default: 100): Number of rows to process in each batch
 - `maxConcurrentRequests` (number, optional, default: 5): Maximum number of concurrent API requests
 
+### get_workspace
+
+Retrieves the current state of a Workspace, including its contents which can be sheets, reports, or other folders
+
+**Parameters:**
+- `workspaceId` (string, required): The ID of the workspace to retrieve
+
+### create_workspace
+
+Creates a new workspace
+
+**Parameters:**
+- `workspaceName` (string, required): The name of the new workspace
+
+### get_folder
+
+Retrieves the current state of a folder, including its contents which can be sheets, reports, or other folders
+
+**Parameters:**
+- `folderId` (string, required): The ID of the folder to retrieve 
+
+### create_folder
+
+Creates a new folder in a folder
+
+**Parameters:**
+- `folderId` (string, required): The ID of the folder to create the folder in
+- `folderName` (string, required): The name of the new folder
+
+### create_workspace_folder
+
+Creates a new folder in a workspace
+
+**Parameters:**
+- `workspaceId` (string, required): The ID of the workspace to create the folder in
+- `folderName` (string, required): The name of the new folder
+
 ## Example Usage
 
 Here's an example of how to use the `create_version_backup` tool to create a backup of a sheet at a specific timestamp:
@@ -207,10 +204,11 @@ const result = await use_mcp_tool({
 // }
 ```
 
-## Environment Variables
+## Request Headers
 
-- `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
-- `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
+- `authToken`: Your Smartsheet API token (required)
+- `baseUrl`: The base URL of the Smartsheet API (required)
+- `allowDeleteTools`: Set to 'true' to enable deletion operations like delete_rows (default: false)
 
 ## Development
 
@@ -218,12 +216,6 @@ const result = await use_mcp_tool({
 
 - Node.js 16 or higher
 - npm 7 or higher
-
-### Building
-
-```bash
-npm run build
-```
 
 ### Project Structure
 
@@ -234,9 +226,6 @@ npm run build
 - `src/smartsheet-types`: Classes representing Smartsheet API objects
 - `tests/`: Test files for various functionality
 - `scripts/`: Utility scripts
-- `examples/`: Example usage files
-- `.env`: Environment variables
-- `.env.example`: Template for environment variables
 - `claude_desktop_config-example.json`: Example claude desktop config to connect with the tool - Set your Smartsheet key in the env setting. 
 
 ### Testing 

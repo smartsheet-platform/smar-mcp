@@ -22,20 +22,20 @@ export function findCellValueAtTimestamp(cellHistory: any[], targetTimestamp: st
     const entryDate = new Date(entry.modifiedAt);
     if (entryDate <= targetDate) {
       // Log the entry for debugging
-      console.error(`[Info] Found historical value at ${entry.modifiedAt} for timestamp ${targetTimestamp}`);
+      console.info(`[Info] Found historical value at ${entry.modifiedAt} for timestamp ${targetTimestamp}`);
       
       // Log important properties for debugging
       if (entry.formula) {
-        console.error(`[Info] Formula found: ${entry.formula}`);
+        console.info(`[Info] Formula found: ${entry.formula}`);
       }
       if (entry.format) {
-        console.error(`[Info] Format found: ${entry.format}`);
+        console.info(`[Info] Format found: ${entry.format}`);
       }
       if (entry.hyperlink) {
-        console.error(`[Info] Hyperlink found: ${JSON.stringify(entry.hyperlink)}`);
+        console.info(`[Info] Hyperlink found: ${JSON.stringify(entry.hyperlink)}`);
       }
       if (entry.objectValue) {
-        console.error(`[Info] Object value found: ${JSON.stringify(entry.objectValue)}`);
+        console.info(`[Info] Object value found: ${JSON.stringify(entry.objectValue)}`);
       }
       
       // Create a comprehensive historical value object with all available properties
@@ -180,7 +180,7 @@ export function identifySystemColumns(columns: any[]): Set<string> {
       column.title === 'Created Date'
     ) {
       systemColumnIds.add(column.id);
-      console.error(`[Info] Identified system column: ${column.title} (${column.id})`);
+      console.info(`[Info] Identified system column: ${column.title} (${column.id})`);
     }
   }
   
@@ -196,14 +196,14 @@ export function identifySystemColumns(columns: any[]): Set<string> {
 export function mapColumnIds(sourceColumns: any[], targetColumns: any[]): Map<string, string> {
   const columnIdMap = new Map<string, string>();
   
-  console.error(`[Info] Mapping ${sourceColumns.length} source columns to ${targetColumns.length} target columns`);
+  console.info(`[Info] Mapping ${sourceColumns.length} source columns to ${targetColumns.length} target columns`);
   
   // First try to map by title (most reliable)
   for (const sourceColumn of sourceColumns) {
     const targetColumn = targetColumns.find(col => col.title === sourceColumn.title);
     if (targetColumn) {
       columnIdMap.set(sourceColumn.id, targetColumn.id);
-      console.error(`[Info] Mapped column by title: ${sourceColumn.title} (${sourceColumn.id} -> ${targetColumn.id})`);
+      console.info(`[Info] Mapped column by title: ${sourceColumn.title} (${sourceColumn.id} -> ${targetColumn.id})`);
     }
   }
   
@@ -211,19 +211,19 @@ export function mapColumnIds(sourceColumns: any[], targetColumns: any[]): Map<st
   const unmappedSourceColumns = sourceColumns.filter(col => !Array.from(columnIdMap.keys()).includes(col.id));
   
   if (unmappedSourceColumns.length > 0) {
-    console.error(`[Info] Mapping ${unmappedSourceColumns.length} remaining columns by index`);
+    console.info(`[Info] Mapping ${unmappedSourceColumns.length} remaining columns by index`);
     
     for (const sourceColumn of unmappedSourceColumns) {
       const sourceIndex = sourceColumns.findIndex(col => col.id === sourceColumn.id);
       if (sourceIndex >= 0 && sourceIndex < targetColumns.length) {
         columnIdMap.set(sourceColumn.id, targetColumns[sourceIndex].id);
-        console.error(`[Info] Mapped column by index: ${sourceColumn.title} (${sourceColumn.id} -> ${targetColumns[sourceIndex].id})`);
+        console.info(`[Info] Mapped column by index: ${sourceColumn.title} (${sourceColumn.id} -> ${targetColumns[sourceIndex].id})`);
       } else {
-        console.error(`[Warning] Could not map column: ${sourceColumn.title} (${sourceColumn.id})`);
+        console.warn(`[Warning] Could not map column: ${sourceColumn.title} (${sourceColumn.id})`);
       }
     }
   }
   
-  console.error(`[Info] Successfully mapped ${columnIdMap.size} of ${sourceColumns.length} columns`);
+  console.info(`[Info] Successfully mapped ${columnIdMap.size} of ${sourceColumns.length} columns`);
   return columnIdMap;
 }

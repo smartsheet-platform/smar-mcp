@@ -43,7 +43,7 @@ export async function createVersionBackup(
     } = options;
     
     // Step 1: Get the source sheet to determine its structure and folder location
-    console.error(`[Workflow] Getting source sheet details for ${sheetId}`);
+    console.info(`[Workflow] Getting source sheet details for ${sheetId}`);
     const sourceSheet = await api.getSheet(sheetId);
     
     // Extract location details from sheet
@@ -55,7 +55,7 @@ export async function createVersionBackup(
     
     // Step 2: Create or find the backup folder in the workspace
     const backupFolderName = `Backup of ${sourceSheet.name}`;
-    console.error(`[Workflow] Looking for backup folder: ${backupFolderName}`);
+    console.info(`[Workflow] Looking for backup folder: ${backupFolderName}`);
     
     // List all folders in the workspace
     const foldersResponse = await api.listWorkspaceFolders(workspaceId);
@@ -66,17 +66,17 @@ export async function createVersionBackup(
     for (const folder of folders) {
       if (folder.name === backupFolderName) {
         backupFolderId = folder.id;
-        console.error(`[Workflow] Found existing backup folder with ID: ${backupFolderId}`);
+        console.info(`[Workflow] Found existing backup folder with ID: ${backupFolderId}`);
         break;
       }
     }
     
     // If no backup folder exists, create one
     if (!backupFolderId) {
-      console.error(`[Workflow] Creating new backup folder: ${backupFolderName}`);
+      console.info(`[Workflow] Creating new backup folder: ${backupFolderName}`);
       const createFolderResult = await api.createWorkspaceFolder(workspaceId, backupFolderName);
       backupFolderId = createFolderResult.result.id;
-      console.error(`[Workflow] Created backup folder with ID: ${backupFolderId}`);
+      console.info(`[Workflow] Created backup folder with ID: ${backupFolderId}`);
     }
     
     // Step 3: Create a name for the archive sheet
@@ -84,7 +84,7 @@ export async function createVersionBackup(
     const archiveSheetName = archiveName || `Version as of ${formattedTimestamp}`;
     
     // Step 4: Create a copy of the sheet in the backup folder
-    console.error(`[Workflow] Creating archive sheet: ${archiveSheetName} in folder ${backupFolderId}`);
+    console.info(`[Workflow] Creating archive sheet: ${archiveSheetName} in folder ${backupFolderId}`);
     
     // Use the direct API request to copy the sheet to the backup folder
     const copyData = {
@@ -96,19 +96,19 @@ export async function createVersionBackup(
     const copyResult = await api.request<any>('POST', `/sheets/${sheetId}/copy`, copyData);
     const archiveSheetId = copyResult.result.id;
     
-    console.error(`[Workflow] Created archive sheet with ID: ${archiveSheetId}`);
+    console.info(`[Workflow] Created archive sheet with ID: ${archiveSheetId}`);
     
     // Step 4: Get the newly created archive sheet to get its column IDs
-    console.error(`[Workflow] Fetching archive sheet with ID: ${archiveSheetId}`);
+    console.info(`[Workflow] Fetching archive sheet with ID: ${archiveSheetId}`);
     const archiveSheet = await api.getSheet(archiveSheetId);
     
     // Step 5: Get cells that existed at the timestamp
-    console.error(`[Workflow] Identifying cells that existed at ${timestamp}`);
+    console.info(`[Workflow] Identifying cells that existed at ${timestamp}`);
     const existingCells = getCellsExistingAtTime(sourceSheet, timestamp);
-    console.error(`[Workflow] Found ${existingCells.length} cells to process`);
+    console.info(`[Workflow] Found ${existingCells.length} cells to process`);
     
     // Step 6: Get historical values for cells
-    console.error(`[Workflow] Getting historical values for cells`);
+    console.info(`[Workflow] Getting historical values for cells`);
     const historicalCellValues: Record<string, Record<string, any>> = {};
     
     // Process cells in batches
@@ -116,7 +116,7 @@ export async function createVersionBackup(
     
     for (let i = 0; i < cellBatches.length; i++) {
       const batch = cellBatches[i];
-      console.error(`[Workflow] Processing batch ${i + 1}/${cellBatches.length} (${batch.length} cells)`);
+      console.info(`[Workflow] Processing batch ${i + 1}/${cellBatches.length} (${batch.length} cells)`);
       
       const batchPromises = batch.map(async (cell: { rowId: string, columnId: string }) => {
         try {
@@ -132,7 +132,7 @@ export async function createVersionBackup(
             includeParams.push('format');
           }
           
-          console.error(`[Info] Getting history for cell at row ${cell.rowId}, column ${cell.columnId}`);
+          console.info(`[Info] Getting history for cell at row ${cell.rowId}, column ${cell.columnId}`);
           const history = await api.getCellHistory(
             sheetId,
             cell.rowId,
@@ -140,7 +140,7 @@ export async function createVersionBackup(
             includeParams.join(',')
           );
           
-          console.error(`[Info] Got ${history.data?.length || 0} history entries`);
+          console.info(`[Info] Got ${history.data?.length || 0} history entries`);
           
           const historicalValue = findCellValueAtTimestamp(history.data, timestamp);
           
@@ -154,7 +154,7 @@ export async function createVersionBackup(
                 .find((c: any) => c.columnId === cell.columnId);
               
               if (sourceCell?.format) {
-                console.error(`[Info] Using current cell format for cell at row ${cell.rowId}, column ${cell.columnId}: ${sourceCell.format}`);
+                console.info(`[Info] Using current cell format for cell at row ${cell.rowId}, column ${cell.columnId}: ${sourceCell.format}`);
                 historicalValue.format = sourceCell.format;
               }
             }
@@ -181,7 +181,7 @@ export async function createVersionBackup(
     }
     
     // Step 7: Create a mapping of source row IDs to archive sheet row IDs
-    console.error(`[Workflow] Creating row ID mapping`);
+    console.info(`[Workflow] Creating row ID mapping`);
     const rowIdMap = new Map<string, string>();
     
     // Create a map of row numbers to archive sheet row IDs
@@ -198,10 +198,10 @@ export async function createVersionBackup(
       }
     }
     
-    console.error(`[Workflow] Mapped ${rowIdMap.size} rows from source to archive sheet`);
+    console.info(`[Workflow] Mapped ${rowIdMap.size} rows from source to archive sheet`);
     
     // Step 8: Prepare row updates
-    console.error(`[Workflow] Preparing row updates`);
+    console.info(`[Workflow] Preparing row updates`);
     const rowUpdates: any[] = [];
     
     // Identify system columns that shouldn't be updated
@@ -213,7 +213,7 @@ export async function createVersionBackup(
     for (const sourceRowId in historicalCellValues) {
       // Skip rows that don't have a mapping in the archive sheet
       if (!rowIdMap.has(sourceRowId)) {
-        console.error(`[Warning] No matching row found in archive sheet for source row ${sourceRowId}`);
+        console.warn(`[Warning] No matching row found in archive sheet for source row ${sourceRowId}`);
         continue;
       }
       
@@ -228,7 +228,7 @@ export async function createVersionBackup(
         
         // Skip system columns
         if (systemColumnIds.has(targetColumnId)) {
-          console.error(`[Info] Skipping update to system column: ${targetColumnId}`);
+          console.info(`[Info] Skipping update to system column: ${targetColumnId}`);
           continue;
         }
         
@@ -271,7 +271,7 @@ export async function createVersionBackup(
     }
     
     // Step 8: Instead of updating rows, let's delete all rows and add new ones
-    console.error(`[Workflow] Deleting existing rows in archive sheet`);
+    console.info(`[Workflow] Deleting existing rows in archive sheet`);
     
     // Get all row IDs in the archive sheet
     const rowIds = archiveSheet.rows.map((row: any) => row.id);
@@ -308,7 +308,7 @@ export async function createVersionBackup(
             sourceColumn.title === 'Modified Date' ||
             sourceColumn.title === 'Created By' ||
             sourceColumn.title === 'Created Date') {
-          console.error(`[Info] Skipping system column: ${sourceColumn.title} (${sourceColumn.id} -> ${targetColumnId})`);
+          console.info(`[Info] Skipping system column: ${sourceColumn.title} (${sourceColumn.id} -> ${targetColumnId})`);
           continue;
         }
         
@@ -328,7 +328,7 @@ export async function createVersionBackup(
         if (sourceColumn.title === 'Duration') {
           cellAdd.formula = "=[Start Date]@row - [End Date]@row";
           // When using a formula, don't set any other properties
-          console.error(`[Info] Using hardcoded formula for Duration column: ${cellAdd.formula}`);
+          console.info(`[Info] Using hardcoded formula for Duration column: ${cellAdd.formula}`);
         }
         // Always prioritize formulas over values for other columns
         else if (includeFormulas && (
@@ -339,18 +339,18 @@ export async function createVersionBackup(
         )) {
           // If we have a formula, include only the formula
           cellAdd.formula = historicalValue?.formula || sourceCell?.formula;
-          console.error(`[Info] Using formula for cell: ${sourceColumn.title} (${cellAdd.formula})`);
+          console.info(`[Info] Using formula for cell: ${sourceColumn.title} (${cellAdd.formula})`);
         }
         // Use value if no formula or if it's not a formula column
         else if (historicalValue) {
           // Otherwise include the value
           cellAdd.value = historicalValue.value !== undefined ? historicalValue.value : null;
-          console.error(`[Info] Using value for cell: ${sourceColumn.title} (${historicalValue?.value})`);
+          console.info(`[Info] Using value for cell: ${sourceColumn.title} (${historicalValue?.value})`);
         }
         // Ensure every cell has a value property
         else {
           cellAdd.value = null;
-          console.error(`[Info] No historical value found for cell: ${sourceColumn.title}, using null`);
+          console.info(`[Info] No historical value found for cell: ${sourceColumn.title}, using null`);
         }
         
         // Include all available properties from historical value
@@ -361,18 +361,18 @@ export async function createVersionBackup(
           // Always include formatting (can be used with formula)
           if (historicalValue.format) {
             cellAdd.format = historicalValue.format;
-            console.error(`[Info] Using format from history for cell: ${sourceColumn.title}`);
+            console.info(`[Info] Using format from history for cell: ${sourceColumn.title}`);
           } else {
             // Try to get format from the current cell if available
             if (sourceCell?.format) {
               cellAdd.format = sourceCell.format;
-              console.error(`[Info] Using format from current cell: ${sourceColumn.title}`);
+              console.info(`[Info] Using format from current cell: ${sourceColumn.title}`);
             } else {
               // If no format is available from history or current cell, use the column's format
               const columnFormat = sourceColumn.format;
               if (columnFormat) {
                 cellAdd.format = columnFormat;
-                console.error(`[Info] Using format from column for cell: ${sourceColumn.title}`);
+                console.info(`[Info] Using format from column for cell: ${sourceColumn.title}`);
               }
             }
           }
@@ -380,7 +380,7 @@ export async function createVersionBackup(
           // Conditional formatting (can be used with formula)
           if (historicalValue.conditionalFormat) {
             cellAdd.conditionalFormat = historicalValue.conditionalFormat;
-            console.error(`[Info] Using conditional format from history for cell: ${sourceColumn.title}`);
+            console.info(`[Info] Using conditional format from history for cell: ${sourceColumn.title}`);
           }
           
           // The following properties can't be used with formula
@@ -388,30 +388,30 @@ export async function createVersionBackup(
             // Hyperlinks
             if (historicalValue.hyperlink) {
               cellAdd.hyperlink = historicalValue.hyperlink;
-              console.error(`[Info] Using hyperlink from history for cell: ${sourceColumn.title}: ${JSON.stringify(historicalValue.hyperlink)}`);
+              console.info(`[Info] Using hyperlink from history for cell: ${sourceColumn.title}: ${JSON.stringify(historicalValue.hyperlink)}`);
             } else if (sourceCell?.hyperlink) {
               cellAdd.hyperlink = sourceCell.hyperlink;
-              console.error(`[Info] Using hyperlink from current cell: ${sourceColumn.title}`);
+              console.info(`[Info] Using hyperlink from current cell: ${sourceColumn.title}`);
             }
             
             // Images
             if (historicalValue.image) {
               cellAdd.image = historicalValue.image;
-              console.error(`[Info] Using image from history for cell: ${sourceColumn.title}`);
+              console.info(`[Info] Using image from history for cell: ${sourceColumn.title}`);
             } else if (sourceCell?.image) {
               cellAdd.image = sourceCell.image;
-              console.error(`[Info] Using image from current cell: ${sourceColumn.title}`);
+              console.info(`[Info] Using image from current cell: ${sourceColumn.title}`);
             }
             
             // Cell links
             if (historicalValue.linkInFromCell) {
               cellAdd.linkInFromCell = historicalValue.linkInFromCell;
-              console.error(`[Info] Using linkInFromCell from history for cell: ${sourceColumn.title}`);
+              console.info(`[Info] Using linkInFromCell from history for cell: ${sourceColumn.title}`);
             }
             
             if (historicalValue.linksOutToCells) {
               cellAdd.linksOutToCells = historicalValue.linksOutToCells;
-              console.error(`[Info] Using linksOutToCells from history for cell: ${sourceColumn.title}`);
+              console.info(`[Info] Using linksOutToCells from history for cell: ${sourceColumn.title}`);
             }
             
             // Object values (like dates, contact lists, etc.)
@@ -419,12 +419,12 @@ export async function createVersionBackup(
               // If we have an objectValue, use it and remove the value property
               cellAdd.objectValue = historicalValue.objectValue;
               delete cellAdd.value; // Remove value property to avoid conflict
-              console.error(`[Info] Using objectValue from history for cell: ${sourceColumn.title}: ${JSON.stringify(historicalValue.objectValue)}`);
+              console.info(`[Info] Using objectValue from history for cell: ${sourceColumn.title}: ${JSON.stringify(historicalValue.objectValue)}`);
             } else if (sourceCell?.objectValue) {
               // If we have an objectValue from the source cell, use it and remove the value property
               cellAdd.objectValue = sourceCell.objectValue;
               delete cellAdd.value; // Remove value property to avoid conflict
-              console.error(`[Info] Using objectValue from current cell: ${sourceColumn.title}`);
+              console.info(`[Info] Using objectValue from current cell: ${sourceColumn.title}`);
             }
           }
           
@@ -450,12 +450,12 @@ export async function createVersionBackup(
     }
     
     // Add rows in batches
-    console.error(`[Workflow] Adding ${rowsToAdd.length} rows in batches of ${batchSize}`);
+    console.info(`[Workflow] Adding ${rowsToAdd.length} rows in batches of ${batchSize}`);
     const addBatches = chunkArray(rowsToAdd, batchSize);
     
     for (let i = 0; i < addBatches.length; i++) {
       const batch = addBatches[i];
-      console.error(`[Workflow] Adding batch ${i + 1}/${addBatches.length} (${batch.length} rows)`);
+      console.info(`[Workflow] Adding batch ${i + 1}/${addBatches.length} (${batch.length} rows)`);
       
       await api.addRows(archiveSheetId, batch);
       
@@ -466,7 +466,7 @@ export async function createVersionBackup(
     }
     
     // Step 9: We no longer add a metadata row at the top
-    console.error(`[Workflow] Skipping metadata row as requested`);
+    console.info(`[Workflow] Skipping metadata row as requested`);
     
     return {
       success: true,

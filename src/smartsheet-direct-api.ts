@@ -1,8 +1,4 @@
 import axios from 'axios';
-import { config } from 'dotenv';
-
-// Load environment variables
-config();
 
 /**
  * Direct Smartsheet API client that doesn't rely on the SDK
@@ -17,8 +13,8 @@ export class SmartsheetDirectAPI {
    * @param baseUrl Smartsheet API base URL (defaults to https://api.smartsheet.com/2.0)
    */
   constructor(accessToken?: string, baseUrl?: string) {
-    this.baseUrl = baseUrl || process.env.SMARTSHEET_ENDPOINT || 'https://api.smartsheet.com/2.0';
-    this.accessToken = accessToken || process.env.SMARTSHEET_API_KEY || '';
+    this.baseUrl = baseUrl || 'https://api.smartsheet.com/2.0';
+    this.accessToken = accessToken || '';
     
     if (!this.accessToken) {
       throw new Error('SMARTSHEET_API_KEY environment variable is not set');
@@ -55,7 +51,7 @@ export class SmartsheetDirectAPI {
           });
         }
         
-        console.error(`[API] ${method} ${url.toString()}`);
+        console.info(`[API] ${method} ${url.toString()}`);
         
         const response = await axios({
           method,
@@ -220,19 +216,19 @@ export class SmartsheetDirectAPI {
     if (destinationFolderId) {
       data.destinationType = 'folder';
       data.destinationId = destinationFolderId;
-      console.error(`[API] Copying sheet to folder: ${destinationFolderId}`);
+      console.info(`[API] Copying sheet to folder: ${destinationFolderId}`);
     } else if (workspaceId) {
       data.destinationType = 'workspace';
       data.destinationId = workspaceId;
-      console.error(`[API] Copying sheet to workspace: ${workspaceId}`);
+      console.info(`[API] Copying sheet to workspace: ${workspaceId}`);
     } else {
       // Default to 'home' if no folder or workspace specified
       data.destinationType = 'home';
-      console.error(`[API] Copying sheet to home`);
+      console.info(`[API] Copying sheet to home`);
     }
     
     const result = await this.request('POST', `/sheets/${sheetId}/copy`, data);
-    console.error(`[API] Copy sheet result: ${JSON.stringify((result as any).result?.id)}`);
+    console.info(`[API] Copy sheet result: ${JSON.stringify((result as any).result?.id)}`);
     return result;
   }
   

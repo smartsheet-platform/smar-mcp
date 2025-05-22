@@ -1,7 +1,4 @@
-import { config } from "dotenv";
-
-// Load environment variables from .env file
-config();
+#!/usr/bin/env node
 
 // Control whether deletion operations are enabled
 const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
@@ -10,7 +7,7 @@ console.info(`[Config] Delete operations are ${allowDeleteTools ? 'enabled' : 'd
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { createSmartsheetDirectAPI } from "./smartsheet-direct-api.js";
+import { SmartsheetDirectAPI } from "./smartsheet-direct-api.js";
 import { createVersionBackup } from "./smartsheet-workflows.js";
 
 // Initialize the MCP server
@@ -20,7 +17,7 @@ const server = new McpServer({
 });
 
 // Initialize the direct API client
-const api = createSmartsheetDirectAPI();
+const api = new SmartsheetDirectAPI(process.env.SMARTSHEET_API_KEY, process.env.SMARTSHEET_ENDPOINT);
 
 // Tool 1: Get Sheet
 server.tool(
@@ -32,7 +29,7 @@ server.tool(
   },
   async ({ sheetId, include }) => {
     try {
-      console.error(`[Tool] Getting sheet with ID: ${sheetId}`);
+      console.info(`[Tool] Getting sheet with ID: ${sheetId}`);
       const sheet = await api.getSheet(sheetId, include);
       
       return {
@@ -67,7 +64,7 @@ server.tool(
   },
   async ({ sheetId }) => {
     try {
-      console.error(`[Tool] Getting version for sheet with ID: ${sheetId}`);
+      console.info(`[Tool] Getting version for sheet with ID: ${sheetId}`);
       const version = await api.getSheetVersion(sheetId);
       
       return {
@@ -107,7 +104,7 @@ server.tool(
   },
   async ({ sheetId, rowId, columnId, include, pageSize, page }) => {
     try {
-      console.error(`[Tool] Getting history for cell at row ${rowId}, column ${columnId} in sheet ${sheetId}`);
+      console.info(`[Tool] Getting history for cell at row ${rowId}, column ${columnId} in sheet ${sheetId}`);
       const history = await api.getCellHistory(sheetId, rowId, columnId, include, pageSize, page);
       
       return {
@@ -155,7 +152,7 @@ server.tool(
   },
   async ({ sheetId, rows }) => {
     try {
-      console.error(`[Tool] Updating ${rows.length} rows in sheet ${sheetId}`);
+      console.info(`[Tool] Updating ${rows.length} rows in sheet ${sheetId}`);
       const result = await api.updateRows(sheetId, rows);
       
       return {
@@ -204,7 +201,7 @@ server.tool(
   },
   async ({ sheetId, rows }) => {
     try {
-      console.error(`[Tool] Adding ${rows.length} rows to sheet ${sheetId}`);
+      console.info(`[Tool] Adding ${rows.length} rows to sheet ${sheetId}`);
       const result = await api.addRows(sheetId, rows);
       
       return {
@@ -242,7 +239,7 @@ if (allowDeleteTools) {
     },
     async ({ sheetId, rowIds, ignoreRowsNotFound }) => {
       try {
-        console.error(`[Tool] Deleting ${rowIds.length} rows from sheet ${sheetId}`);
+        console.info(`[Tool] Deleting ${rowIds.length} rows from sheet ${sheetId}`);
         const result = await api.deleteRows(sheetId, rowIds, ignoreRowsNotFound);
         
         return {
@@ -280,7 +277,7 @@ server.tool(
   },
   async ({ sheetId }) => {
     try {
-      console.error(`[Tool] Getting location for sheet ${sheetId}`);
+      console.info(`[Tool] Getting location for sheet ${sheetId}`);
       const location = await api.getSheetLocation(sheetId);
       
       return {
@@ -317,7 +314,7 @@ server.tool(
   },
   async ({ sheetId, destinationName, destinationFolderId }) => {
     try {
-      console.error(`[Tool] Copying sheet ${sheetId} to "${destinationName}"`);
+      console.info(`[Tool] Copying sheet ${sheetId} to "${destinationName}"`);
       
       // If no destination folder is specified, get the current folder
       if (!destinationFolderId) {
@@ -325,7 +322,7 @@ server.tool(
           const location = await api.getSheetLocation(sheetId);
           destinationFolderId = location.folderId;
         } catch (error) {
-          console.error("[Warning] Failed to get sheet location, using default folder:", error);
+          console.warn("[Warning] Failed to get sheet location, using default folder:", error);
         }
       }
       
@@ -371,7 +368,7 @@ server.tool(
   },
   async ({ name, columns, folderId }) => {
     try {
-      console.error(`[Tool] Creating new sheet "${name}"`);
+      console.info(`[Tool] Creating new sheet "${name}"`);
       const result = await api.createSheet(name, columns, folderId);
       
       return {
@@ -413,7 +410,7 @@ server.tool(
   },
   async (options) => {
     try {
-      console.error(`[Tool] Creating version backup for ${options.sheetId} at timestamp ${options.timestamp}`);
+      console.info(`[Tool] Creating version backup for ${options.sheetId} at timestamp ${options.timestamp}`);
       const result = await createVersionBackup(api, options);
       
       return {
@@ -452,7 +449,7 @@ server.tool(
   },
   async ({ sheetId, include, pageSize, page, includeAll }) => {
     try {
-      console.error(`[Tool] Getting discussions for sheet ${sheetId}`);
+      console.info(`[Tool] Getting discussions for sheet ${sheetId}`);
       const discussions = await api.getSheetDiscussions(sheetId, include, pageSize, page, includeAll);
       
       return {
@@ -489,7 +486,7 @@ server.tool(
   },
   async ({ sheetId, rowId, commentText }) => {
     try {
-      console.error(`[Tool] Creating discussion on row ${rowId} in sheet ${sheetId}`);
+      console.info(`[Tool] Creating discussion on row ${rowId} in sheet ${sheetId}`);
       const result = await api.createRowDiscussion(sheetId, rowId, commentText);
       
       return {
@@ -536,7 +533,7 @@ server.tool(
   },
   async ({ sheetId, rowIds, columnIds, includeAttachments, includeDiscussions, message, subject, ccMe, sendTo }) => {
     try {
-      console.error(`[Tool] Creating update request for sheet ${sheetId}`);
+      console.info(`[Tool] Creating update request for sheet ${sheetId}`);
       const result = await api.createUpdateRequest(sheetId, {
         rowIds,
         columnIds,
@@ -785,7 +782,7 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Smartsheet MCP Server running on stdio");
+  console.info("Smartsheet MCP Server running on stdio");
 }
 
 main().catch((error) => {

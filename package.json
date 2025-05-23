@@ -13,7 +13,7 @@
     "test": "node -r dotenv/config tests/test-direct-api.js",
     "setup-claude": "node -r dotenv/config scripts/setup-claude-config.sh",
     "prepare": "npm run build",
-    "publish": "npm install"
+    "publish": "npm run build && npm publish"
   },
   "keywords": [],
   "author": "Smartsheet",

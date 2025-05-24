@@ -1,6 +1,6 @@
 import { SmartsheetAPI } from './smartsheet-api';
-import { Workspace } from '../models/Workspace';
-import { Folder } from '../models/Folder';
+import { Workspace } from '../types/Workspace';
+import { Folder } from '../types/Folder';
 
 /**
  * Workspace-specific API methods for Smartsheet

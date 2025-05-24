@@ -1,13 +1,13 @@
-import { Sheet } from '../models/Sheet';
-import { SheetVersion } from '../models/SheetVersion';
-import { CellHistory } from '../models/CellHistory';
-import { Row } from '../models/Row';
-import { RowsAddToSheet200Response } from '../models/RowsAddToSheet200Response';
-import { DeleteRows200Response } from '../models/DeleteRows200Response';
-import { CopySheet200Response, CopySheet200ResponseFromJSON } from '../models/CopySheet200Response';
-import { Discussion, DiscussionFromJSON } from '../models/Discussion';
-import { SheetLocation } from '../models/SheetLocation';
-import { UpdaterequestsCreate200Response, UpdaterequestsCreate200ResponseFromJSON } from '../models/UpdaterequestsCreate200Response';
+import { Sheet } from '../types/Sheet';
+import { SheetVersion } from '../types/SheetVersion';
+import { CellHistory } from '../types/CellHistory';
+import { Row } from '../types/Row';
+import { RowsAddToSheet200Response } from '../types/RowsAddToSheet200Response';
+import { DeleteRows200Response } from '../types/DeleteRows200Response';
+import { CopySheet200Response, CopySheet200ResponseFromJSON } from '../types/CopySheet200Response';
+import { Discussion, DiscussionFromJSON } from '../types/Discussion';
+import { SheetLocation } from '../types/SheetLocation';
+import { UpdaterequestsCreate200Response, UpdaterequestsCreate200ResponseFromJSON } from '../types/UpdaterequestsCreate200Response';
 import { SmartsheetAPI } from './smartsheet-api';
 
 /**

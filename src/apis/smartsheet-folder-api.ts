@@ -1,4 +1,4 @@
-import { Folder } from '../models/Folder';
+import { Folder } from '../types/Folder';
 import { SmartsheetAPI } from './smartsheet-api';
 
 /**

@@ -7,10 +7,10 @@
   },
   "scripts": {
     "build": "tsc && chmod 755 build/index.js",
-    "start": "node -r dotenv/config build/index.js",
+    "start": "node build/index.js",
     "dev": "npm run build && npm run start",
     "test": "jest",
-    "setup-claude": "node -r dotenv/config scripts/setup-claude-config.sh",
+    "setup-claude": "node scripts/setup-claude-config.sh",
     "prepare": "npm run build",
     "publish": "npm run build && npm publish"
   },
@@ -36,7 +36,7 @@
     "lint-staged": "^15.2.0",
     "semantic-release": "^22.0.12",
     "ts-jest": "^29.3.4",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   },
   "files": [
     "build"

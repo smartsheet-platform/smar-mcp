@@ -7,8 +7,7 @@ console.info(`[Config] Delete operations are ${allowDeleteTools ? 'enabled' : 'd
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { SmartsheetDirectAPI } from "./smartsheet-direct-api.js";
-import { createVersionBackup } from "./smartsheet-workflows.js";
+import { SmartsheetAPI } from "./apis/smartsheet-api.js";
 
 // Initialize the MCP server
 const server = new McpServer({
@@ -17,9 +16,9 @@ const server = new McpServer({
 });
 
 // Initialize the direct API client
-const api = new SmartsheetDirectAPI(process.env.SMARTSHEET_API_KEY, process.env.SMARTSHEET_ENDPOINT);
+const api = new SmartsheetAPI(process.env.SMARTSHEET_API_KEY, process.env.SMARTSHEET_ENDPOINT);
 
-// Tool 1: Get Sheet
+// Tool: Get Sheet
 server.tool(
   "get_sheet",
   "Retrieves the current state of a sheet, including rows, columns, and cells",
@@ -30,7 +29,7 @@ server.tool(
   async ({ sheetId, include }) => {
     try {
       console.info(`[Tool] Getting sheet with ID: ${sheetId}`);
-      const sheet = await api.getSheet(sheetId, include);
+      const sheet = await api.sheets.getSheet(sheetId, include);
       
       return {
         content: [
@@ -55,7 +54,7 @@ server.tool(
   }
 );
 
-// Tool 2: Get Sheet Version
+// Tool: Get Sheet Version
 server.tool(
   "get_sheet_version",
   "Gets the current version number of a sheet",
@@ -65,7 +64,7 @@ server.tool(
   async ({ sheetId }) => {
     try {
       console.info(`[Tool] Getting version for sheet with ID: ${sheetId}`);
-      const version = await api.getSheetVersion(sheetId);
+      const version = await api.sheets.getSheetVersion(sheetId);
       
       return {
         content: [
@@ -90,7 +89,7 @@ server.tool(
   }
 );
 
-// Tool 3: Get Cell History
+// Tool: Get Cell History
 server.tool(
   "get_cell_history",
   "Retrieves the history of changes for a specific cell",
@@ -105,7 +104,7 @@ server.tool(
   async ({ sheetId, rowId, columnId, include, pageSize, page }) => {
     try {
       console.info(`[Tool] Getting history for cell at row ${rowId}, column ${columnId} in sheet ${sheetId}`);
-      const history = await api.getCellHistory(sheetId, rowId, columnId, include, pageSize, page);
+      const history = await api.sheets.getCellHistory(sheetId, rowId, columnId, include, pageSize, page);
       
       return {
         content: [
@@ -130,7 +129,7 @@ server.tool(
   }
 );
 
-// Tool 4: Update Rows
+// Tool: Update Rows
 server.tool(
   "update_rows",
   "Updates rows in a sheet, including cell values, formatting, and formulae",
@@ -153,7 +152,7 @@ server.tool(
   async ({ sheetId, rows }) => {
     try {
       console.info(`[Tool] Updating ${rows.length} rows in sheet ${sheetId}`);
-      const result = await api.updateRows(sheetId, rows);
+      const result = await api.sheets.updateRows(sheetId, rows);
       
       return {
         content: [
@@ -178,7 +177,7 @@ server.tool(
   }
 );
 
-// Tool 5: Add Rows
+// Tool: Add Rows
 server.tool(
   "add_rows",
   "Adds new rows to a sheet",
@@ -202,7 +201,7 @@ server.tool(
   async ({ sheetId, rows }) => {
     try {
       console.info(`[Tool] Adding ${rows.length} rows to sheet ${sheetId}`);
-      const result = await api.addRows(sheetId, rows);
+      const result = await api.sheets.addRows(sheetId, rows);
       
       return {
         content: [
@@ -227,7 +226,7 @@ server.tool(
   }
 );
 
-// Tool 6: Delete Rows (conditionally registered)
+// Tool: Delete Rows (conditionally registered)
 if (allowDeleteTools) {
   server.tool(
     "delete_rows",
@@ -240,7 +239,7 @@ if (allowDeleteTools) {
     async ({ sheetId, rowIds, ignoreRowsNotFound }) => {
       try {
         console.info(`[Tool] Deleting ${rowIds.length} rows from sheet ${sheetId}`);
-        const result = await api.deleteRows(sheetId, rowIds, ignoreRowsNotFound);
+        const result = await api.sheets.deleteRows(sheetId, rowIds, ignoreRowsNotFound);
         
         return {
           content: [
@@ -268,7 +267,7 @@ if (allowDeleteTools) {
   console.info("[Config] Delete operations are disabled. Set ALLOW_DELETE_TOOLS=true to enable them.");
 }
 
-// Tool 7: Get Sheet Location
+// Tool: Get Sheet Location
 server.tool(
   "get_sheet_location",
   "Gets the folder ID where a sheet is located",
@@ -278,7 +277,7 @@ server.tool(
   async ({ sheetId }) => {
     try {
       console.info(`[Tool] Getting location for sheet ${sheetId}`);
-      const location = await api.getSheetLocation(sheetId);
+      const location = await api.sheets.getSheetLocation(sheetId);
       
       return {
         content: [
@@ -303,7 +302,7 @@ server.tool(
   }
 );
 
-// Tool 8: Copy Sheet
+// Tool: Copy Sheet
 server.tool(
   "copy_sheet",
   "Creates a copy of the specified sheet in the same folder",
@@ -319,14 +318,14 @@ server.tool(
       // If no destination folder is specified, get the current folder
       if (!destinationFolderId) {
         try {
-          const location = await api.getSheetLocation(sheetId);
+          const location = await api.sheets.getSheetLocation(sheetId);
           destinationFolderId = location.folderId;
         } catch (error) {
           console.warn("[Warning] Failed to get sheet location, using default folder:", error);
         }
       }
       
-      const result = await api.copySheet(sheetId, destinationName, destinationFolderId);
+      const result = await api.sheets.copySheet(sheetId, destinationName, destinationFolderId);
       
       return {
         content: [
@@ -351,7 +350,7 @@ server.tool(
   }
 );
 
-// Tool 9: Create Sheet
+// Tool: Create Sheet
 server.tool(
   "create_sheet",
   "Creates a new sheet",
@@ -369,7 +368,7 @@ server.tool(
   async ({ name, columns, folderId }) => {
     try {
       console.info(`[Tool] Creating new sheet "${name}"`);
-      const result = await api.createSheet(name, columns, folderId);
+      const result = await api.sheets.createSheet(name, columns, folderId);
       
       return {
         content: [
@@ -394,49 +393,7 @@ server.tool(
   }
 );
 
-// Tool 10: Create Version Backup (Workflow)
-server.tool(
-  "create_version_backup",
-  "Creates a backup sheet with data from a specific timestamp",
-  {
-    sheetId: z.string().describe("The ID of the source sheet"),
-    timestamp: z.string().describe("The ISO 8601 timestamp to use for historical data (e.g., '2025-03-27T13:00:00Z')"),
-    archiveName: z.string().optional().describe("Name for the archive sheet (defaults to 'Original Sheet Name - Archive YYYY-MM-DD')"),
-    createBackup: z.boolean().default(false).describe("Not used for archive sheet, but required by the interface"),
-    includeFormulas: z.boolean().default(true).describe("Whether to include formulas in the archive"),
-    includeFormatting: z.boolean().default(true).describe("Whether to include formatting in the archive"),
-    batchSize: z.number().default(100).describe("Number of rows to process in each batch"),
-    maxConcurrentRequests: z.number().default(5).describe("Maximum number of concurrent API requests"),
-  },
-  async (options) => {
-    try {
-      console.info(`[Tool] Creating version backup for ${options.sheetId} at timestamp ${options.timestamp}`);
-      const result = await createVersionBackup(api, options);
-      
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2)
-          }
-        ]
-      };
-    } catch (error: any) {
-      console.error("[Error] in create_version_backup:", error);
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Failed to create version backup: ${error.message}`
-          }
-        ],
-        isError: true
-      };
-    }
-  }
-);
-
-// Tool 11: Get Sheet Discussions
+// Tool: Get Sheet Discussions
 server.tool(
   "get_sheet_discussions",
   "Retrieves the discussions for a sheet",
@@ -450,7 +407,7 @@ server.tool(
   async ({ sheetId, include, pageSize, page, includeAll }) => {
     try {
       console.info(`[Tool] Getting discussions for sheet ${sheetId}`);
-      const discussions = await api.getSheetDiscussions(sheetId, include, pageSize, page, includeAll);
+      const discussions = await api.sheets.getSheetDiscussions(sheetId, include, pageSize, page, includeAll);
       
       return {
         content: [
@@ -475,7 +432,7 @@ server.tool(
   }
 );
 
-// Tool 12: Create Row Discussion
+// Tool: Create Row Discussion
 server.tool(
   "create_row_discussion",
   "Creates a discussion on a specific row",
@@ -487,7 +444,7 @@ server.tool(
   async ({ sheetId, rowId, commentText }) => {
     try {
       console.info(`[Tool] Creating discussion on row ${rowId} in sheet ${sheetId}`);
-      const result = await api.createRowDiscussion(sheetId, rowId, commentText);
+      const result = await api.sheets.createRowDiscussion(sheetId, rowId, commentText);
       
       return {
         content: [
@@ -512,7 +469,7 @@ server.tool(
   }
 );
 
-// Tool 13: Create Update Request
+// Tool: Create Update Request
 server.tool(
   "create_update_request",
   "Creates an update request for a sheet",
@@ -534,7 +491,7 @@ server.tool(
   async ({ sheetId, rowIds, columnIds, includeAttachments, includeDiscussions, message, subject, ccMe, sendTo }) => {
     try {
       console.info(`[Tool] Creating update request for sheet ${sheetId}`);
-      const result = await api.createUpdateRequest(sheetId, {
+      const result = await api.sheets.createUpdateRequest(sheetId, {
         rowIds,
         columnIds,
         includeAttachments,
@@ -576,7 +533,7 @@ server.tool(
     async ({ }) => {
       try {
         console.info(`[Tool] Getting workspaces`);
-        const workspace = await api.getWorkspaces();
+        const workspace = await api.workspaces.getWorkspaces();
 
         return {
           content: [
@@ -611,7 +568,7 @@ server.tool(
     async ({ workspaceId}) => {
       try {
         console.info(`[Tool] Getting workspace with ID: ${workspaceId}`);
-        const workspace = await api.getWorkspace(workspaceId);
+        const workspace = await api.workspaces.getWorkspace(workspaceId);
 
         return {
           content: [
@@ -646,7 +603,7 @@ server.tool(
     async ({ workspaceName }) => {
       try {
         console.info(`[Tool] Creating workspace: ${workspaceName}`);
-        const workspace = await api.createWorkspace(workspaceName);
+        const workspace = await api.workspaces.createWorkspace(workspaceName);
 
         return {
           content: [
@@ -681,7 +638,7 @@ server.tool(
     async ({ folderId}) => {
       try {
         console.info(`[Tool] Getting folder with ID: ${folderId}`);
-        const folder = await api.getFolder(folderId);
+        const folder = await api.folders.getFolder(folderId);
 
         return {
           content: [
@@ -717,7 +674,7 @@ server.tool(
     async ({ folderId, folderName }) => {
       try {
         console.info(`[Tool] Creating folder in workspace with ID: ${folderId}`);
-        const folder = await api.createFolder(folderId, folderName);
+        const folder = await api.folders.createFolder(folderId, folderName);
 
         return {
           content: [
@@ -753,7 +710,7 @@ server.tool(
     async ({ workspaceId, folderName }) => {
       try {
         console.info(`[Tool] Creating folder in workspace with ID: ${workspaceId}`);
-        const folder = await api.createWorkspaceFolder(workspaceId, folderName);
+        const folder = await api.workspaces.createWorkspaceFolder(workspaceId, folderName);
 
         return {
           content: [
@@ -770,6 +727,73 @@ server.tool(
             {
               type: "text",
               text: `Failed to create_workspace_folder: ${error.message}`
+            }
+          ],
+          isError: true
+        };
+      }
+    }
+);
+
+// Tool: Get Current User
+server.tool(
+    "get_current_user",
+    "Gets the current user's information",
+    async () => {
+      try {
+        console.info("[Tool] Getting current user");
+        const user = await api.users.getCurrentUser();
+        
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(user, null, 2)
+            }
+          ]
+        };
+      } catch (error: any) {
+        console.error("[Error] in get_current_user:", error);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to get current user: ${error.message}`
+            }
+          ],
+          isError: true
+        };
+      }
+    }
+);
+
+// Tool: Get User
+server.tool(
+    "get_user",
+    "Gets a user's information by ID",
+    {
+      userId: z.string().describe("ID of the user to get")
+    },
+    async ({ userId }) => {
+      try {
+        console.info(`[Tool] Getting user with ID: ${userId}`);
+        const user = await api.users.getUserById(userId);
+        
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(user, null, 2)
+            }
+          ]
+        };
+      } catch (error: any) {
+        console.error("[Error] in get_user:", error);
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to get user: ${error.message}`
             }
           ],
           isError: true

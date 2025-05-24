@@ -1,3 +1,4 @@
+import { Folder } from '../models/Folder.js';
 import { SmartsheetAPI } from './smartsheet-api.js';
 
 /**
@@ -16,7 +17,7 @@ export class SmartsheetFolderAPI {
    * @param folderName Name of the folder to create
    * @returns Created folder data
    */
-  async createFolder(folderId: string, folderName: string): Promise<any> {
+  async createFolder(folderId: string, folderName: string): Promise<Folder> {
     const data = {
       name: folderName
     };
@@ -29,7 +30,7 @@ export class SmartsheetFolderAPI {
    * @param folderId Folder ID
    * @returns Folder data
    */
-  async getFolder(folderId: string): Promise<any> {
+  async getFolder(folderId: string): Promise<Folder> {
     return this.api.request('GET', `/folders/${folderId}`);
   }
 }

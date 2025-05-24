@@ -1,4 +1,14 @@
-import { SmartsheetAPI } from './smartsheet-api.js';
+import { Sheet } from '../models/Sheet';
+import { SheetVersion } from '../models/SheetVersion';
+import { CellHistory } from '../models/CellHistory';
+import { Row } from '../models/Row';
+import { RowsAddToSheet200Response } from '../models/RowsAddToSheet200Response';
+import { DeleteRows200Response } from '../models/DeleteRows200Response';
+import { CopySheet200Response, CopySheet200ResponseFromJSON } from '../models/CopySheet200Response';
+import { Discussion, DiscussionFromJSON } from '../models/Discussion';
+import { SheetLocation } from '../models/SheetLocation';
+import { UpdaterequestsCreate200Response, UpdaterequestsCreate200ResponseFromJSON } from '../models/UpdaterequestsCreate200Response';
+import { SmartsheetAPI } from './smartsheet-api';
 
 /**
  * Sheet-specific API methods for Smartsheet
@@ -16,7 +26,7 @@ export class SmartsheetSheetAPI {
    * @param include Optional comma-separated list of elements to include
    * @returns Sheet data
    */
-  async getSheet(sheetId: string, include?: string): Promise<any> {
+  async getSheet(sheetId: string, include?: string): Promise<Sheet> {
     return this.api.request('GET', `/sheets/${sheetId}`, undefined, { include });
   }
   
@@ -25,7 +35,7 @@ export class SmartsheetSheetAPI {
    * @param sheetId Sheet ID
    * @returns Sheet version
    */
-  async getSheetVersion(sheetId: string): Promise<any> {
+  async getSheetVersion(sheetId: string): Promise< SheetVersion> {
     return this.api.request('GET', `/sheets/${sheetId}/version`);
   }
   
@@ -46,7 +56,7 @@ export class SmartsheetSheetAPI {
     include?: string, 
     pageSize?: number, 
     page?: number
-  ): Promise<any> {
+  ): Promise<CellHistory> {
     return this.api.request('GET', `/sheets/${sheetId}/rows/${rowId}/columns/${columnId}/history`, undefined, {
       include,
       pageSize,
@@ -60,7 +70,7 @@ export class SmartsheetSheetAPI {
    * @param rows Array of row objects to update
    * @returns Update result
    */
-  async updateRows(sheetId: string, rows: any[]): Promise<any> {
+  async updateRows(sheetId: string, rows: Row[]): Promise<Row[]> {
     return this.api.request('PUT', `/sheets/${sheetId}/rows`, rows);
   }
   
@@ -70,7 +80,7 @@ export class SmartsheetSheetAPI {
    * @param rows Array of row objects to add
    * @returns Add result
    */
-  async addRows(sheetId: string, rows: any[]): Promise<any> {
+  async addRows(sheetId: string, rows: Row[]): Promise<RowsAddToSheet200Response> {
     return this.api.request('POST', `/sheets/${sheetId}/rows`, rows);
   }
   
@@ -81,7 +91,7 @@ export class SmartsheetSheetAPI {
    * @param ignoreRowsNotFound Whether to ignore rows that don't exist
    * @returns Delete result
    */
-  async deleteRows(sheetId: string, rowIds: string[], ignoreRowsNotFound: boolean = true): Promise<any> {
+  async deleteRows(sheetId: string, rowIds: string[], ignoreRowsNotFound: boolean = true): Promise<DeleteRows200Response> {
     return this.api.request('DELETE', `/sheets/${sheetId}/rows`, undefined, {
       ids: rowIds.join(','),
       ignoreRowsNotFound: ignoreRowsNotFound.toString()
@@ -93,12 +103,12 @@ export class SmartsheetSheetAPI {
    * @param sheetId Sheet ID
    * @returns Location information including folder ID
    */
-  async getSheetLocation(sheetId: string): Promise<any> {
+  async getSheetLocation(sheetId: string): Promise<SheetLocation> {
     const sheet = await this.getSheet(sheetId);
     return {
-      folderId: sheet.parentId,
-      folderType: sheet.parentType,
-      workspaceId: sheet.workspaceId
+      folderId: sheet.workspace?.id,
+      folderType: 'workspace',
+      workspaceId: sheet.workspace?.id
     };
   }
   
@@ -115,7 +125,7 @@ export class SmartsheetSheetAPI {
     destinationName: string,
     destinationFolderId?: string,
     workspaceId?: string
-  ): Promise<any> {
+  ): Promise<CopySheet200Response> {
     const data: any = {
       newName: destinationName
     };
@@ -134,9 +144,9 @@ export class SmartsheetSheetAPI {
       console.error(`[API] Copying sheet to home`);
     }
     
-    const result = await this.api.request('POST', `/sheets/${sheetId}/copy`, data);
-    console.error(`[API] Copy sheet result: ${JSON.stringify((result as any).result?.id)}`);
-    return result;
+    const response = await this.api.request('POST', `/sheets/${sheetId}/copy`, data);
+    console.error(`[API] Copy sheet result: ${JSON.stringify(response)}`);
+    return CopySheet200ResponseFromJSON(response);
   }
   
   /**
@@ -146,7 +156,7 @@ export class SmartsheetSheetAPI {
    * @param folderId Optional folder ID where the sheet should be created
    * @returns New sheet data
    */
-  async createSheet(name: string, columns: any[], folderId?: string): Promise<any> {
+  async createSheet(name: string, columns: any[], folderId?: string): Promise<Sheet> {
     const data = {
       name,
       columns
@@ -177,13 +187,14 @@ export class SmartsheetSheetAPI {
     pageSize?: number,
     page?: number,
     includeAll?: boolean
-  ): Promise<any> {
-    return this.api.request('GET', `/sheets/${sheetId}/discussions`, undefined, {
+  ): Promise<Discussion[]> {
+    const response = await this.api.request('GET', `/sheets/${sheetId}/discussions`, undefined, {
       include,
       pageSize,
       page,
       includeAll,
     });
+    return (response as any[]).map(item => DiscussionFromJSON(item));
   }
   
   /**
@@ -197,14 +208,15 @@ export class SmartsheetSheetAPI {
     sheetId: string,
     rowId: string,
     commentText: string
-  ): Promise<any> {
+  ): Promise<Discussion> {
     const data = {
       comment: {
         text: commentText
       }
     };
     
-    return this.api.request('POST', `/sheets/${sheetId}/rows/${rowId}/discussions`, data);
+    const response = await this.api.request('POST', `/sheets/${sheetId}/rows/${rowId}/discussions`, data);
+    return DiscussionFromJSON(response);
   }
   
   /**
@@ -225,7 +237,8 @@ export class SmartsheetSheetAPI {
       subject?: string;
       ccMe?: boolean;
     }
-  ): Promise<any> {
-    return this.api.request('POST', `/sheets/${sheetId}/updaterequests`, options);
+  ): Promise<UpdaterequestsCreate200Response> {
+    const response = await this.api.request('POST', `/sheets/${sheetId}/updaterequests`, options);
+    return UpdaterequestsCreate200ResponseFromJSON(response);
   }
 }

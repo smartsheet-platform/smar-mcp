@@ -1,4 +1,5 @@
 import { SmartsheetAPI } from "./smartsheet-api.js";
+import { User } from "../models/User.js";
 
 export class SmartsheetUserAPI {
   private api: SmartsheetAPI;
@@ -12,7 +13,7 @@ export class SmartsheetUserAPI {
    * @param userId ID of the user to get
    * @returns User data
    */
-  async getUserById(userId: string): Promise<any> {
+  async getUserById(userId: string): Promise<User> {
     return this.api.request('GET', `/users/${userId}`);
   }
 
@@ -20,7 +21,7 @@ export class SmartsheetUserAPI {
    * Gets the current user
    * @returns Current user data
    */
-  async getCurrentUser(): Promise<any> {
+  async getCurrentUser(): Promise<User> {
     return this.api.request('GET', '/users/me');
   }
 

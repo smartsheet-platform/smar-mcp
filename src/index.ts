@@ -137,10 +137,10 @@ server.tool(
     sheetId: z.string().describe("The ID of the sheet"),
     rows: z.array(
       z.object({
-        id: z.string().describe("Row ID"),
+        id: z.number().describe("Row ID"),
         cells: z.array(
           z.object({
-            columnId: z.number().or(z.string()).describe("Column ID"),
+            columnId: z.number().describe("Column ID"),
             value: z.any().optional().describe("Cell value"),
             formula: z.string().optional().describe("Cell formula"),
             format: z.string().optional().describe("Cell format"),
@@ -189,7 +189,7 @@ server.tool(
         toBottom: z.boolean().optional().describe("Add row to the bottom of the sheet"),
         cells: z.array(
           z.object({
-            columnId: z.number().or(z.string()).describe("Column ID"),
+            columnId: z.number().describe("Column ID"),
             value: z.any().optional().describe("Cell value"),
             formula: z.string().optional().describe("Cell formula"),
             format: z.string().optional().describe("Cell format"),
@@ -319,7 +319,7 @@ server.tool(
       if (!destinationFolderId) {
         try {
           const location = await api.sheets.getSheetLocation(sheetId);
-          destinationFolderId = location.folderId;
+          destinationFolderId = location.folderId?.toString();
         } catch (error) {
           console.warn("[Warning] Failed to get sheet location, using default folder:", error);
         }

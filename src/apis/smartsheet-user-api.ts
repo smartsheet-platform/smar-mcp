@@ -1,5 +1,5 @@
-import { SmartsheetAPI } from "./smartsheet-api.js";
-import { User } from "../models/User.js";
+import { SmartsheetAPI } from "./smartsheet-api";
+import { User } from "../models/User";
 
 export class SmartsheetUserAPI {
   private api: SmartsheetAPI;

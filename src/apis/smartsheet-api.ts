@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { SmartsheetSheetAPI } from './smartsheet-sheet-api.js';
-import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api.js';
-import { SmartsheetFolderAPI } from './smartsheet-folder-api.js';
-import { SmartsheetUserAPI } from './smartsheet-user-api.js';
+import { SmartsheetSheetAPI } from './smartsheet-sheet-api';
+import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api';
+import { SmartsheetFolderAPI } from './smartsheet-folder-api';
+import { SmartsheetUserAPI } from './smartsheet-user-api';
 
 /**
  * Direct Smartsheet API client that doesn't rely on the SDK

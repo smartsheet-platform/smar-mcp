@@ -1,5 +1,5 @@
-import { Folder } from '../models/Folder.js';
-import { SmartsheetAPI } from './smartsheet-api.js';
+import { Folder } from '../models/Folder';
+import { SmartsheetAPI } from './smartsheet-api';
 
 /**
  * Folder-specific API methods for Smartsheet

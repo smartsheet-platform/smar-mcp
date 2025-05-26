@@ -6,11 +6,11 @@
     "smar-mcp": "./build/index.js"
   },
   "scripts": {
-    "build": "tsc && chmod 755 build/index.js",
+    "build": "tsc && echo '#!/usr/bin/env node' > build/index.js.tmp && tail -n +2 build/index.js >> build/index.js.tmp && mv build/index.js.tmp build/index.js && chmod 755 build/index.js",
     "start": "node build/index.js",
     "dev": "npm run build && npm run start",
     "test": "jest",
-    "setup-claude": "node scripts/setup-claude-config.sh",
+    "setup-claude": "cd scripts && sh setup-claude-config.sh",
     "prepare": "npm run build",
     "publish": "npm run build && npm publish"
   },

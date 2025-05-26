@@ -2,7 +2,6 @@
 
 // Control whether deletion operations are enabled
 const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
-console.info(`[Config] Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -263,8 +262,6 @@ if (allowDeleteTools) {
       }
     }
   );
-} else {
-  console.info("[Config] Delete operations are disabled. Set ALLOW_DELETE_TOOLS=true to enable them.");
 }
 
 // Tool: Get Sheet Location

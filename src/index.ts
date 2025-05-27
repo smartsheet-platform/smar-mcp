@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 
-// Control whether deletion operations are enabled
-const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
-console.info(`[Config] Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
-
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { SmartsheetAPI } from "./apis/smartsheet-api.js";
+import { config } from "dotenv";
 
+// Load environment variables
+config();
+
+// Control whether deletion operations are enabled
+const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
+console.info(`[Config] Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
+  
 // Initialize the MCP server
 const server = new McpServer({
   name: "smartsheet",

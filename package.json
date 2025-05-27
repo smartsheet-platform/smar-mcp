@@ -23,6 +23,7 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@modelcontextprotocol/sdk": "^1.7.0",
     "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
     "zod": "^3.24.2"
   },
   "devDependencies": {

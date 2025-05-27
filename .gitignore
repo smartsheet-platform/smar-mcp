@@ -33,6 +33,7 @@ coverage/
 *.swp
 *.swo
 .DS_Store
+.roo/
 
 # Cache directories
 .npm

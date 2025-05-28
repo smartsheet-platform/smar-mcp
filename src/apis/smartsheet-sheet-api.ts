@@ -135,7 +135,7 @@ export class SmartsheetSheetAPI {
     }
     
     const result = await this.api.request('POST', `/sheets/${sheetId}/copy`, data);
-    console.error(`[API] Copy sheet result: ${JSON.stringify((result as any).result?.id)}`);
+    console.info(`[API] Copy sheet result: ${JSON.stringify((result as any).result?.id)}`);
     return result;
   }
   

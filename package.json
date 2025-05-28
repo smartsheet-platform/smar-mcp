@@ -1,5 +1,5 @@
 {
-  "name": "@smartsheet/smar-mcp",
+  "name": "@smartsheet/smar-mcp-dev-dev",
   "version": "1.0.0",
   "main": "build/index.js",
   "type": "module",
@@ -34,9 +34,9 @@
     "@types/node": "^22.13.10",
     "husky": "^8.0.3",
     "jest": "^29.5.0",
-    "ts-jest": "^29.1.0",
     "lint-staged": "^15.2.0",
     "semantic-release": "^22.0.12",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.8.2"
   },
   "files": [

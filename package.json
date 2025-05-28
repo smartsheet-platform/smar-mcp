@@ -1,5 +1,5 @@
 {
-  "name": "@smartsheet/smar-mcp-dev-dev",
+  "name": "@smartsheet/smar-mcp",
   "version": "1.0.0",
   "main": "build/index.js",
   "type": "module",
@@ -14,7 +14,7 @@
     "setup-claude": "node -r dotenv/config scripts/setup-claude-config.sh",
     "prepare": "npm run build",
     "package": "npm run build && npm pack",
-    "publish": "npm run build && npm publish --access public"
+    "deploy": "npm run build && npm publish --access public"
   },
   "keywords": [],
   "author": "Smartsheet",

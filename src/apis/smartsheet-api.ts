@@ -3,6 +3,7 @@ import { SmartsheetSheetAPI } from './smartsheet-sheet-api.js';
 import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api.js';
 import { SmartsheetFolderAPI } from './smartsheet-folder-api.js';
 import { SmartsheetUserAPI } from './smartsheet-user-api.js';
+import { SmartsheetSearchAPI } from './smartsheet-search-api.js';
 
 /**
  * Direct Smartsheet API client that doesn't rely on the SDK
@@ -14,8 +15,9 @@ export class SmartsheetAPI {
   public workspaces: SmartsheetWorkspaceAPI;
   public folders: SmartsheetFolderAPI;
   public users: SmartsheetUserAPI;
+  public search: SmartsheetSearchAPI;
 
-  /**
+  /** 
    * Creates a new SmartsheetAPI instance
    * @param accessToken Smartsheet API access token
    * @param baseUrl Smartsheet API base URL
@@ -27,6 +29,7 @@ export class SmartsheetAPI {
     this.workspaces = new SmartsheetWorkspaceAPI(this);
     this.folders = new SmartsheetFolderAPI(this);
     this.users = new SmartsheetUserAPI(this);
+    this.search = new SmartsheetSearchAPI(this);
     
     if (this.accessToken == '') {
       throw new Error('SMARTSHEET_API_KEY environment variable is not set');

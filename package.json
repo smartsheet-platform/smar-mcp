@@ -1,6 +1,6 @@
 {
 	"name": "@smartsheet/smar-mcp",
-	"version": "0.0.10",
+	"version": "0.0.12",
 	"description": "A Model Context Protocol (MCP) server for interacting with the Smartsheet API. This server provides tools for searching, retrieving, and updating Smartsheet sheets through the MCP protocol.",
 	"main": "build/index.js",
 	"type": "module",
@@ -55,6 +55,7 @@
 		"axios": "^1.8.4",
 		"dotenv": "^16.4.7",
 		"winston": "^3.17.0",
+		"winston-daily-rotate-file": "^5.0.0",
 		"zod": "^3.24.2"
 	},
 	"devDependencies": {

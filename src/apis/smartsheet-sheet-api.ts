@@ -1,4 +1,5 @@
-import { SmartsheetAPI } from './smartsheet-api.js';
+import { SmartsheetAPI } from "./smartsheet-api.js";
+import logger from "../utils/logger.js";
 
 /**
  * Sheet-specific API methods for Smartsheet
@@ -123,19 +124,19 @@ export class SmartsheetSheetAPI {
     if (destinationFolderId) {
       data.destinationType = 'folder';
       data.destinationId = destinationFolderId;
-      console.error(`[API] Copying sheet to folder: ${destinationFolderId}`);
+      logger.debug(`Copying sheet to folder: ${destinationFolderId}`);
     } else if (workspaceId) {
       data.destinationType = 'workspace';
       data.destinationId = workspaceId;
-      console.error(`[API] Copying sheet to workspace: ${workspaceId}`);
+      logger.debug(`Copying sheet to workspace: ${workspaceId}`);
     } else {
       // Default to 'home' if no folder or workspace specified
       data.destinationType = 'home';
-      console.error(`[API] Copying sheet to home`);
+      logger.debug("Copying sheet to home");
     }
     
     const result = await this.api.request('POST', `/sheets/${sheetId}/copy`, data);
-    console.info(`[API] Copy sheet result: ${JSON.stringify((result as any).result?.id)}`);
+    logger.info(`Copy sheet result: ${JSON.stringify((result as any).result?.id)}`);
     return result;
   }
   

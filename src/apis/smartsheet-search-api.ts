@@ -14,7 +14,7 @@ export class SmartsheetSearchAPI {
    * @returns Search results
    */
   async searchSheet(sheetId: string, query: string): Promise<any> {
-    return this.api.request('GET', `/search/sheet/${sheetId}?query=${query}`);
+    return this.api.request('GET', `/search/sheets/${sheetId}?query=${query}`);
   }
 
   /**

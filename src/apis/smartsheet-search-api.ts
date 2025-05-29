@@ -8,6 +8,16 @@ export class SmartsheetSearchAPI {
   }
 
   /**
+   * Search in Sheet
+   * @param sheetId ID of the sheet to search in
+   * @param query Text to search for
+   * @returns Search results
+   */
+  async searchSheet(sheetId: string, query: string): Promise<any> {
+    return this.api.request('GET', `/search/sheet/${sheetId}?query=${query}`);
+  }
+
+  /**
    * Search for Sheets
    * @param query Text to search for
    * @returns Search results

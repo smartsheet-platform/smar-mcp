@@ -39,6 +39,41 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     );
 
     server.tool(
+        "search_in_sheet",
+        "Search cell data and summary fields for a specific sheet",
+        {
+            sheetId: z.string().describe("The ID of the sheet to retrieve"),
+            query: z.string().describe("Text to search for in sheet names, cell data, or summary fields"),
+        },
+        async ({ sheetId, query }) => {
+        try {
+            console.info(`[Tool] Searching for sheet with ID: ${sheetId} with query: ${query}`);
+            const results = await api.search.searchSheet(sheetId, query);
+            
+            return {
+            content: [
+                {
+                type: "text",
+                text: JSON.stringify(results, null, 2)
+                }
+            ]
+            };
+        } catch (error: any) {
+            console.error("[Error] in search_sheets:", error);
+            return {
+            content: [
+                {
+                type: "text",
+                text: `Failed to search for sheets: ${error.message}`
+                }
+            ],
+            isError: true
+            };
+        }
+        }
+    );
+
+    server.tool(
         "search_folders",
         "Search for folders by name",
         {

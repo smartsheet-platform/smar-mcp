@@ -1,6 +1,6 @@
 {
 	"name": "@smartsheet/smar-mcp",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"main": "build/index.js",
 	"type": "module",
 	"bin": {

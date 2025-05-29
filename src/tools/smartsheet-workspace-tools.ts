@@ -28,7 +28,7 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get get_workspace: ${error.message}`
+                  text: `Failed to get workspace: ${error.message}`
                 }
               ],
               isError: true

@@ -24,4 +24,12 @@ export class SmartsheetUserAPI {
     return this.api.request('GET', '/users/me');
   }
 
+  /**
+   * List Users 
+   * @returns List of users
+   */
+  async listUsers(): Promise<any> {
+    return this.api.request('GET', '/users');
+  }
+
 }

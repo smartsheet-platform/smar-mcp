@@ -71,4 +71,35 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
         }
     );
 
+    server.tool(
+        "list_users",
+        "Lists all users",
+        async () => {
+            try {
+                console.info("[Tool] Listing all users");
+                const users = await api.users.listUsers();
+                
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(users, null, 2)
+                        }
+                    ]
+                };
+            } catch (error: any) {
+                console.error("[Error] in list_users:", error);
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Failed to list users: ${error.message}`
+                        }
+                    ],
+                    isError: true
+                };
+            }
+        }
+    );
+
 }

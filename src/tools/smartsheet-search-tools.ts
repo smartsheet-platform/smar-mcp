@@ -74,8 +74,57 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     );
 
     server.tool(
-        "what_am_i_assigned_to",
-        "Search a sheet to find assigned tasks",
+        "search_in_sheet_by_url",
+        "Search cell data and summary fields for a specific sheet by URL",
+        {
+            url: z.string().describe("The URL of the sheet to retrieve"),
+            query: z.string().describe("Text to search for in sheet names, cell data, or summary fields"),
+        },
+        async ({ url, query }) => {
+        try {
+            console.info(`Searching for sheet with URL: ${url} with query: ${query}`);
+            const match = url.match(/\/sheets\/([^?\/]+)/);
+            const directIdToken = match ? match[1] : null;
+            if (!directIdToken) {
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Failed to get sheet: Invalid URL format`
+                        }
+                    ],
+                    isError: true
+                };
+            }
+            const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken);
+            const results = await api.search.searchSheet(sheet.id, query);
+            
+            return {
+            content: [
+                {
+                type: "text",
+                text: JSON.stringify(results, null, 2)
+                }
+            ]
+            };
+        } catch (error: any) {
+            console.error(`Failed to search in sheet ${url} with query "${query}": ${error.message}`, { error });
+            return {
+            content: [
+                {
+                type: "text",
+                text: `Failed to search in sheet: ${error.message}`
+                }
+            ],
+            isError: true
+            };
+        }
+        }
+    );
+
+    server.tool(
+        "what_am_i_assigned_to_by_sheet_id",
+        "Search a sheet by ID to find assigned tasks",
         {
             sheetId: z.string().describe("The ID of the sheet to retrieve"),
         },
@@ -94,6 +143,54 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
             };
         } catch (error: any) {
             console.error(`Failed to search in sheet ${sheetId}: ${error.message}`, { error });
+            return {
+            content: [
+                {
+                type: "text",
+                text: `Failed to search for assigned tasks in sheet: ${error.message}`
+                }
+            ],
+            isError: true
+            };
+        }
+        }
+    );
+
+    server.tool(
+        "what_am_i_assigned_to_by_sheet_url",
+        "Search a sheet by URL to find assigned tasks",
+        {
+            url: z.string().describe("The URL of the sheet to retrieve"),
+        },
+        async ({ url }) => {
+        try {
+            const user = await api.users.getCurrentUser();
+            const match = url.match(/\/sheets\/([^?\/]+)/);
+            const directIdToken = match ? match[1] : null;
+            if (!directIdToken) {
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Failed to get sheet: Invalid URL format`
+                        }
+                    ],
+                    isError: true
+                };
+            }
+            const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken);
+            const results = await api.search.searchSheet(sheet.id, user.email);
+            
+            return {
+            content: [
+                {
+                type: "text",
+                text: JSON.stringify(results, null, 2)
+                }
+            ]
+            };
+        } catch (error: any) {
+            console.error(`Failed to search in sheet ${url}: ${error.message}`, { error });
             return {
             content: [
                 {

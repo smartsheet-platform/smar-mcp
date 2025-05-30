@@ -16,8 +16,8 @@ export class SmartsheetSheetAPI {
    * @param include Optional comma-separated list of elements to include
    * @returns Sheet data
    */
-  async getSheet(sheetId: string, include?: string): Promise<any> {
-    return this.api.request('GET', `/sheets/${sheetId}`, undefined, { include });
+  async getSheet(sheetId: string, include?: string, exclude?: string, pageSize?: number, page?: number): Promise<any> {
+    return this.api.request('GET', `/sheets/${sheetId}`, undefined, { include, exclude, pageSize, page });
   }
 
   /**
@@ -26,8 +26,8 @@ export class SmartsheetSheetAPI {
    * @param include Optional comma-separated list of elements to include
    * @returns Sheet data
    */
-  async getSheetByDirectIdToken(directIdToken: string, include?: string): Promise<any> {
-    return this.api.request('GET', `/sheets/${directIdToken}`, undefined, { include });
+  async getSheetByDirectIdToken(directIdToken: string, include?: string, exclude?: string, pageSize?: number, page?: number): Promise<any> {
+    return this.api.request('GET', `/sheets/${directIdToken}`, undefined, { include, exclude, pageSize, page });
   }
   
   /**
@@ -62,6 +62,17 @@ export class SmartsheetSheetAPI {
       pageSize,
       page
     });
+  }
+
+  /**
+   * Get Row
+   * @param sheetId Sheet ID
+   * @param rowId Row ID
+   * @param include Optional comma-separated list of elements to include
+   * @returns Row data
+   */
+  async getRow(sheetId: string, rowId: string, include?: string, exclude?: string): Promise<any> {
+    return this.api.request('GET', `/sheets/${sheetId}/rows/${rowId}`, undefined, { include, exclude });
   }
   
   /**

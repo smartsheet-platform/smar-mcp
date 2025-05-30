@@ -10,11 +10,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       {
         sheetId: z.string().describe("The ID of the sheet to retrieve"),
         include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'format,formulas')"),
+        pageSize: z.number().optional().describe("Number of rows to return per page"),
+        page: z.number().optional().describe("Page number to return"),
       },
-      async ({ sheetId, include }) => {
+      async ({ sheetId, include, pageSize, page }) => {
         try {
           console.info(`Getting sheet with ID: ${sheetId}`);
-          const sheet = await api.sheets.getSheet(sheetId, include);
+          const sheet = await api.sheets.getSheet(sheetId, include, undefined, pageSize, page);
           
           return {
             content: [
@@ -45,8 +47,10 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       {
         url: z.string().describe("The URL of the sheet to retrieve"),
         include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'format,formulas')"),
+        pageSize: z.number().optional().describe("Number of rows to return per page"),
+        page: z.number().optional().describe("Page number to return"),
       },
-      async ({ url, include }) => {
+      async ({ url, include, pageSize, page }) => {
         try {
           console.info(`Getting sheet with URL: ${url}`);
           const match = url.match(/\/sheets\/([^?\/]+)/);
@@ -62,7 +66,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               isError: true
             };
           }
-          const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken, include);
+          const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken, include, undefined, pageSize, page);
           
           return {
             content: [
@@ -153,6 +157,43 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
                 {
                   type: "text",
                   text: `Failed to get cell history: ${error.message}`
+                }
+              ],
+              isError: true
+            };
+          }
+        }
+      );
+
+      // Tool: Get Row
+      server.tool(
+        "get_row",
+        "Retrieves a specific row from a sheet",
+        {
+          sheetId: z.string().describe("The ID of the sheet"),
+          rowId: z.string().describe("The ID of the row"),
+          include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'format,formulas')"),
+        },
+        async ({ sheetId, rowId, include }) => {
+          try {
+            console.info(`Getting row ${rowId} in sheet ${sheetId}`);
+            const row = await api.sheets.getRow(sheetId, rowId, include);
+            
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(row, null, 2)
+                }
+              ]
+            };
+          } catch (error: any) {
+            console.error(`Failed to get row ${rowId} in sheet ${sheetId}`, { error });
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Failed to get row: ${error.message}`
                 }
               ],
               isError: true

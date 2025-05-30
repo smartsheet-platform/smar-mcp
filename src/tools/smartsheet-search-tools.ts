@@ -74,6 +74,40 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     );
 
     server.tool(
+        "what_am_i_assigned_to",
+        "Search a sheet to find assigned tasks",
+        {
+            sheetId: z.string().describe("The ID of the sheet to retrieve"),
+        },
+        async ({ sheetId }) => {
+        try {
+            const user = await api.users.getCurrentUser();
+            const results = await api.search.searchSheet(sheetId, user.email);
+            
+            return {
+            content: [
+                {
+                type: "text",
+                text: JSON.stringify(results, null, 2)
+                }
+            ]
+            };
+        } catch (error: any) {
+            console.error(`Failed to search in sheet ${sheetId}: ${error.message}`, { error });
+            return {
+            content: [
+                {
+                type: "text",
+                text: `Failed to search for assigned tasks in sheet: ${error.message}`
+                }
+            ],
+            isError: true
+            };
+        }
+        }
+    );
+
+    server.tool(
         "search_folders",
         "Search for folders by name",
         {

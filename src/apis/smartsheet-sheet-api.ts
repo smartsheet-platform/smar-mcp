@@ -20,6 +20,16 @@ export class SmartsheetSheetAPI {
   async getSheet(sheetId: string, include?: string): Promise<any> {
     return this.api.request('GET', `/sheets/${sheetId}`, undefined, { include });
   }
+
+  /**
+   * Gets a sheet by directIdToken
+   * @param directIdToken Sheet directIdToken
+   * @param include Optional comma-separated list of elements to include
+   * @returns Sheet data
+   */
+  async getSheetByDirectIdToken(directIdToken: string, include?: string): Promise<any> {
+    return this.api.request('GET', `/sheets/${directIdToken}`, undefined, { include });
+  }
   
   /**
    * Gets the version of a sheet

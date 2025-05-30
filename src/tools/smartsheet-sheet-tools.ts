@@ -41,6 +41,54 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
     );
 
     server.tool(
+      "get_sheet_by_url",
+      "Retrieves the current state of a sheet, including rows, columns, and cells",
+      {
+        url: z.string().describe("The URL of the sheet to retrieve"),
+        include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'format,formulas')"),
+      },
+      async ({ url, include }) => {
+        try {
+          logger.info(`Getting sheet with URL: ${url}`);
+          const match = url.match(/\/sheets\/([^?\/]+)/);
+          const directIdToken = match ? match[1] : null;
+          if (!directIdToken) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Failed to get sheet: Invalid URL format`
+                }
+              ],
+              isError: true
+            };
+          }
+          const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken, include);
+          
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(sheet, null, 2)
+              }
+            ]
+          };
+        } catch (error: any) {
+          logger.error(`Failed to get sheet with URL: ${url}`, { error });
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Failed to get sheet: ${error.message}`
+              }
+            ],
+            isError: true
+          };
+        }
+      }
+    );
+
+    server.tool(
         "get_sheet_version",
         "Gets the current version number of a sheet",
         {

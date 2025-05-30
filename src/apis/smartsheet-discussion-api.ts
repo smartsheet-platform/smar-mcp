@@ -9,21 +9,52 @@ export class SmartsheetDiscussionAPI {
 
   /**
    * Get discussions by sheet ID 
-   * @param sheetId ID of the sheet to get discussions for
+   * @param sheetId Sheet ID
+   * @param include Optional parameter to include additional information (e.g., 'attachments')
+   * @param pageSize Number of discussions to return per page
+   * @param page Page number to return
+   * @param includeAll Whether to include all results
    * @returns Discussions data
    */
-  async getDiscussionsBySheetId(sheetId: string): Promise<any> {
-    return this.api.request('GET', `/sheets/${sheetId}/discussions`);
+  async getDiscussionsBySheetId(
+    sheetId: string,
+    include?: string,
+    pageSize?: number,
+    page?: number,
+    includeAll?: boolean
+  ): Promise<any> {
+    return this.api.request('GET', `/sheets/${sheetId}/discussions`, undefined, {
+      include,
+      pageSize,
+      page,
+      includeAll,
+    });
   }
 
   /**
    * Get discussions by row ID
-   * @param sheetId ID of the sheet to get discussions for
-   * @param rowId ID of the row to get discussions for
+   * @param sheetId Sheet ID
+   * @param rowId Row ID
+   * @param include Optional parameter to include additional information (e.g., 'attachments')
+   * @param pageSize Number of discussions to return per page
+   * @param page Page number to return
+   * @param includeAll Whether to include all results
    * @returns Discussions data
    */
-  async getDiscussionsByRowId(sheetId: string, rowId: string): Promise<any> {
-    return this.api.request('GET', `/sheets/${sheetId}/rows/${rowId}/discussions`);
+  async getDiscussionsByRowId(
+    sheetId: string,
+    rowId: string,
+    include?: string,
+    pageSize?: number,
+    page?: number,
+    includeAll?: boolean
+  ): Promise<any> {
+    return this.api.request('GET', `/sheets/${sheetId}/rows/${rowId}/discussions`, undefined, {
+      include,
+      pageSize,
+      page,
+      includeAll,
+    });
   }
 
   /**

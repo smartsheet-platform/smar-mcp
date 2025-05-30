@@ -9,12 +9,16 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         "get_discussions_by_sheet_id",
         "Gets discussions by sheet ID",
         {
-            sheetId: z.string().describe("ID of the sheet to get discussions for")
+            sheetId: z.string().describe("The ID of the sheet"),
+            include: z.string().optional().describe("Optional parameter to include additional information (e.g., 'attachments')"),
+            pageSize: z.number().optional().describe("Number of discussions to return per page"),
+            page: z.number().optional().describe("Page number to return"),
+            includeAll: z.boolean().optional().describe("Whether to include all results"),
         },
-        async ({ sheetId }) => {
+        async ({ sheetId, include, pageSize, page, includeAll }) => {
             try {
                 console.info(`Getting discussions for sheet with ID: ${sheetId}`);
-                const discussions = await api.discussions.getDiscussionsBySheetId(sheetId);
+                const discussions = await api.discussions.getDiscussionsBySheetId(sheetId, include, pageSize, page, includeAll);
                 
                 return {
                     content: [
@@ -45,12 +49,16 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         "Gets discussions by row ID",
         {
             sheetId: z.string().describe("ID of the sheet to get discussions for"),
-            rowId: z.string().describe("ID of the row to get discussions for")
+            rowId: z.string().describe("ID of the row to get discussions for"),
+            include: z.string().optional().describe("Optional parameter to include additional information (e.g., 'attachments')"),
+            pageSize: z.number().optional().describe("Number of discussions to return per page"),
+            page: z.number().optional().describe("Page number to return"),
+            includeAll: z.boolean().optional().describe("Whether to include all results"),
         },
-        async ({ sheetId, rowId }) => {
+        async ({ sheetId, rowId, include, pageSize, page, includeAll }) => {
             try {
                 console.info(`Getting discussions for row with ID: ${rowId} in sheet with ID: ${sheetId}`);
-                const discussions = await api.discussions.getDiscussionsByRowId(sheetId, rowId);
+                const discussions = await api.discussions.getDiscussionsByRowId(sheetId, rowId, include, pageSize, page, includeAll);
                 
                 return {
                     content: [

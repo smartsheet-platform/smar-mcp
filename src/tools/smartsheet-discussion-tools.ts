@@ -148,40 +148,4 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         }
     );
 
-    // Create sheet discussion
-    server.tool(
-        "create_sheet_discussion",
-        "Creates a new discussion on a sheet",
-        {
-            sheetId: z.string().describe("ID of the sheet to create a discussion for"),
-            commentText: z.string().describe("Text of the comment to add")
-        },
-        async ({ sheetId, commentText }) => {
-            try {
-                console.info(`Creating discussion on sheet with ID: ${sheetId}`);
-                const discussion = await api.discussions.createSheetDiscussion(sheetId, commentText);
-                
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(discussion, null, 2)
-                        }
-                    ]
-                };
-            } catch (error: any) {
-                console.error(`Failed to create discussion on sheet ID: ${sheetId}`, { error });
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: `Failed to create discussion: ${error.message}`
-                        }
-                    ],
-                    isError: true
-                };
-            }
-        }
-    );
-
 }

@@ -5,12 +5,13 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { SmartsheetAPI } from "./apis/smartsheet-api.js";
 import { config } from "dotenv";
+import { getDiscussionTools } from "./tools/smartsheet-discussion-tools.js";
+import { getFolderTools } from "./tools/smartsheet-folder-tools.js";
 import { getSearchTools } from "./tools/smartsheet-search-tools.js";
 import { getSheetTools } from "./tools/smartsheet-sheet-tools.js";
-import { getFolderTools } from "./tools/smartsheet-folder-tools.js";
-import { getWorkspaceTools } from "./tools/smartsheet-workspace-tools.js";
 import { getUpdateRequestTools } from "./tools/smartsheet-update-request-tools.js";
 import { getUserTools } from "./tools/smartsheet-user-tools.js";
+import { getWorkspaceTools } from "./tools/smartsheet-workspace-tools.js";
 import logger from "./utils/logger.js";
 
 // Load environment variables
@@ -29,23 +30,26 @@ const server = new McpServer({
 // Initialize the direct API client
 const api = new SmartsheetAPI(process.env.SMARTSHEET_API_KEY, process.env.SMARTSHEET_ENDPOINT);
 
+// Tool: Discussion tools
+getDiscussionTools(server, api);
+
+// Tool: Folder tools
+getFolderTools(server, api);
+
 // Tool: Search tools
 getSearchTools(server, api);
 
 // Tool: Sheet tools
 getSheetTools(server, api, allowDeleteTools);
 
-// Tool: Folder tools
-getFolderTools(server, api);
-
-// Tool: Workspace tools
-getWorkspaceTools(server, api); 
-
 // Tool: Update Request tools
 getUpdateRequestTools(server, api);
 
 // Tool: User tools
 getUserTools(server, api);
+
+// Tool: Workspace tools
+getWorkspaceTools(server, api); 
 
 // Start the server
 async function main() {

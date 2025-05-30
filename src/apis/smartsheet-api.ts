@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { SmartsheetDiscussionAPI } from './smartsheet-discussion-api.js';
+import { SmartsheetFolderAPI } from './smartsheet-folder-api.js';
+import { SmartsheetSearchAPI } from './smartsheet-search-api.js';
 import { SmartsheetSheetAPI } from './smartsheet-sheet-api.js';
 import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api.js';
-import { SmartsheetFolderAPI } from './smartsheet-folder-api.js';
 import { SmartsheetUserAPI } from './smartsheet-user-api.js';
-import { SmartsheetSearchAPI } from './smartsheet-search-api.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -17,7 +18,7 @@ export class SmartsheetAPI {
   public folders: SmartsheetFolderAPI;
   public users: SmartsheetUserAPI;
   public search: SmartsheetSearchAPI;
-
+  public discussions: SmartsheetDiscussionAPI;
   /** 
    * Creates a new SmartsheetAPI instance
    * @param accessToken Smartsheet API access token
@@ -31,6 +32,7 @@ export class SmartsheetAPI {
     this.folders = new SmartsheetFolderAPI(this);
     this.users = new SmartsheetUserAPI(this);
     this.search = new SmartsheetSearchAPI(this);
+    this.discussions = new SmartsheetDiscussionAPI(this);
     
     if (this.accessToken == '') {
       throw new Error('SMARTSHEET_API_KEY environment variable is not set');

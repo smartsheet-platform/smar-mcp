@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
-import logger from "../utils/logger.js";
 
 export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -13,7 +12,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ query }) => {
         try {
-            logger.info(`Searching for sheets with query: ${query}`);
+            console.info(`Searching for sheets with query: ${query}`);
             const results = await api.search.searchSheets(query);
             
             return {
@@ -25,7 +24,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            logger.error(`Failed to search for sheets with query "${query}": ${error.message}`, { error });
+            console.error(`Failed to search for sheets with query "${query}": ${error.message}`, { error });
             return {
             content: [
                 {
@@ -48,7 +47,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ sheetId, query }) => {
         try {
-            logger.info(`Searching for sheet with ID: ${sheetId} with query: ${query}`);
+            console.info(`Searching for sheet with ID: ${sheetId} with query: ${query}`);
             const results = await api.search.searchSheet(sheetId, query);
             
             return {
@@ -60,7 +59,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            logger.error(`Failed to search in sheet ${sheetId} with query "${query}": ${error.message}`, { error });
+            console.error(`Failed to search in sheet ${sheetId} with query "${query}": ${error.message}`, { error });
             return {
             content: [
                 {
@@ -82,7 +81,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ query }) => {
         try {
-            logger.info(`Searching for folders with query: ${query}`);
+            console.info(`Searching for folders with query: ${query}`);
             const results = await api.search.searchFolders(query);
             
             return {
@@ -94,7 +93,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            logger.error(`Failed to search for folders with query: ${query}`, { error });
+            console.error(`Failed to search for folders with query: ${query}`, { error });
             return {
             content: [
                 {
@@ -116,7 +115,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ query }) => {
         try {
-            logger.info(`Searching for workspaces with query: ${query}`);
+            console.info(`Searching for workspaces with query: ${query}`);
             const results = await api.search.searchWorkspaces(query);
             
             return {
@@ -128,7 +127,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            logger.error(`Failed to search for workspaces with query: ${query}`, { error });
+            console.error(`Failed to search for workspaces with query: ${query}`, { error });
             return {
             content: [
                 {
@@ -150,7 +149,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ query }) => {
         try {
-            logger.info(`Searching for reports with query: ${query}`);
+            console.info(`Searching for reports with query: ${query}`);
             const results = await api.search.searchReports(query);
             
             return {
@@ -162,7 +161,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            logger.error(`Failed to search for reports with query: ${query}`, { error });
+            console.error(`Failed to search for reports with query: ${query}`, { error });
             return {
             content: [
                 {
@@ -184,7 +183,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ query }) => {
         try {
-            logger.info(`Searching for dashboards with query: ${query}`);
+            console.info(`Searching for dashboards with query: ${query}`);
             const results = await api.search.searchDashboards(query);
             
             return {
@@ -196,7 +195,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            logger.error(`Failed to search for dashboards with query: ${query}`, { error });
+            console.error(`Failed to search for dashboards with query: ${query}`, { error });
             return {
             content: [
                 {

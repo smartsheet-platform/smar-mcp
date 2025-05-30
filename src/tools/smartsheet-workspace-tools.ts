@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
-import logger from "../utils/logger.js";
 
 export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -12,7 +11,7 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
         {},
         async ({ }) => {
           try {
-            logger.info("Getting workspaces");
+            console.info("Getting workspaces");
             const workspace = await api.workspaces.getWorkspaces();
     
             return {
@@ -24,7 +23,7 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
               ]
             };
           } catch (error: any) {
-            logger.error("Failed to get workspaces", { error });
+            console.error("Failed to get workspaces", { error });
             return {
               content: [
                 {
@@ -47,7 +46,7 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ workspaceId}) => {
           try {
-            logger.info(`Getting workspace with ID: ${workspaceId}`);
+            console.info(`Getting workspace with ID: ${workspaceId}`);
             const workspace = await api.workspaces.getWorkspace(workspaceId);
     
             return {
@@ -59,7 +58,7 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
               ]
             };
           } catch (error: any) {
-            logger.error(`Failed to get workspace with ID: ${workspaceId}`, { error });
+            console.error(`Failed to get workspace with ID: ${workspaceId}`, { error });
             return {
               content: [
                 {
@@ -82,7 +81,7 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ workspaceName }) => {
           try {
-            logger.info(`Creating workspace: ${workspaceName}`);
+            console.info(`Creating workspace: ${workspaceName}`);
             const workspace = await api.workspaces.createWorkspace(workspaceName);
     
             return {
@@ -94,7 +93,7 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
               ]
             };
           } catch (error: any) {
-            logger.error("Failed to create workspace", { error });
+            console.error("Failed to create workspace", { error });
             return {
               content: [
                 {

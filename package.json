@@ -1,42 +1,82 @@
 {
-  "name": "smar-mcp",
-  "version": "1.0.0",
-  "main": "index.js",
-  "type": "module",
-  "bin": {
-    "smartsheet": "./bin/index.js"
-  },
-  "scripts": {
-    "build": "tsc && chmod 755 build/index.js",
-    "start": "node -r dotenv/config build/index.js",
-    "dev": "npm run build && npm run start",
-    "test": "node -r dotenv/config tests/test-direct-api.js",
-    "setup-claude": "node -r dotenv/config scripts/setup-claude-config.sh",
-    "prepare": "npm run build"
-  },
-  "keywords": [],
-  "author": "Smartsheet",
-  "license": "UNLICENSED",
-  "description": "",
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
-    "@modelcontextprotocol/sdk": "^1.7.0",
-    "axios": "^1.8.4",
-    "dotenv": "^16.4.7",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
-    "@commitlint/cli": "^17.8.1",
-    "@commitlint/config-conventional": "^17.8.1",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "@types/node": "^22.13.10",
-    "husky": "^8.0.3",
-    "lint-staged": "^15.2.0",
-    "semantic-release": "^22.0.12",
-    "typescript": "^5.8.2"
-  },
-  "files": [
-    "build"
-  ]
+	"name": "@smartsheet/smar-mcp",
+	"version": "1.0.0",
+	"description": "A Model Context Protocol (MCP) server for interacting with the Smartsheet API. This server provides tools for searching, retrieving, and updating Smartsheet sheets through the MCP protocol.",
+	"main": "build/index.js",
+	"type": "module",
+	"bin": {
+		"smar-mcp": "./build/index.js"
+	},
+	"scripts": {
+		"build": "tsc && chmod +x build/index.js",
+		"start": "node -r dotenv/config build/index.js",
+		"dev": "npm run build && npm run start",
+		"test": "jest",
+		"setup-claude": "node -r dotenv/config scripts/setup-claude-config.js",
+		"prepare": "npm run build",
+		"prepublishOnly": "npm run build",
+		"package": "npm run build && npm pack",
+		"deploy": "npm run build && npm publish --access public",
+		"lint": "eslint src/**/*.ts",
+		"lint:fix": "eslint src/**/*.ts --fix",
+		"typecheck": "tsc --noEmit"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/smartsheet-platform/smar-mcp.git"
+	},
+	"bugs": {
+		"url": "https://github.com/smartsheet-platform/smar-mcp/issues"
+	},
+	"homepage": "https://github.com/smartsheet-platform/smar-mcp#readme",
+	"keywords": [
+		"mcp",
+		"model-context-protocol",
+		"smartsheet",
+		"api",
+		"ai",
+		"automation",
+		"collaboration",
+		"productivity",
+		"claude",
+		"llm"
+	],
+	"author": {
+		"name": "Smartsheet",
+		"url": "https://smartsheet.com"
+	},
+	"license": "MIT",
+	"engines": {
+		"node": ">=16.0.0",
+		"npm": ">=7.0.0"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.12.0",
+		"axios": "^1.8.4",
+		"dotenv": "^16.4.7",
+		"zod": "^3.24.2"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^17.8.1",
+		"@commitlint/config-conventional": "^17.8.1",
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/git": "^10.0.1",
+		"@types/node": "^22.13.10",
+		"@typescript-eslint/eslint-plugin": "^6.0.0",
+		"@typescript-eslint/parser": "^6.0.0",
+		"eslint": "^8.57.0",
+		"husky": "^8.0.3",
+		"jest": "^29.5.0",
+		"lint-staged": "^15.2.0",
+		"semantic-release": "^22.0.12",
+		"ts-jest": "^29.1.0",
+		"typescript": "^5.8.2"
+	},
+	"files": [
+		"build"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
+	}
 }

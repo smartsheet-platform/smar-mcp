@@ -9,7 +9,7 @@ export class Logger {
    * @param optionalParams Additional parameters to log
    */
   public debug(message: string, ...optionalParams: any[]): void {
-    // Placeholder for debug logging implementation
+    this.debugForLevel('debug', message, ...optionalParams);
   }
 
   /**
@@ -18,7 +18,7 @@ export class Logger {
    * @param optionalParams Additional parameters to log
    */
   public info(message: string, ...optionalParams: any[]): void {
-    // Placeholder for info logging implementation
+    this.debugForLevel('info', message, ...optionalParams);
   }
 
   /**
@@ -27,7 +27,7 @@ export class Logger {
    * @param optionalParams Additional parameters to log
    */
   public warn(message: string, ...optionalParams: any[]): void {
-    // Placeholder for warning logging implementation
+    this.debugForLevel('warn', message, ...optionalParams);
   }
 
   /**
@@ -36,7 +36,16 @@ export class Logger {
    * @param optionalParams Additional parameters to log
    */
   public error(message: string, ...optionalParams: any[]): void {
-    // Placeholder for error logging implementation
+    this.debugForLevel('error', message, ...optionalParams);
+  }
+
+  /**
+   * Private debug implementation which includes the original error level
+   * @param message The message to log
+   * @param optionalParams Additional parameters to log
+   */
+  private debugForLevel(level: string, message: string, ...optionalParams: any[]): void {
+    console.debug(`[${level}] ${message}`, ...optionalParams);
   }
 }
 

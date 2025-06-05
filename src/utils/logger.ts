@@ -41,6 +41,7 @@ export class Logger {
 
   /**
    * Private debug implementation which includes the original error level
+   * @param level The error level
    * @param message The message to log
    * @param optionalParams Additional parameters to log
    */

@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
+import { logger } from "../utils/logger.js";
 
 export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -13,7 +14,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ folderId}) => {
         try {
-            console.info(`Getting folder with ID: ${folderId}`);
+            logger.info(`Getting folder with ID: ${folderId}`);
             const folder = await api.folders.getFolder(folderId);
 
             return {
@@ -25,7 +26,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            console.error(`Failed to get folder with ID: ${folderId}`, { error });
+            logger.error(`Failed to get folder with ID: ${folderId}`, { error });
             return {
             content: [
                 {
@@ -49,7 +50,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ folderId, folderName }) => {
         try {
-            console.info(`Creating folder in workspace with ID: ${folderId}`);
+            logger.info(`Creating folder in workspace with ID: ${folderId}`);
             const folder = await api.folders.createFolder(folderId, folderName);
 
             return {
@@ -61,7 +62,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            console.error(`Failed to create folder in workspace with ID: ${folderId}`, { error });
+            logger.error(`Failed to create folder in workspace with ID: ${folderId}`, { error });
             return {
             content: [
                 {
@@ -85,7 +86,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ workspaceId, folderName }) => {
         try {
-            console.info(`Creating folder in workspace with ID: ${workspaceId}`);
+            logger.info(`Creating folder in workspace with ID: ${workspaceId}`);
             const folder = await api.workspaces.createWorkspaceFolder(workspaceId, folderName);
 
             return {
@@ -97,7 +98,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            console.error(`Failed to create folder in workspace with ID: ${workspaceId}`, { error });
+            logger.error(`Failed to create folder in workspace with ID: ${workspaceId}`, { error });
             return {
             content: [
                 {

@@ -18,7 +18,7 @@ MCP is a new technology. This integration relies on a SMARTSHEET API token allow
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/smar-imran-khawaja/smar-mcp.git
+   git clone https://github.com/smartsheet-platform/smar-mcp.git
    cd smar-mcp
    ```
 
@@ -170,6 +170,125 @@ Creates a backup sheet with data from a specific timestamp.
 - `includeFormatting` (boolean, optional, default: true): Whether to include formatting in the archive
 - `batchSize` (number, optional, default: 100): Number of rows to process in each batch
 - `maxConcurrentRequests` (number, optional, default: 5): Maximum number of concurrent API requests
+
+## API Endpoint Coverage
+
+This table outlines the Smartsheet API endpoints, whether they are currently covered by SMAR-MCP tools, and their suitability for MCP.
+
+| API Path                                      | Covered by SMAR-MCP? | SMAR-MCP Tool(s) (Method)                                  | Suitable for MCP? | Reason for Unsuitability/Consideration                                  |
+|-----------------------------------------------|----------------------|------------------------------------------------------------|-------------------|-------------------------------------------------------------------------|
+| `/contacts`                                   | No                   | -                                                          | Consider          | List operation. Response size can vary. Consider pagination/filters.    |
+| `/contacts/{contactId}`                       | No                   | -                                                          | Yes               | Retrieves a specific contact.                                           |
+| `/events`                                     | No                   | -                                                          | No          | Event stream. Potentially large/continuous. Needs specific handling.    |
+| `/favorites`                                  | No                   | -                                                          | Yes               | Manages user favorites.                                                 |
+| `/favorites/{favoriteType}`                   | No                   | -                                                          | Yes               | Manages user favorites by type.                                         |
+| `/favorites/{favoriteType}/{favoriteId}`      | No                   | -                                                          | Yes               | Manages a specific user favorite.                                       |
+| `/filteredEvents`                             | No                   | -                                                          | Consider          | Filtered event stream. Potentially large. Needs specific handling.      |
+| `/folders/{folderId}`                         | Yes                  | `get_folder` (GET)                                         | Yes               | Retrieves a specific folder.                                            |
+| `/folders/{folderId}/copy`                    | No                   | -                                                          | Yes               | Copies a folder.                                                        |
+| `/folders/{folderId}/folders`                 | Yes                  | `create_folder` (POST)                                     | Yes               | Manages sub-folders (create). List via `get_folder`.                  |
+| `/folders/{folderId}/move`                    | No                   | -                                                          | Yes               | Moves a folder.                                                         |
+| `/folders/{folderId}/sheets`                  | Yes                  | `create_sheet` (POST with folderId). List via `get_folder`. | Yes               | Manages sheets within a folder.                                         |
+| `/folders/{folderId}/sheets/import`           | No                   | -                                                          | Yes               | Imports a sheet into a folder.                                          |
+| `/folders/personal`                           | No                   | -                                                          | Yes               | Accesses personal folders (Smartsheet specific, likely `GET /home/folders`). |
+| `/groups`                                     | No                   | -                                                          | Consider          | List operation. Response size can vary.                                 |
+| `/groups/{groupId}`                           | No                   | -                                                          | Yes               | Retrieves a specific group.                                             |
+| `/groups/{groupId}/members`                   | No                   | -                                                          | Consider          | List operation. Response size can vary.                                 |
+| `/groups/{groupId}/members/{userId}`          | No                   | -                                                          | Yes               | Manages a specific group member.                                        |
+| `/home/folders`                               | No                   | -                                                          | Yes               | Lists folders in the user's home.                                       |
+| `/imageurls`                                  | No                   | -                                                          | Consider          | Generates URLs for images. Response size depends on request.            |
+| `/reports`                                    | No                   | -                                                          | Consider          | List operation. Response size can vary.                                 |
+| `/reports/{reportId}`                         | No                   | -                                                          | Yes               | Retrieves a specific report.                                            |
+| `/reports/{reportId}/emails`                  | No                   | -                                                          | Yes               | Sends a report via email.                                               |
+| `/reports/{reportId}/publish`                 | No                   | -                                                          | Yes               | Manages report publishing.                                              |
+| `/reports/{reportId}/shares`                  | No                   | -                                                          | Consider          | List operation. Manages report shares.                                  |
+| `/reports/{reportId}/shares/{shareId}`        | No                   | -                                                          | Yes               | Manages a specific report share.                                        |
+| `/search`                                     | No                   | -                                                          | Consider          | Global search. Response size can be very large.                         |
+| `/search/sheets/{sheetId}`                    | No                   | -                                                          | Consider          | Search within a specific sheet. Response size can vary.                 |
+| `/serverinfo`                                 | No                   | -                                                          | Yes               | Retrieves server information. Small response.                           |
+| `/sheets`                                     | Yes                  | `create_sheet` (POST without folderId). List not directly exposed. | Consider      | List operation (not exposed as tool). Response size can be very large.  |
+| `/sheets/import`                              | No                   | -                                                          | Yes               | Imports a sheet.                                                        |
+| `/sheets/{sheetId}`                           | Yes                  | `get_sheet` (GET), `get_sheet_location` (uses GET)         | Yes               | Retrieves a specific sheet. Response can be large.                      |
+| `/sheets/{sheetId}/attachments`               | No                   | -                                                          | Consider          | List/Manage attachments. Involves binary data.                          |
+| `/sheets/{sheetId}/attachments/{attachmentId}` | No                   | -                                                          | Consider          | Get/Delete specific attachment. Involves binary data.                   |
+| `/sheets/{sheetId}/attachments/{attachmentId}/versions` | No         | -                                                          | Consider          | List attachment versions.                                               |
+| `/sheets/{sheetId}/automationrules`           | No                   | -                                                          | Consider          | List/Manage automation rules.                                           |
+| `/sheets/{sheetId}/automationrules/{automationRuleId}` | No          | -                                                          | Yes               | Get/Update/Delete specific automation rule.                             |
+| `/sheets/{sheetId}/columns`                   | No                   | -                                                          | Consider          | List/Manage columns. Response size depends on sheet complexity.         |
+| `/sheets/{sheetId}/columns/{columnId}`        | No                   | -                                                          | Yes               | Get/Update/Delete specific column.                                      |
+| `/sheets/{sheetId}/comments/{commentId}`      | No                   | -                                                          | Yes               | Get/Delete specific comment.                                            |
+| `/sheets/{sheetId}/comments/{commentId}/attachments` | No            | -                                                          | Consider          | Manage attachments for a comment. Involves binary data.                 |
+| `/sheets/{sheetId}/copy`                      | Yes                  | `copy_sheet` (POST)                                        | Yes               | Copies a sheet.                                                         |
+| `/sheets/{sheetId}/crosssheetreferences`      | No                   | -                                                          | Consider          | List/Manage cross-sheet references.                                     |
+| `/sheets/{sheetId}/crosssheetreferences/{crossSheetReferenceId}` | No | -                                                          | Yes               | Get/Delete specific cross-sheet reference.                              |
+| `/sheets/{sheetId}/discussions`               | Yes                  | `get_sheet_discussions` (GET)                              | Consider          | List discussions. Response size can vary.                               |
+| `/sheets/{sheetId}/discussions/{discussionId}` | No                  | -                                                          | Yes               | Get/Delete specific discussion.                                         |
+| `/sheets/{sheetId}/discussions/{discussionId}/attachments` | No      | -                                                          | Consider          | Manage attachments for a discussion. Involves binary data.              |
+| `/sheets/{sheetId}/discussions/{discussionId}/comments` | No         | -                                                          | Consider          | List/Add comments to a discussion.                                      |
+| `/sheets/{sheetId}/emails`                    | No                   | -                                                          | Yes               | Sends a sheet via email.                                                |
+| `/sheets/{sheetId}/move`                      | No                   | -                                                          | Yes               | Moves a sheet.                                                          |
+| `/sheets/{sheetId}/proofs`                    | No                   | -                                                          | Consider          | List/Manage proofs.                                                     |
+| `/sheets/{sheetId}/proofs/{proofId}`          | No                   | -                                                          | Yes               | Get/Update specific proof.                                              |
+| `/sheets/{sheetId}/proofs/{proofId}/attachments` | No                | -                                                          | Consider          | Manage attachments for a proof. Involves binary data.                   |
+| `/sheets/{sheetId}/proofs/{proofId}/discussions` | No                | -                                                          | Consider          | Manage discussions for a proof.                                         |
+| `/sheets/{sheetId}/proofs/{proofId}/requestactions` | No             | -                                                          | Yes               | Manage request actions for a proof.                                     |
+| `/sheets/{sheetId}/proofs/{proofId}/requests` | No                   | -                                                          | Consider          | Manage requests for a proof.                                            |
+| `/sheets/{sheetId}/proofs/{proofId}/versions` | No                   | -                                                          | Consider          | List versions of a proof.                                               |
+| `/sheets/{sheetId}/publish`                   | No                   | -                                                          | Yes               | Manages sheet publishing.                                               |
+| `/sheets/{sheetId}/rows`                      | Yes                  | `update_rows` (PUT), `add_rows` (POST), `delete_rows` (DELETE) | Yes           | Manages rows. Individual row operations are fine. Bulk can be large.    |
+| `/sheets/{sheetId}/rows/copy`                 | No                   | -                                                          | Yes               | Copies rows within or between sheets.                                   |
+| `/sheets/{sheetId}/rows/emails`               | No                   | -                                                          | Yes               | Sends rows via email.                                                   |
+| `/sheets/{sheetId}/rows/move`                 | No                   | -                                                          | Yes               | Moves rows within or between sheets.                                    |
+| `/sheets/{sheetId}/rows/{rowId}`              | No                   | -                                                          | Yes               | Get/Update/Delete specific row.                                         |
+| `/sheets/{sheetId}/rows/{rowId}/attachments`  | No                   | -                                                          | Consider          | Manage attachments for a row. Involves binary data.                     |
+| `/sheets/{sheetId}/rows/{rowId}/columns/{columnId}/cellimages` | No  | -                                                          | Consider          | Manage cell images. Involves binary data.                               |
+| `/sheets/{sheetId}/rows/{rowId}/columns/{columnId}/history` | Yes    | `get_cell_history` (GET)                                   | Yes               | Retrieves cell history. Response size can vary.                         |
+| `/sheets/{sheetId}/rows/{rowId}/discussions`  | Yes                  | `create_row_discussion` (POST). List via parent.           | Yes               | Manages discussions for a row.                                          |
+| `/sheets/{sheetId}/rows/{rowId}/proofs`       | No                   | -                                                          | Consider          | Manage proofs for a row.                                                |
+| `/sheets/{sheetId}/sentupdaterequests`        | No                   | -                                                          | Consider          | List sent update requests.                                              |
+| `/sheets/{sheetId}/sentupdaterequests/{sentUpdateRequestId}` | No    | -                                                          | Yes               | Get/Delete specific sent update request.                                |
+| `/sheets/{sheetId}/shares`                    | No                   | -                                                          | Consider          | List/Manage sheet shares.                                               |
+| `/sheets/{sheetId}/shares/{shareId}`          | No                   | -                                                          | Yes               | Get/Update/Delete specific sheet share.                                 |
+| `/sheets/{sheetId}/sort`                      | No                   | -                                                          | Yes               | Sorts a sheet.                                                          |
+| `/sheets/{sheetId}/summary`                   | No                   | -                                                          | Yes               | Get sheet summary.                                                      |
+| `/sheets/{sheetId}/summary/fields`            | No                   | -                                                          | Yes               | List/Add/Update sheet summary fields.                                   |
+| `/sheets/{sheetId}/summary/fields/{fieldId}/images` | No             | -                                                          | Consider          | Manage images for a sheet summary field. Involves binary data.          |
+| `/sheets/{sheetId}/updaterequests`            | Yes                  | `create_update_request` (POST). List not directly exposed. | Consider          | List/Manage update requests.                                            |
+| `/sheets/{sheetId}/updaterequests/{updateRequestId}` | No            | -                                                          | Yes               | Get/Update/Delete specific update request.                              |
+| `/sheets/{sheetId}/version`                   | Yes                  | `get_sheet_version` (GET)                                  | Yes               | Retrieves sheet version. Small response.                                |
+| `/sights`                                     | No                   | -                                                          | Consider          | List dashboards. Response size can vary.                                |
+| `/sights/{sightId}`                           | No                   | -                                                          | Yes               | Get specific dashboard. Response can be large.                          |
+| `/sights/{sightId}/copy`                      | No                   | -                                                          | Yes               | Copies a dashboard.                                                     |
+| `/sights/{sightId}/move`                      | No                   | -                                                          | Yes               | Moves a dashboard.                                                      |
+| `/sights/{sightId}/publish`                   | No                   | -                                                          | Yes               | Manages dashboard publishing.                                           |
+| `/sights/{sightId}/shares`                    | No                   | -                                                          | Consider          | List/Manage dashboard shares.                                           |
+| `/sights/{sightId}/shares/{shareId}`          | No                   | -                                                          | Yes               | Get/Update/Delete specific dashboard share.                             |
+| `/templates`                                  | No                   | -                                                          | Consider          | List templates. Response size can vary.                                 |
+| `/templates/public`                           | No                   | -                                                          | Consider          | List public templates. Response size can vary.                          |
+| `/token`                                      | No                   | -                                                          | No               | OAuth token endpoint. Handled by auth flow, not direct MCP tool.        |
+| `/users`                                      | No                   | -                                                          | Consider          | List users. Response size can be very large. Requires admin.            |
+| `/users/me`                                   | No                   | -                                                          | Yes               | Retrieves current user details. Small response.                         |
+| `/users/sheets`                               | No                   | -                                                          | Consider          | List sheets owned by or shared with users. Potentially large.           |
+| `/users/{userId}`                             | No                   | -                                                          | Yes               | Get specific user.                                                      |
+| `/users/{userId}/alternateemails`             | No                   | -                                                          | Yes               | Manage alternate emails for a user.                                     |
+| `/users/{userId}/alternateemails/{alternateEmailId}` | No            | -                                                          | Yes               | Manage a specific alternate email.                                      |
+| `/users/{userId}/alternateemails/{alternateEmailId}/makeprimary` | No | -                                                          | Yes               | Makes an alternate email primary.                                       |
+| `/users/{userId}/deactivate`                  | No                   | -                                                          | Yes               | Deactivates a user. (Admin)                                             |
+| `/users/{userId}/profileimage`                | No                   | -                                                          | Consider          | Manage user profile image. Involves binary data.                        |
+| `/users/{userId}/reactivate`                  | No                   | -                                                          | Yes               | Reactivates a user. (Admin)                                             |
+| `/webhooks`                                   | No                   | -                                                          | Consider          | List/Manage webhooks.                                                   |
+| `/webhooks/{webhookId}`                       | No                   | -                                                          | Yes               | Get/Update/Delete specific webhook.                                     |
+| `/webhooks/{webhookId}/resetSharedSecret`     | No                   | -                                                          | Yes               | Resets webhook shared secret.                                           |
+| `/workspaces`                                 | Yes                  | `get_workspaces` (GET), `create_workspace` (POST)          | Consider          | List workspaces. Response size can vary. Create is fine.                |
+| `/workspaces/{workspaceId}`                   | Yes                  | `get_workspace` (GET)                                      | Yes               | Get specific workspace. Response can be large.                          |
+| `/workspaces/{workspaceId}/copy`              | No                   | -                                                          | Yes               | Copies a workspace.                                                     |
+| `/workspaces/{workspaceId}/folders`           | Yes                  | `create_workspace_folder` (POST). List via `get_workspace`. | Yes              | Manages folders within a workspace.                                     |
+| `/workspaces/{workspaceId}/shares`            | No                   | -                                                          | Consider          | List/Manage workspace shares.                                           |
+| `/workspaces/{workspaceId}/shares/{shareId}`  | No                   | -                                                          | Yes               | Get/Update/Delete specific workspace share.                             |
+| `/workspaces/{workspaceId}/sheets`            | No                   | -                                                          | Consider          | List sheets in workspace. List via `get_workspace`.                     |
+| `/workspaces/{workspaceId}/sheets/import`     | No                   | -                                                          | Yes               | Imports a sheet into a workspace.                                       |
+
+*Note: The `create_version_backup` tool is a workflow using multiple underlying API calls and is not listed as a direct endpoint coverer but its constituent calls are.*
 
 ## Example Usage
 

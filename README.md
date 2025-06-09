@@ -5,7 +5,7 @@ A [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) server for in
 
 ## Disclaimer
 
-MCP is a new technology. This integration relies on a SMARTSHEET API token allowing access to your account.
+MCP is a new technology. This integration relies on a SMARTSHEET API token allowing access to your account. While powerful, they can be susceptible to prompt injection when processing untrusted data. We recommend exercising caution and reviewing actions taken through these clients to ensure secure operation.
 
 ## Features
 

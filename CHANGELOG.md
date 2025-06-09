@@ -1,3 +1,28 @@
+# [1.3.0](https://github.com/smartsheet-platform/smar-mcp/compare/v1.2.0...v1.3.0) (2025-06-09)
+
+
+### Bug Fixes
+
+* change error log to info level for sheet copy result ([41e4961](https://github.com/smartsheet-platform/smar-mcp/commit/41e49616e64180cedfaa536ca4b6f001ffc216c6))
+* correct API endpoint path from /search/sheet to /search/sheets ([2ff5898](https://github.com/smartsheet-platform/smar-mcp/commit/2ff5898e50f1ea3d2cd06485b8fb52ddbc7d861d))
+* push package.lock ([f12d5ba](https://github.com/smartsheet-platform/smar-mcp/commit/f12d5bacd6622921692b1c5e89f8931885abd6a1))
+* update publish script to build before publishing ([5aec64d](https://github.com/smartsheet-platform/smar-mcp/commit/5aec64d5fb4b7273d41e62907a693e7e514a726a))
+
+
+### Features
+
+* add discussion management tools and API endpoints for sheets and rows ([728e4a5](https://github.com/smartsheet-platform/smar-mcp/commit/728e4a5d3cd0ede6a8f8bfe05b1b61d1866e2469))
+* add dotenv configuration and .roo directory to gitignore ([aba689d](https://github.com/smartsheet-platform/smar-mcp/commit/aba689de432cdfd5a2964b1b239b6498a598c363))
+* add get_sheet_by_url tool and support for directIdToken sheet retrieval ([6e3b2a3](https://github.com/smartsheet-platform/smar-mcp/commit/6e3b2a33e28465e32b9dcb0c6c9a01dd01f7d97d))
+* add list users API endpoint and tool command ([25e8dc5](https://github.com/smartsheet-platform/smar-mcp/commit/25e8dc512b2f4ff1453de210914ec90f2c31ac58))
+* add search endpoints for folders, workspaces, reports and dashboards ([79b71fc](https://github.com/smartsheet-platform/smar-mcp/commit/79b71fc59ea0c3b7724aaee55ed748798bd34fd7))
+* add searchSheet API endpoint and tool for searching within specific sheets ([bccd85f](https://github.com/smartsheet-platform/smar-mcp/commit/bccd85f1d713328097a3b647d3890d5ceb0ab8d5))
+* add sheet search by URL and row retrieval endpoints with pagination support ([2308f21](https://github.com/smartsheet-platform/smar-mcp/commit/2308f215253994cec293138f9ff300330a7b0e50))
+* add what_am_i_assigned_to tool for finding user's assigned tasks in a sheet ([086d794](https://github.com/smartsheet-platform/smar-mcp/commit/086d7943d93770c6be69fcd1429611cc31e2a86f))
+* configs semantic release to publish to npm ([9d0a998](https://github.com/smartsheet-platform/smar-mcp/commit/9d0a998e6dbb4ede2f6343ec0b05a3361375b475))
+* implement platform-specific log rotation with winston-daily-rotate-file ([895da94](https://github.com/smartsheet-platform/smar-mcp/commit/895da9428b619fca92c9bd2ccd435d459c8c1488))
+* replace console logging with structured winston logger ([cad6cff](https://github.com/smartsheet-platform/smar-mcp/commit/cad6cff07c12e2c1f5b6dcf8a911ffb00e1249ed))
+
 # [1.2.0](https://github.com/smar-imran-khawaja/smar-mcp/compare/v1.1.1...v1.2.0) (2025-04-25)
 
 

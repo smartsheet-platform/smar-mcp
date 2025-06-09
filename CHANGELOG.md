@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/smartsheet-platform/smar-mcp/compare/v1.3.0...v1.4.0) (2025-06-09)
+
+
+### Bug Fixes
+
+* update User-Agent header to use correct app name in Smartsheet API requests ([b35d2d4](https://github.com/smartsheet-platform/smar-mcp/commit/b35d2d4fedb9c020e710e58a43a68da915b96c53))
+
+
+### Features
+
+* update User-Agent header to include package version in API requests ([edcc26f](https://github.com/smartsheet-platform/smar-mcp/commit/edcc26f9d0c81f48709d86ae00f22ddffba509ee))
+
 # [1.3.0](https://github.com/smartsheet-platform/smar-mcp/compare/v1.2.0...v1.3.0) (2025-06-09)
 
 

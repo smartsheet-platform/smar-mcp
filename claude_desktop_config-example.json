@@ -1,10 +1,12 @@
 {
     "mcpServers": {
       "smartsheet": {
-        "command": "node",
+        "command": "npx",
         "args": [
-          "/Users/ssekora/git/smar-mcp/build/index.js"
-        ],"env": {
+          "-y",
+          "@smartsheet/smar-mcp@latest"
+        ],
+        "env": {
           "SMARTSHEET_API_KEY": "YOUR_SMARTSHEET_API_KEY",
           "SMARTSHEET_ENDPOINT": "https://api.smartsheet.com/2.0",
           "ALLOW_DELETE_TOOLS": "false"

@@ -18,7 +18,7 @@ MCP is a new technology. This integration relies on a SMARTSHEET API token allow
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/smar-imran-khawaja/smar-mcp.git
+   git clone https://github.com/smartsheet-platform/smar-mcp.git
    cd smar-mcp
    ```
 

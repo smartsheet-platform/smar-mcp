@@ -82,7 +82,7 @@ export class SmartsheetAPI {
           headers: {
             'Authorization': `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json',
-            'User-Agent': `smar-mcp/roo-code/${packageJson.version}`,
+            'User-Agent': `smar-mcp/${packageJson.version}`,
           }
         });
         

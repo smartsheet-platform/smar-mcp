@@ -5,6 +5,7 @@ import { SmartsheetSearchAPI } from './smartsheet-search-api.js';
 import { SmartsheetSheetAPI } from './smartsheet-sheet-api.js';
 import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api.js';
 import { SmartsheetUserAPI } from './smartsheet-user-api.js';
+import packageJson from '../../package.json' with { type: 'json' };
 
 /**
  * Direct Smartsheet API client that doesn't rely on the SDK
@@ -81,7 +82,7 @@ export class SmartsheetAPI {
           headers: {
             'Authorization': `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json',
-            'User-Agent': 'mcp',
+            'User-Agent': `smar-mcp/${packageJson.version}`,
           }
         });
         

@@ -74,3 +74,4 @@ coverage/
 .clinerules*
 memory-bank
 projectBrief.md
+CLAUDE.*

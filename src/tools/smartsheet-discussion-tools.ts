@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
+import { logger } from "../utils/logger.js";
 
 export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -17,7 +18,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ sheetId, include, pageSize, page, includeAll }) => {
             try {
-                console.info(`Getting discussions for sheet with ID: ${sheetId}`);
+                logger.info(`Getting discussions for sheet with ID: ${sheetId}`);
                 const discussions = await api.discussions.getDiscussionsBySheetId(sheetId, include, pageSize, page, includeAll);
                 
                 return {
@@ -29,7 +30,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                console.error(`Failed to get discussions for sheet ID: ${sheetId}`, { error });
+                logger.error(`Failed to get discussions for sheet ID: ${sheetId}`, { error });
                 return {
                     content: [
                         {
@@ -57,7 +58,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ sheetId, rowId, include, pageSize, page, includeAll }) => {
             try {
-                console.info(`Getting discussions for row with ID: ${rowId} in sheet with ID: ${sheetId}`);
+                logger.info(`Getting discussions for row with ID: ${rowId} in sheet with ID: ${sheetId}`);
                 const discussions = await api.discussions.getDiscussionsByRowId(sheetId, rowId, include, pageSize, page, includeAll);
                 
                 return {
@@ -69,7 +70,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                console.error(`Failed to get discussions for row ID: ${rowId} in sheet ID: ${sheetId}`, { error });
+                logger.error(`Failed to get discussions for row ID: ${rowId} in sheet ID: ${sheetId}`, { error });
                 return {
                     content: [
                         {
@@ -93,7 +94,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ sheetId, commentText }) => {
             try {
-                console.info(`Creating discussion on sheet with ID: ${sheetId}`);
+                logger.info(`Creating discussion on sheet with ID: ${sheetId}`);
                 const discussion = await api.discussions.createSheetDiscussion(sheetId, commentText);
                 
                 return {
@@ -105,7 +106,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                console.error(`Failed to create discussion on sheet ID: ${sheetId}`, { error });
+                logger.error(`Failed to create discussion on sheet ID: ${sheetId}`, { error });
                 return {
                     content: [
                         {
@@ -130,7 +131,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ sheetId, rowId, commentText }) => {
             try {
-                console.info(`Creating discussion on row with ID: ${rowId} in sheet with ID: ${sheetId}`);
+                logger.info(`Creating discussion on row with ID: ${rowId} in sheet with ID: ${sheetId}`);
                 const discussion = await api.discussions.createRowDiscussion(sheetId, rowId, commentText);
                 
                 return {
@@ -142,7 +143,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                console.error(`Failed to create discussion on row ID: ${rowId} in sheet ID: ${sheetId}`, { error });
+                logger.error(`Failed to create discussion on row ID: ${rowId} in sheet ID: ${sheetId}`, { error });
                 return {
                     content: [
                         {

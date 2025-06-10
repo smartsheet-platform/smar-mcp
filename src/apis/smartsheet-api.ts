@@ -5,6 +5,7 @@ import { SmartsheetSearchAPI } from './smartsheet-search-api.js';
 import { SmartsheetSheetAPI } from './smartsheet-sheet-api.js';
 import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api.js';
 import { SmartsheetUserAPI } from './smartsheet-user-api.js';
+import { logger } from '../utils/logger.js';
 import packageJson from '../../package.json' with { type: 'json' };
 
 /**
@@ -73,7 +74,7 @@ export class SmartsheetAPI {
           });
         }
         
-        console.info(`API Request: ${method} ${url.toString()}`);
+        logger.info(`API Request: ${method} ${url.toString()}`);
         
         const response = await axios({
           method,
@@ -95,11 +96,11 @@ export class SmartsheetAPI {
             parseInt(retryAfter, 10) * 1000,
             Math.pow(2, retries) * 1000 + Math.random() * 1000
           );
-          console.error(`[Rate Limit] Retrying in ${delay}ms...`);
+          logger.error(`[Rate Limit] Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           retries++;
         } else {
-          console.error(`API Error: ${error.message}`, { error });
+          logger.error(`API Error: ${error.message}`, { error });
           throw this.formatError(error);
         }
       }

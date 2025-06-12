@@ -204,4 +204,28 @@ export class SmartsheetSheetAPI {
   ): Promise<any> {
     return this.api.request('POST', `/sheets/${sheetId}/updaterequests`, options);
   }
+
+  /**
+   * Gets the shares for a sheet
+   * @param sheetId Sheet ID
+   * @param sharingInclude Optional parameter to define the scope of the share (ITEM or WORKSPACE)
+   * @param includeAll If true, include all results without pagination
+   * @param pageSize Number of shares to return per page
+   * @param page Page number to return
+   * @returns Sheet shares data
+   */
+  async getSheetShares(
+    sheetId: string,
+    sharingInclude?: string,
+    includeAll?: boolean,
+    pageSize?: number,
+    page?: number
+  ): Promise<any> {
+    return this.api.request('GET', `/sheets/${sheetId}/shares`, undefined, {
+      sharingInclude,
+      includeAll,
+      pageSize,
+      page
+    });
+  }
 }

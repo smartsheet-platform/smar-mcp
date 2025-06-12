@@ -468,7 +468,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
 
       // Tool: Get Sheet Shares
       server.tool(
-        "get_sheet_shares",
+        "get_sheet_shares_by_id",
         "Gets a list of all users and groups to whom the specified Sheet is shared, and their access level",
         {
           sheetId: z.string().describe("The ID of the sheet"),
@@ -492,6 +492,59 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
             };
           } catch (error: any) {
             console.error(`Failed to get shares for sheet ${sheetId}`, { error });
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Failed to get sheet shares: ${error.message}`
+                }
+              ],
+              isError: true
+            };
+          }
+        }
+      );
+
+      // Tool: Get Sheet Shares by URL
+      server.tool(
+        "get_sheet_shares_by_url",
+        "Gets a list of all users and groups to whom the specified Sheet is shared, and their access level, using the sheet URL",
+        {
+          url: z.string().describe("The URL of the sheet"),
+          sharingInclude: z.string().optional().describe("Optional parameter to define the scope of the share. Possible values are ITEM or WORKSPACE"),
+          includeAll: z.boolean().optional().describe("If true, include all results, that is, do not paginate. Mutually exclusive with page and pageSize"),
+          pageSize: z.number().optional().describe("Number of shares to return per page"),
+          page: z.number().optional().describe("Page number to return"),
+        },
+        async ({ url, sharingInclude, includeAll, pageSize, page }) => {
+          try {
+            console.info(`Getting shares for sheet with URL: ${url}`);
+            const match = url.match(/\/sheets\/([^?\/]+)/);
+            const directIdToken = match ? match[1] : null;
+            if (!directIdToken) {
+              return {
+                content: [
+                  {
+                    type: "text",
+                    text: `Failed to get sheet shares: Invalid URL format`
+                  }
+                ],
+                isError: true
+              };
+            }
+            const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken);
+            const shares = await api.sheets.getSheetShares(sheet.id, sharingInclude, includeAll, pageSize, page);
+            
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(shares, null, 2)
+                }
+              ]
+            };
+          } catch (error: any) {
+            console.error(`Failed to get shares for sheet ${url}`, { error });
             return {
               content: [
                 {

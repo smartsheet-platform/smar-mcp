@@ -9,6 +9,7 @@
 	},
 	"scripts": {
 		"build": "tsc && chmod +x build/index.js",
+		"build-windows": "tsc && if exist build\\index.js (attrib +x build\\index.js)",
 		"start": "node -r dotenv/config build/index.js",
 		"dev": "npm run build && npm run start",
 		"test": "jest",

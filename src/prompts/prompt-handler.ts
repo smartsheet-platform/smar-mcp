@@ -234,14 +234,26 @@ export function registerPromptHandlers(server: McpServer): void {
 }
 
 /**
- * Utility function to create and register a prompt
+ * Utility function to create and register a prompt with the global registry
+ * 
+ * @param definition - The prompt definition to register
+ * @throws Will throw an error if the definition fails schema validation
  */
 export function createPrompt(definition: PromptDefinition): void {
   promptRegistry.register(definition);
 }
 
 /**
- * Utility function to get prompt completion suggestions
+ * Utility function to get prompt completion suggestions for a specific prompt parameter
+ * 
+ * Retrieves contextual auto-completion suggestions for a specific parameter
+ * of a registered prompt. The suggestions are determined by analyzing the parameter
+ * name and type to provide relevant options.
+ * 
+ * @param promptName - The name of the prompt to get suggestions for
+ * @param parameterName - The specific parameter to get suggestions for
+ * @returns Promise<string[]> - Array of suggestion strings for the parameter
+ * @returns Empty array if prompt doesn't exist or no suggestions are available
  */
 export async function getPromptCompletionSuggestions(
   promptName: string, 
@@ -250,6 +262,6 @@ export async function getPromptCompletionSuggestions(
   const prompt = promptRegistry.get(promptName);
   if (!prompt) return [];
 
-  const parameter = prompt.arguments?.find(p => p.name === parameterName);
+  const parameter = prompt.arguments?.find((p: PromptParameter) => p.name === parameterName);
   return PromptAutoCompletion.getSuggestions(parameterName, parameter?.type);
 }

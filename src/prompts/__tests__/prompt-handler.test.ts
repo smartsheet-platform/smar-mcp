@@ -267,4 +267,86 @@ describe('Global Prompt Registry', () => {
       expect(promptRegistry.get('duplicate_test')?.description).toBe('Second prompt');
     });
   });
+
+  describe('getPromptCompletionSuggestions', () => {
+    it('should return suggestions for existing prompt and parameter', async () => {
+      // Create a test prompt with arguments
+      const prompt: PromptDefinition = {
+        name: 'user_prompt',
+        description: 'User management prompt',
+        template: 'Assign {user} to {task}',
+        arguments: [
+          { name: 'user', required: true, type: 'string' },
+          { name: 'task', required: true, type: 'string' }
+        ],
+        category: 'test'
+      };
+      createPrompt(prompt);
+      
+      // Test user parameter suggestions
+      const userSuggestions = await import('../prompt-handler.js').then(m => 
+        m.getPromptCompletionSuggestions('user_prompt', 'user')
+      );
+      expect(userSuggestions).toContain('John Doe');
+      expect(userSuggestions).toContain('Jane Smith');
+      
+      // Mock implementation assumes 'task' is like a column name
+      const taskSuggestions = await import('../prompt-handler.js').then(m => 
+        m.getPromptCompletionSuggestions('user_prompt', 'task')
+      );
+      expect(taskSuggestions).toEqual([]);
+    });
+    
+    it('should return empty array for non-existing prompt', async () => {
+      const suggestions = await import('../prompt-handler.js').then(m => 
+        m.getPromptCompletionSuggestions('non_existing_prompt', 'any_param')
+      );
+      expect(suggestions).toEqual([]);
+    });
+    
+    it('should return appropriate suggestions based on parameter name', async () => {
+      // Create a test prompt with various parameter types
+      const prompt: PromptDefinition = {
+        name: 'test_prompt',
+        description: 'Test prompt with various parameters',
+        template: 'Template with {sheet_name}, {column_name}, {status}, and {priority}',
+        arguments: [
+          { name: 'sheet_name', required: true, type: 'string' },
+          { name: 'column_name', required: true, type: 'string' },
+          { name: 'status', required: true, type: 'string' },
+          { name: 'priority', required: false, type: 'string' }
+        ],
+        category: 'test'
+      };
+      createPrompt(prompt);
+      
+      // Test sheet name suggestions
+      const sheetSuggestions = await import('../prompt-handler.js').then(m => 
+        m.getPromptCompletionSuggestions('test_prompt', 'sheet_name')
+      );
+      expect(sheetSuggestions).toContain('Project Dashboard');
+      expect(sheetSuggestions).toContain('Sprint Backlog');
+      
+      // Test column name suggestions
+      const columnSuggestions = await import('../prompt-handler.js').then(m => 
+        m.getPromptCompletionSuggestions('test_prompt', 'column_name')
+      );
+      expect(columnSuggestions).toContain('Task Name');
+      expect(columnSuggestions).toContain('Status');
+      
+      // Test status suggestions
+      const statusSuggestions = await import('../prompt-handler.js').then(m => 
+        m.getPromptCompletionSuggestions('test_prompt', 'status')
+      );
+      expect(statusSuggestions).toContain('In Progress');
+      expect(statusSuggestions).toContain('Complete');
+      
+      // Test priority suggestions
+      const prioritySuggestions = await import('../prompt-handler.js').then(m => 
+        m.getPromptCompletionSuggestions('test_prompt', 'priority')
+      );
+      expect(prioritySuggestions).toContain('High');
+      expect(prioritySuggestions).toContain('Medium');
+    });
+  });
 });

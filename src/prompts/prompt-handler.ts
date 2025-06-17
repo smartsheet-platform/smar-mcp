@@ -112,11 +112,9 @@ export class TemplateEngine {
     variables: Record<string, any>, 
     requiredParams: PromptParameter[] = []
   ): { isValid: boolean; missingVariables: string[] } {
-    const templateVars = this.extractVariables(template);
     const requiredVars = requiredParams.filter(p => p.required).map(p => p.name);
-    const allRequiredVars = [...new Set([...templateVars, ...requiredVars])];
     
-    const missingVariables = allRequiredVars.filter(varName => 
+    const missingVariables = requiredVars.filter(varName => 
       variables[varName] === undefined || variables[varName] === null
     );
 

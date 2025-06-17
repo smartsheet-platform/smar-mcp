@@ -39,6 +39,9 @@ class PromptRegistry {
   register(prompt: PromptDefinition): void {
     // Validate prompt definition
     PromptDefinitionSchema.parse(prompt);
+    if (this.prompts.has(prompt.name)) {
+      throw new Error(`A prompt with the name "${prompt.name}" is already registered.`);
+    }
     this.prompts.set(prompt.name, prompt);
   }
 
@@ -109,11 +112,9 @@ export class TemplateEngine {
     variables: Record<string, any>, 
     requiredParams: PromptParameter[] = []
   ): { isValid: boolean; missingVariables: string[] } {
-    const templateVars = this.extractVariables(template);
     const requiredVars = requiredParams.filter(p => p.required).map(p => p.name);
-    const allRequiredVars = [...new Set([...templateVars, ...requiredVars])];
     
-    const missingVariables = allRequiredVars.filter(varName => 
+    const missingVariables = requiredVars.filter(varName => 
       variables[varName] === undefined || variables[varName] === null
     );
 

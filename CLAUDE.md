@@ -5,6 +5,18 @@ This file contains configuration and instructions for Claude to help with this r
 ## Repository Overview
 This repository contains a Smartsheet Model Context Protocol (MCP) server that provides tools for interacting with the Smartsheet API.
 
+## GitHub CLI Setup and Authentication
+
+To use GitHub CLI (gh) commands, you need to authenticate first:
+
+```bash
+# Log in to GitHub CLI
+gh auth login
+
+# Follow the prompts to complete authentication
+# This will open a browser window and ask for a one-time code
+```
+
 ## GitHub Commands
 
 ### Creating Issues
@@ -62,6 +74,42 @@ gh pr view [PR number] --comments --json comments
 gh pr comment [PR number] --body "This looks good!"
 ```
 
+## Git Workflow
+
+### Creating a new branch
+```bash
+# Create and switch to a new branch
+git checkout -b feature/branch-name
+```
+
+### Committing changes with conventional commit messages
+```bash
+# Stage changes
+git add .
+
+# Commit with conventional format
+git commit -m "$(cat <<'EOF'
+feat: short summary of changes
+
+- Detailed bullet point 1
+- Detailed bullet point 2
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+EOF
+)"
+```
+
+### Pushing and creating a PR
+```bash
+# Push with branch tracking
+git push -u origin feature/branch-name
+
+# Create PR using the GitHub CLI
+gh pr create --title "PR Title" --body "PR description"
+```
+
 ## Repository Structure
 ```
 .github/
@@ -72,6 +120,18 @@ gh pr comment [PR number] --body "This looks good!"
   └── PULL_REQUEST_TEMPLATE/
       └── default.md         # Default PR template
 ```
+
+## Conventional Commits
+
+This repository follows the conventional commits standard:
+
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation changes
+- `style`: Changes that don't affect code meaning
+- `refactor`: Code changes that neither fix bugs nor add features
+- `test`: Adding/modifying tests
+- `chore`: Changes to build process or auxiliary tools
 
 ## Development Commands
 

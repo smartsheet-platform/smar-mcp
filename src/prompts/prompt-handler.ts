@@ -39,6 +39,9 @@ class PromptRegistry {
   register(prompt: PromptDefinition): void {
     // Validate prompt definition
     PromptDefinitionSchema.parse(prompt);
+    if (this.prompts.has(prompt.name)) {
+      throw new Error(`A prompt with the name "${prompt.name}" is already registered.`);
+    }
     this.prompts.set(prompt.name, prompt);
   }
 

@@ -12,6 +12,8 @@ import { getSheetTools } from "./tools/smartsheet-sheet-tools.js";
 import { getUpdateRequestTools } from "./tools/smartsheet-update-request-tools.js";
 import { getUserTools } from "./tools/smartsheet-user-tools.js";
 import { getWorkspaceTools } from "./tools/smartsheet-workspace-tools.js";
+import { registerPromptHandlers } from "./prompts/prompt-handler.js";
+import { registerCorePrompts } from "./prompts/core-prompts.js";
 
 // Load environment variables
 config();
@@ -49,6 +51,10 @@ getUserTools(server, api);
 
 // Tool: Workspace tools
 getWorkspaceTools(server, api); 
+
+// Register core prompts and handlers
+registerCorePrompts();
+registerPromptHandlers(server);
 
 // Start the server
 async function main() {

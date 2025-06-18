@@ -83,7 +83,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         async ({ url, query }) => {
         try {
             console.info(`Searching for sheet with URL: ${url} with query: ${query}`);
-            const match = url.match(/\/sheets\/([^?\/]+)/);
+            const match = url.match(/\/sheets\/([^?/]+)/);
             const directIdToken = match ? match[1] : null;
             if (!directIdToken) {
                 return {

@@ -1,0 +1,83 @@
+name: PR Description Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  validate-pr-description:
+    name: Validate PR Description
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate Release Notes Section
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            const body = pullRequest.body || '';
+            const releaseNotesHeader = '## Release Notes';
+            
+            if (!body.includes(releaseNotesHeader)) {
+              core.setFailed('PR description is missing the "## Release Notes" section');
+              return;
+            }
+            
+            // Extract the release notes section content
+            const releaseNotesRegex = /## Release Notes\s+([\s\S]*?)(?=##|$)/;
+            const match = body.match(releaseNotesRegex);
+            
+            if (!match || !match[1].trim()) {
+              core.setFailed('The "Release Notes" section is empty. Please add a concise description of your changes for the changelog.');
+              return;
+            }
+            
+            const releaseNotes = match[1].trim();
+            const contentLines = releaseNotes
+              .split('\n')
+              .map(line => line.trim())
+              .filter(line => line && !line.startsWith('<!--') && !line.endsWith('-->'));
+            
+            if (contentLines.length === 0) {
+              core.setFailed('Release Notes section only contains comments. Please add actual content.');
+              return;
+            }
+            
+            // Check for start with verb in present tense (common patterns)
+            const firstLine = contentLines[0];
+            const verbPattern = /^(Add|Fix|Update|Improve|Enhance|Remove|Change|Refactor|Optimize|Implement|Support|Prevent|Allow|Enable|Disable)s?\b/i;
+            
+            if (!verbPattern.test(firstLine)) {
+              core.warning('Release Notes should preferably start with a verb in present tense (e.g., "Adds", "Fixes", "Updates")');
+            }
+            
+            core.info('PR description validation passed');
+            core.info(`Found Release Notes: ${releaseNotes}`);
+            
+            // Note: Skipping label creation as it requires additional permissions
+            // To enable label creation, the workflow needs write permissions to issues
+            // You can add this by setting 'issues: write' in the permissions section
+            /*
+            if (contentLines.length > 2) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['good-release-notes']
+              });
+            }
+            */

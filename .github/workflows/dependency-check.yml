@@ -1,0 +1,63 @@
+name: Dependency Security Check
+
+on:
+  schedule:
+    # Run weekly on Monday at 3:00 AM UTC
+    - cron: '0 3 * * 1'
+  # Allow manual triggering
+  workflow_dispatch:
+  # Also run on PRs to main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  security-check:
+    name: Check Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run npm audit
+        run: npm audit
+        continue-on-error: true
+      
+      - name: Run snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test --severity-threshold=high
+      
+      # Create a GitHub issue if severe vulnerabilities are found
+      - name: Create issue for severe vulnerabilities
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Security vulnerabilities detected in dependencies',
+              body: `Security vulnerabilities were detected in project dependencies.
+              
+              Please review the workflow run for details: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+              
+              This issue was automatically created by the dependency security check workflow.`,
+              labels: ['security', 'dependencies']
+            });
+            console.log(`Issue created: ${issue.data.html_url}`);

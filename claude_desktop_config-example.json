@@ -1,11 +1,16 @@
 {
-    "mcpServers": {
-      "smartsheet": {
-        "command": "ABSOLUTE_PATH_TO_NODE", // e.g., "/Users/imkhawaja/.volta/bin/node"
-        "args": ["-r", "/Users/imkhawaja/repos/learnmcp/node/smar-mcp/node_modules/dotenv/config", "/Users/imkhawaja/repos/learnmcp/node/smar-mcp/build/index.js"],
-        "env": {
-          "SMARTSHEET_API_KEY": "YOUR_SMARTSHEET_API_KEY"
-        }
+  "mcpServers": {
+    "smartsheet": {
+      "args": [
+        "-y",
+        "@smartsheet/smar-mcp@latest"
+      ],
+      "command": "npx",
+      "env": {
+        "ALLOW_DELETE_TOOLS": "false",
+        "SMARTSHEET_API_KEY": "YOUR_SMARTSHEET_API_KEY",
+        "SMARTSHEET_ENDPOINT": "https://api.smartsheet.com/2.0"
       }
     }
   }
+}

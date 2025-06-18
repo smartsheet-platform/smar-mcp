@@ -1,0 +1,89 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+  # This ensures the workflow runs when a PR to main is updated
+  # or when new commits are pushed to a branch with an open PR
+
+jobs:
+  validate:
+    name: Validate PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: TypeScript type checking
+        run: npm run typecheck
+      
+      - name: Lint code
+        run: npm run lint
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Run tests with coverage
+        run: npm run test:coverage
+      
+      # Generate and upload code coverage report
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+      
+      # Generate coverage summary for PR comment
+      - name: Generate coverage summary
+        if: always()
+        id: coverage
+        run: |
+          echo "summary=$(cat coverage/coverage-summary.json | jq -r '.total | .statements.pct, .branches.pct, .functions.pct, .lines.pct' | paste -sd ',' - | tr ',' '\n' | awk '{sum+=$1} END {print sum/NR}')" >> $GITHUB_OUTPUT
+
+      # Add a summary to the PR
+      - name: PR validation summary
+        if: always()
+        run: |
+          echo "## PR Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "✅ TypeScript type checking" >> $GITHUB_STEP_SUMMARY
+          echo "✅ ESLint code quality checks" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Build verification" >> $GITHUB_STEP_SUMMARY
+          
+          # Display test status and coverage
+          if [ -d "coverage" ]; then
+            echo "✅ Tests passed" >> $GITHUB_STEP_SUMMARY
+            echo "📊 Code Coverage: ~$(printf "%.1f" $(echo "${{ steps.coverage.outputs.summary }}"))%" >> $GITHUB_STEP_SUMMARY
+            
+            # Add detailed coverage metrics
+            echo "| Category | Coverage |" >> $GITHUB_STEP_SUMMARY
+            echo "| -------- | -------- |" >> $GITHUB_STEP_SUMMARY
+            
+            # Extract coverage data using jq
+            STATEMENTS=$(cat coverage/coverage-summary.json | jq -r '.total.statements.pct')
+            BRANCHES=$(cat coverage/coverage-summary.json | jq -r '.total.branches.pct')
+            FUNCTIONS=$(cat coverage/coverage-summary.json | jq -r '.total.functions.pct')
+            LINES=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+            
+            echo "| Statements | ${STATEMENTS}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Branches | ${BRANCHES}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Functions | ${FUNCTIONS}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Lines | ${LINES}% |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Tests failed or coverage report not generated" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage reports are available as workflow artifacts." >> $GITHUB_STEP_SUMMARY

@@ -7,23 +7,18 @@ on:
     branches:
       - ci*
 
-
 jobs:
-  release:
-    name: Release
+  verify:
+    name: Verify
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
@@ -31,15 +26,61 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
+      - name: TypeScript type checking
+        run: npm run typecheck
+        
+      - name: Lint code
+        run: npm run lint
+        
       - name: Build
         run: npm run build
         
       - name: Test
-        # Skip tests for now as they need to be updated for TypeScript
-        run: echo "Tests temporarily skipped"
+        # Uncomment once tests are implemented
+        # run: npm test
+        run: echo "Tests temporarily skipped - please implement tests"
+
+  release:
+    name: Release
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
         
+      - name: Fetch PR data
+        id: fetch-pr-data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching PR details for enhanced release notes"
+          git log -1 --pretty=format:"Commits analyzed for release notes:^%n%h %s"
+          
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
+        
+      - name: Verify Release Success
+        if: success()
+        run: |
+          echo "✅ Release completed successfully!"
+          echo "Check the CHANGELOG.md file for the updated release notes."

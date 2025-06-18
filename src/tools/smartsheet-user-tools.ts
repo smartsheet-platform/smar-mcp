@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
-import { logger } from "../utils/logger.js";
 
 export function getUserTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -11,7 +10,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
         "Gets the current user's information",
         async () => {
         try {
-            logger.info("Getting current user");
+            console.info("Getting current user");
             const user = await api.users.getCurrentUser();
             
             return {
@@ -23,7 +22,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            logger.error("Failed to get current user", { error });
+            console.error("Failed to get current user", { error });
             return {
             content: [
                 {
@@ -46,7 +45,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ userId }) => {
         try {
-            logger.info(`Getting user with ID: ${userId}`);
+            console.info(`Getting user with ID: ${userId}`);
             const user = await api.users.getUserById(userId);
             
             return {
@@ -58,7 +57,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            logger.error("Failed to get user", { error });
+            console.error("Failed to get user", { error });
             return {
             content: [
                 {
@@ -77,7 +76,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
         "Lists all users",
         async () => {
             try {
-                logger.info("Listing all users");
+                console.info("Listing all users");
                 const users = await api.users.listUsers();
                 
                 return {
@@ -89,7 +88,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                logger.error("Failed to list users", { error });
+                console.error("Failed to list users", { error });
                 return {
                     content: [
                         {

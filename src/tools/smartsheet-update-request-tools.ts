@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
-import { logger } from "../utils/logger.js";
 
 export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -26,7 +25,7 @@ export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
       },
       async ({ sheetId, rowIds, columnIds, includeAttachments, includeDiscussions, message, subject, ccMe, sendTo }) => {
         try {
-          logger.info(`Creating update request for sheet ${sheetId}`);
+          console.info(`Creating update request for sheet ${sheetId}`);
           const result = await api.sheets.createUpdateRequest(sheetId, {
             rowIds,
             columnIds,
@@ -47,7 +46,7 @@ export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
             ]
           };
         } catch (error: any) {
-          logger.error("Failed to create update request", { error });
+          console.error("Failed to create update request", { error });
           return {
             content: [
               {

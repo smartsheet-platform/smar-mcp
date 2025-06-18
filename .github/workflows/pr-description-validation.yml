@@ -68,7 +68,10 @@ jobs:
             core.info('PR description validation passed');
             core.info(`Found Release Notes: ${releaseNotes}`);
             
-            // Optionally label the PR based on the quality of release notes
+            // Note: Skipping label creation as it requires additional permissions
+            // To enable label creation, the workflow needs write permissions to issues
+            // You can add this by setting 'issues: write' in the permissions section
+            /*
             if (contentLines.length > 2) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
@@ -77,3 +80,4 @@ jobs:
                 labels: ['good-release-notes']
               });
             }
+            */

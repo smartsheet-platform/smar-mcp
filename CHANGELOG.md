@@ -1,3 +1,12 @@
+# [1.5.0](https://github.com/smartsheet-platform/smar-mcp/compare/v1.4.0...v1.5.0) (2025-06-18)
+
+
+### Features
+
+* add logger utility and replace console logging with structured logging ([562a5a0](https://github.com/smartsheet-platform/smar-mcp/commit/562a5a033ce9a5fc83129b28a71ac8b369eb597e))
+* implement logging methods with level-based debug output ([078b979](https://github.com/smartsheet-platform/smar-mcp/commit/078b979653b571faf36a216b421ae0ade7c1767a))
+* implement Winston logger with configurable log levels and formatting ([c4d92cb](https://github.com/smartsheet-platform/smar-mcp/commit/c4d92cb37f330dc85e4f83f71d7c6c6000c28f1f))
+
 # [1.4.0](https://github.com/smartsheet-platform/smar-mcp/compare/v1.3.0...v1.4.0) (2025-06-09)
 
 

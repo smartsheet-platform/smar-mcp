@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/smartsheet-platform/smar-mcp/compare/v1.5.0...v1.6.0) (2025-06-18)
+
+
+### Features
+
+* add GitHub pull request and issue templates ([78ee52a](https://github.com/smartsheet-platform/smar-mcp/commit/78ee52ab5c6af6eb4ff9c8caeb3256402896b543))
+
 # [1.5.0](https://github.com/smartsheet-platform/smar-mcp/compare/v1.4.0...v1.5.0) (2025-06-18)
 
 

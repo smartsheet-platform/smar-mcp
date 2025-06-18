@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions & Help
+    url: https://github.com/smartsheet-platform/smar-mcp/discussions
+    about: Please ask questions here if you need help with using the project
+  - name: Documentation
+    url: https://github.com/smartsheet-platform/smar-mcp/wiki
+    about: Check our documentation for usage information

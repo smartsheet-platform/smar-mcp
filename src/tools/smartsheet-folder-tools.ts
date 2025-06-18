@@ -1,6 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
+import { withComponent } from "../utils/logger.js";
+
+// Create component-specific logger
+const folderLogger = withComponent('folder-tools');
 
 export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -13,7 +17,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ folderId}) => {
         try {
-            console.info(`Getting folder with ID: ${folderId}`);
+            folderLogger.info(`Getting folder`, { folderId });
             const folder = await api.folders.getFolder(folderId);
 
             return {
@@ -25,12 +29,16 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            console.error(`Failed to get folder with ID: ${folderId}`, { error });
+            folderLogger.error(`Failed to get folder`, { 
+                folderId, 
+                error: error instanceof Error ? error.message : String(error),
+                stack: error.stack 
+            });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to get_folder: ${error.message}`
+                text: `Failed to get_folder: ${error instanceof Error ? error.message : String(error)}`
                 }
             ],
             isError: true

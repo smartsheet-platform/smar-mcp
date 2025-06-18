@@ -1,6 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
+import { withComponent } from "../utils/logger.js";
+
+// Create component-specific logger
+const discussionLogger = withComponent('discussion-tools');
 
 export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -17,7 +21,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ sheetId, include, pageSize, page, includeAll }) => {
             try {
-                console.info(`Getting discussions for sheet with ID: ${sheetId}`);
+                discussionLogger.info(`Getting sheet discussions`, { sheetId, include, pageSize, page, includeAll });
                 const discussions = await api.discussions.getDiscussionsBySheetId(sheetId, include, pageSize, page, includeAll);
                 
                 return {
@@ -29,12 +33,16 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                console.error(`Failed to get discussions for sheet ID: ${sheetId}`, { error });
+                discussionLogger.error(`Failed to get sheet discussions`, { 
+                  sheetId, 
+                  error: error instanceof Error ? error.message : String(error),
+                  stack: error.stack 
+                });
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Failed to get discussions: ${error.message}`
+                            text: `Failed to get discussions: ${error instanceof Error ? error.message : String(error)}`
                         }
                     ],
                     isError: true
@@ -74,7 +82,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
                     content: [
                         {
                             type: "text",
-                            text: `Failed to get discussions: ${error.message}`
+                            text: `Failed to get discussions: ${error instanceof Error ? error.message : String(error)}`
                         }
                     ],
                     isError: true

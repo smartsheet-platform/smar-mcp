@@ -2,7 +2,6 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
 import { SmartsheetAPI } from "./apis/smartsheet-api.js";
 import { config } from "dotenv";
 import { getDiscussionTools } from "./tools/smartsheet-discussion-tools.js";

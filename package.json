@@ -21,10 +21,11 @@
 		"prepublishOnly": "npm run build",
 		"package": "npm run build && npm pack",
 		"deploy": "npm run build && npm publish --access public",
-		"lint": "eslint src/**/*.ts",
-		"lint:fix": "eslint src/**/*.ts --fix",
+		"lint": "eslint 'src/**/*.ts'",
+		"lint:fix": "eslint 'src/**/*.ts' --fix",
 		"typecheck": "tsc --noEmit",
-		"husky:setup": "husky install && husky add .husky/commit-msg 'npx --no -- commitlint --edit ${1}'"
+		"husky:setup": "husky install && husky add .husky/commit-msg 'npx --no -- commitlint --edit ${1}'",
+		"ci:fix": "npm run lint:fix && npm run typecheck"
 	},
 	"repository": {
 		"type": "git",

@@ -5,11 +5,21 @@
  * capabilities with configurable log levels and context.
  */
 
+// Define the Logger interface
+interface Logger {
+  debug: (message: string, ...args: any[]) => void;
+  info: (message: string, ...args: any[]) => void;
+  warn: (message: string, ...args: any[]) => void;
+  error: (message: string, ...args: any[]) => void;
+  trace: (message: string, ...args: any[]) => void;
+  child: (context: Record<string, any>) => Logger;
+}
+
 // Mock logger factory if MCP logger is not available
-const createMockLogger = (config: { level: string; name: string }) => {
+const createMockLogger = (config: { level: string; name: string }): Logger => {
   console.log(`Creating mock logger with level ${config.level} for ${config.name}`);
   
-  const logger = {
+  const logger: Logger = {
     debug: (message: string, ...args: any[]) => console.debug(`[${config.name}] [DEBUG] ${message}`, ...args),
     info: (message: string, ...args: any[]) => console.info(`[${config.name}] [INFO] ${message}`, ...args),
     warn: (message: string, ...args: any[]) => console.warn(`[${config.name}] [WARN] ${message}`, ...args),

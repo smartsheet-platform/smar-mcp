@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
-import { withComponent } from "../utils/logger.js";
+import { withComponent, formatError } from "../utils/logger.js";
 
 // Create component-specific logger
 const workspaceLogger = withComponent('workspace-tools');
@@ -26,16 +26,13 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
                 }
               ]
             };
-          } catch (error: any) {
-            workspaceLogger.error("Failed to get workspaces", { 
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
-            });
+          } catch (error) {
+            workspaceLogger.error("Failed to get workspaces", formatError(error));
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get workspaces: ${error instanceof Error ? error.message : String(error)}`
+                  text: `Failed to get workspaces: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -64,13 +61,13 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
                 }
               ]
             };
-          } catch (error: any) {
-            console.error(`Failed to get workspace with ID: ${workspaceId}`, { error });
+          } catch (error) {
+            workspaceLogger.error(`Failed to get workspace with ID: ${workspaceId}`, formatError(error));
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get workspace: ${error.message}`
+                  text: `Failed to get workspace: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -99,13 +96,13 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
                 }
               ]
             };
-          } catch (error: any) {
-            console.error("Failed to create workspace", { error });
+          } catch (error) {
+            workspaceLogger.error("Failed to create workspace", formatError(error));
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to create_workspace: ${error.message}`
+                  text: `Failed to create_workspace: ${formatError(error).message}`
                 }
               ],
               isError: true

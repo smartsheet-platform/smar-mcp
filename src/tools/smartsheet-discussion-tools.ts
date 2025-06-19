@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
-import { withComponent } from "../utils/logger.js";
+import { withComponent, formatError } from "../utils/logger.js";
 
 // Create component-specific logger
 const discussionLogger = withComponent('discussion-tools');
@@ -35,14 +35,13 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
             } catch (error: any) {
                 discussionLogger.error(`Failed to get sheet discussions`, { 
                   sheetId, 
-                  error: error instanceof Error ? error.message : String(error),
-                  stack: error.stack 
+                  ...formatError(error)
                 });
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Failed to get discussions: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to get discussions: ${formatError(error).message}`
                         }
                     ],
                     isError: true
@@ -77,12 +76,12 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                console.error(`Failed to get discussions for row ID: ${rowId} in sheet ID: ${sheetId}`, { error });
+                discussionLogger.error(`Failed to get discussions for row ID: ${rowId} in sheet ID: ${sheetId}`, formatError(error));
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Failed to get discussions: ${error instanceof Error ? error.message : String(error)}`
+                            text: `Failed to get discussions: ${formatError(error).message}`
                         }
                     ],
                     isError: true
@@ -113,12 +112,12 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                console.error(`Failed to create discussion on sheet ID: ${sheetId}`, { error });
+                discussionLogger.error(`Failed to create discussion on sheet ID: ${sheetId}`, formatError(error));
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Failed to create discussion: ${error.message}`
+                            text: `Failed to create discussion: ${formatError(error).message}`
                         }
                     ],
                     isError: true
@@ -150,12 +149,12 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                console.error(`Failed to create discussion on row ID: ${rowId} in sheet ID: ${sheetId}`, { error });
+                discussionLogger.error(`Failed to create discussion on row ID: ${rowId} in sheet ID: ${sheetId}`, formatError(error));
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Failed to create discussion: ${error.message}`
+                            text: `Failed to create discussion: ${formatError(error).message}`
                         }
                     ],
                     isError: true

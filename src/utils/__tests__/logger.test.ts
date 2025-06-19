@@ -52,11 +52,17 @@ jest.mock('../logger.js', () => ({
       mockBaseLogger.child({ requestId });
     }
     return mockBaseLogger;
+  }),
+  formatError: jest.fn().mockImplementation((error) => {
+    if (error instanceof Error) {
+      return { message: error.message, stack: error.stack };
+    }
+    return { message: String(error) };
   })
 }));
 
 // AFTER mocking, import the module under test
-import { logger, LOG_LEVELS, withComponent, withRequestContext } from '../logger.js';
+import { logger, LOG_LEVELS, withComponent, withRequestContext, formatError } from '../logger.js';
 
 describe('Logger module', () => {
   beforeEach(() => {
@@ -141,6 +147,28 @@ describe('Logger module', () => {
       const message = 'test trace message';
       logger.trace(message);
       expect(mockTrace).toHaveBeenCalledWith(message);
+    });
+  });
+  
+  describe('formatError function', () => {
+    test('should format Error objects correctly', () => {
+      const errorObj = new Error('test error');
+      const result = formatError(errorObj);
+      expect(result).toEqual({
+        message: errorObj.message,
+        stack: errorObj.stack
+      });
+    });
+    
+    test('should format non-Error values correctly', () => {
+      const stringError = 'test error string';
+      expect(formatError(stringError)).toEqual({ message: stringError });
+      
+      const numberError = 404;
+      expect(formatError(numberError)).toEqual({ message: '404' });
+      
+      const objError = { error: 'bad request' };
+      expect(formatError(objError)).toEqual({ message: '[object Object]' });
     });
   });
 });

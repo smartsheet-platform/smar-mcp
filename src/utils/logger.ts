@@ -38,10 +38,14 @@ const createMockLogger = (config: { level: string; name: string }): Logger => {
 // Try to import MCP logger or use mock if not available
 let createLogger: (config: { level: string; name: string }) => any;
 
+// We use a try-catch pattern here to handle the case where the MCP logger isn't available
+let mcpLogger;
 try {
   // Try to import MCP logger
-  createLogger = require("@modelcontextprotocol/sdk/server/logger.js").createLogger;
-} catch (err) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  mcpLogger = require("@modelcontextprotocol/sdk/server/logger.js");
+  createLogger = mcpLogger.createLogger;
+} catch {
   console.warn("MCP logger not available, using mock logger instead");
   createLogger = createMockLogger;
 }
@@ -61,7 +65,7 @@ export const LOG_LEVELS = {
  * Global logger instance configured with environment settings
  */
 export const logger = createLogger({
-  level: process.env.LOG_LEVEL || "info",
+  level: process.env.LOG_LEVEL ?? "info",
   name: "smartsheet-mcp"
 });
 
@@ -89,4 +93,22 @@ export function withComponent(component: string) {
   return logger.child({
     component
   });
+}
+
+/**
+ * Format error objects consistently for logging
+ * 
+ * @param error - Any error object or value
+ * @returns A structured error object with message and stack properties
+ */
+export function formatError(error: unknown): { message: string; stack?: string } {
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+      stack: error.stack
+    };
+  }
+  return {
+    message: String(error)
+  };
 }

@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
-import { withComponent } from "../utils/logger.js";
+import { withComponent, formatError } from "../utils/logger.js";
 
 // Create component-specific logger
 const userLogger = withComponent('user-tools');
@@ -26,15 +26,12 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            userLogger.error("Failed to get current user", { 
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
-            });
+            userLogger.error("Failed to get current user", formatError(error));
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to get current user: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to get current user: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -64,12 +61,12 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
             ]
             };
         } catch (error: any) {
-            console.error("Failed to get user", { error });
+            userLogger.error("Failed to get user", formatError(error));
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to get user: ${error.message}`
+                text: `Failed to get user: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -95,12 +92,12 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
                     ]
                 };
             } catch (error: any) {
-                console.error("Failed to list users", { error });
+                userLogger.error("Failed to list users", formatError(error));
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Failed to list users: ${error.message}`
+                            text: `Failed to list users: ${formatError(error).message}`
                         }
                     ],
                     isError: true

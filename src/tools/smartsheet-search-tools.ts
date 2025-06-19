@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
-import { withComponent } from "../utils/logger.js";
+import { withComponent, formatError } from "../utils/logger.js";
 
 // Create component-specific logger
 const searchLogger = withComponent('search-tools');
@@ -30,14 +30,13 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         } catch (error: any) {
             searchLogger.error(`Failed to search for sheets`, { 
                 query,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
             });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to search for sheets: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to search for sheets: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -70,14 +69,13 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
             searchLogger.error(`Failed to search in sheet`, { 
                 sheetId,
                 query,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
             });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to search in sheet: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to search in sheet: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -96,7 +94,8 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         async ({ url, query }) => {
         try {
             searchLogger.info(`Searching in sheet by URL`, { url, query });
-            const match = url.match(/\/sheets\/([^?/]+)/);
+            const regex = /\/sheets\/([^?/]+)/;
+            const match = regex.exec(url);
             const directIdToken = match ? match[1] : null;
             if (!directIdToken) {
                 return {
@@ -124,14 +123,13 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
             searchLogger.error(`Failed to search in sheet by URL`, { 
                 url,
                 query,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
             });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to search in sheet: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to search in sheet: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -162,14 +160,13 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         } catch (error: any) {
             searchLogger.error(`Failed to search for assigned tasks`, { 
                 sheetId,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
             });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to search for assigned tasks in sheet: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to search for assigned tasks in sheet: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -187,7 +184,8 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         async ({ url }) => {
         try {
             const user = await api.users.getCurrentUser();
-            const match = url.match(/\/sheets\/([^?/]+)/);
+            const regex = /\/sheets\/([^?/]+)/;
+            const match = regex.exec(url);
             const directIdToken = match ? match[1] : null;
             if (!directIdToken) {
                 return {
@@ -214,14 +212,13 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         } catch (error: any) {
             searchLogger.error(`Failed to search for assigned tasks by URL`, { 
                 url,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
             });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to search for assigned tasks in sheet: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to search for assigned tasks in sheet: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -252,14 +249,13 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         } catch (error: any) {
             searchLogger.error(`Failed to search for folders`, { 
                 query,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
             });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to search for folders: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to search for folders: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -290,14 +286,13 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         } catch (error: any) {
             searchLogger.error(`Failed to search for workspaces`, { 
                 query,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
             });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to search for workspaces: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to search for workspaces: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -328,14 +323,13 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         } catch (error: any) {
             searchLogger.error(`Failed to search for reports`, { 
                 query,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
             });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to search for reports: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to search for reports: ${formatError(error).message}`
                 }
             ],
             isError: true
@@ -366,14 +360,13 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         } catch (error: any) {
             searchLogger.error(`Failed to search for dashboards`, { 
                 query,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
             });
             return {
             content: [
                 {
                 type: "text",
-                text: `Failed to search for dashboards: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to search for dashboards: ${formatError(error).message}`
                 }
             ],
             isError: true

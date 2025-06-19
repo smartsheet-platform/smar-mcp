@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
-import { withComponent } from "../utils/logger.js";
+import { withComponent, formatError } from "../utils/logger.js";
 
 // Create component-specific logger
 const sheetLogger = withComponent('sheet-tools');
@@ -33,14 +33,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         } catch (error: any) {
           sheetLogger.error(`Failed to get sheet`, { 
             sheetId, 
-            error: error instanceof Error ? error.message : String(error),
-            stack: error.stack 
+            ...formatError(error)
           });
           return {
             content: [
               {
                 type: "text",
-                text: `Failed to get sheet: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to get sheet: ${formatError(error).message}`
               }
             ],
             isError: true
@@ -61,7 +60,8 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       async ({ url, include, pageSize, page }) => {
         try {
           sheetLogger.info(`Getting sheet by URL`, { url, include, pageSize, page });
-          const match = url.match(/\/sheets\/([^?/]+)/);
+          const regex = /\/sheets\/([^?/]+)/;
+          const match = regex.exec(url);
           const directIdToken = match ? match[1] : null;
           if (!directIdToken) {
             return {
@@ -87,14 +87,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         } catch (error: any) {
           sheetLogger.error(`Failed to get sheet by URL`, { 
             url, 
-            error: error instanceof Error ? error.message : String(error),
-            stack: error.stack 
+            ...formatError(error)
           });
           return {
             content: [
               {
                 type: "text",
-                text: `Failed to get sheet: ${error instanceof Error ? error.message : String(error)}`
+                text: `Failed to get sheet: ${formatError(error).message}`
               }
             ],
             isError: true
@@ -125,14 +124,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
           } catch (error: any) {
             sheetLogger.error(`Failed to get sheet version`, { 
               sheetId, 
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined
+              ...formatError(error)
             });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get sheet version: ${error instanceof Error ? error.message : String(error)}`
+                  text: `Failed to get sheet version: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -178,14 +176,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               sheetId,
               rowId,
               columnId,
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined
+              ...formatError(error)
             });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get cell history: ${error instanceof Error ? error.message : String(error)}`
+                  text: `Failed to get cell history: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -220,14 +217,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
             sheetLogger.error(`Failed to get row`, { 
               sheetId,
               rowId,
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined
+              ...formatError(error)
             });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get row: ${error instanceof Error ? error.message : String(error)}`
+                  text: `Failed to get row: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -277,14 +273,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
             sheetLogger.error(`Failed to update rows`, { 
               sheetId,
               rowCount: rows.length,
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined
+              ...formatError(error)
             });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to update rows: ${error instanceof Error ? error.message : String(error)}`
+                  text: `Failed to update rows: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -334,14 +329,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
             sheetLogger.error(`Failed to add rows`, { 
               sheetId,
               rowCount: rows.length,
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined
+              ...formatError(error)
             });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to add rows: ${error instanceof Error ? error.message : String(error)}`
+                  text: `Failed to add rows: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -382,14 +376,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               sheetLogger.error(`Failed to delete rows`, { 
                 sheetId,
                 rowCount: rowIds.length,
-                error: error instanceof Error ? error.message : String(error),
-                stack: error.stack 
+                ...formatError(error)
               });
               return {
                 content: [
                   {
                     type: "text",
-                    text: `Failed to delete rows: ${error instanceof Error ? error.message : String(error)}`
+                    text: `Failed to delete rows: ${formatError(error).message}`
                   }
                 ],
                 isError: true
@@ -426,14 +419,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
           } catch (error: any) {
             sheetLogger.error(`Failed to get sheet location`, { 
               sheetId,
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined
+              ...formatError(error)
             });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get sheet location: ${error instanceof Error ? error.message : String(error)}`
+                  text: `Failed to get sheet location: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -467,7 +459,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               } catch (error) {
                 sheetLogger.warn("Failed to get sheet location, using default folder", { 
                   sheetId,
-                  error: error instanceof Error ? error.message : String(error)
+                  ...formatError(error)
                 });
               }
             }
@@ -487,14 +479,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               sheetId,
               destinationName,
               destinationFolderId,
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined
+              ...formatError(error)
             });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to copy sheet: ${error instanceof Error ? error.message : String(error)}`
+                  text: `Failed to copy sheet: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -540,14 +531,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               name,
               columnCount: columns.length,
               folderId,
-              error: error instanceof Error ? error.message : String(error),
-              stack: error instanceof Error ? error.stack : undefined
+              ...formatError(error)
             });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to create sheet: ${error instanceof Error ? error.message : String(error)}`
+                  text: `Failed to create sheet: ${formatError(error).message}`
                 }
               ],
               isError: true

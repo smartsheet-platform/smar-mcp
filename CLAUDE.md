@@ -3,7 +3,14 @@
 This file contains configuration and instructions for Claude to help with this repository.
 
 ## Repository Overview
-This repository contains a Smartsheet Model Context Protocol (MCP) server that provides tools for interacting with the Smartsheet API.
+This repository contains a Smartsheet Model Context Protocol (MCP) server that provides tools for interacting with the Smartsheet API. It enables AI assistants to access and manipulate Smartsheet data through a standardized interface.
+
+### Key Features
+- MCP-compliant server implementation
+- Structured logging with client notifications
+- Rate limiting and security best practices
+- Support for sheets, folders, workspaces, and search operations
+- Support for discussion threads and update requests
 
 ## GitHub CLI Setup and Authentication
 
@@ -135,8 +142,37 @@ This repository follows the conventional commits standard:
 
 ## Development Commands
 
-Add common development commands here that should be run regularly.
+```bash
+# Build the project
+npm run build
+
+# Run the server
+npm run start
+
+# Build and run in one command
+npm run dev
+
+# Run tests
+npm test
+
+# Run linting
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+
+# Type checking
+npm run typecheck
+```
 
 ## Code Conventions
 
-Add code conventions specific to this repository here.
+- Use ESM modules (import/export) instead of CommonJS (require)
+- TypeScript for all new code
+- Prefer async/await over Promises with then/catch
+- Follow conventional commits format for all commits
+- Include JSDoc comments for public APIs
+- Add unit tests for new features
+- Maintain 100% code coverage if possible
+- Follow RFC 5424 for logging levels
+- Implement proper error handling

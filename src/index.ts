@@ -6,6 +6,8 @@ import { z } from "zod";
 import { SmartsheetAPI } from "./apis/smartsheet-api.js";
 import { config } from "dotenv";
 import { logger } from "./utils/logger.js";
+import { createNotificationLogger } from "./utils/notification-logger.js";
+import { registerLoggingCapability } from "./server/logging-capability.js";
 import { getDiscussionTools } from "./tools/smartsheet-discussion-tools.js";
 import { getFolderTools } from "./tools/smartsheet-folder-tools.js";
 import { getSearchTools } from "./tools/smartsheet-search-tools.js";
@@ -19,7 +21,8 @@ config();
 
 // Control whether deletion operations are enabled
 const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
-logger.info(`Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`, { allowDeleteTools });
+const enableLogNotifications = process.env.ENABLE_LOG_NOTIFICATIONS !== 'false';
+logger.info(`Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}, log notifications are ${enableLogNotifications ? 'enabled' : 'disabled'}`, { allowDeleteTools, enableLogNotifications });
   
 // Initialize the MCP server
 const server = new McpServer({
@@ -27,6 +30,18 @@ const server = new McpServer({
   version: "1.0.0",
   logger: logger
 });
+
+// Register the logging capability and enable notifications
+registerLoggingCapability(server);
+
+// Create a notification-enabled logger if enabled via environment variable
+let serverLogger = logger;
+if (process.env.ENABLE_LOG_NOTIFICATIONS !== 'false') {
+  serverLogger = createNotificationLogger(server);
+}
+
+// Log server startup with notification if enabled
+serverLogger.info("Smartsheet MCP server starting", { version: "1.0.0" });
 
 // Initialize the direct API client
 const api = new SmartsheetAPI(process.env.SMARTSHEET_API_KEY, process.env.SMARTSHEET_ENDPOINT);

@@ -347,7 +347,8 @@ const result = await use_mcp_tool({
 
 - `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
 - `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
-- `LOG_LEVEL`: Configures the logging verbosity. Available levels: error, warn, info, debug, trace (default: info)
+- `LOG_LEVEL`: Configures the logging verbosity following RFC 5424 severity levels. Available levels: emergency, alert, critical, error, warn, notice, info, debug, trace (default: info)
+- `ENABLE_LOG_NOTIFICATIONS`: Set to 'true' to enable sending log notifications to MCP clients (default: true)
 
 ## Development
 

@@ -20,8 +20,19 @@ const mockChildLogger = {
   child: mockChild
 };
 
-// Create the base mock logger
-const mockBaseLogger = {
+// Create the base mock logger with explicitly defined functions
+// to ensure they are never undefined
+// Define logger interface to ensure all methods are defined
+interface Logger {
+  debug: jest.Mock<any, any>;
+  info: jest.Mock<any, any>;
+  warn: jest.Mock<any, any>;
+  error: jest.Mock<any, any>;
+  trace: jest.Mock<any, any>;
+  child: jest.Mock<any, any>;
+}
+
+const mockBaseLogger: Logger = {
   debug: mockDebug,
   info: mockInfo,
   warn: mockWarn,
@@ -57,6 +68,16 @@ jest.mock('../logger.js', () => ({
 
 // AFTER mocking, import the module under test
 import { logger, LOG_LEVELS, withComponent, withRequestContext } from '../logger.js';
+
+// Define the logger type to ensure TypeScript recognizes all methods
+const typedLogger = logger as {
+  debug: jest.Mock;
+  info: jest.Mock;
+  warn: jest.Mock;
+  error: jest.Mock;
+  trace: jest.Mock;
+  child: jest.Mock;
+};
 
 describe('Logger module', () => {
   beforeEach(() => {
@@ -104,42 +125,42 @@ describe('Logger module', () => {
 
   describe('logger methods', () => {
     test('should expose standard logging methods', () => {
-      expect(logger.debug).toBeDefined();
-      expect(logger.info).toBeDefined();
-      expect(logger.warn).toBeDefined();
-      expect(logger.error).toBeDefined();
-      expect(logger.trace).toBeDefined();
-      expect(logger.child).toBeDefined();
+      expect(typedLogger.debug).toBeDefined();
+      expect(typedLogger.info).toBeDefined();
+      expect(typedLogger.warn).toBeDefined();
+      expect(typedLogger.error).toBeDefined();
+      expect(typedLogger.trace).toBeDefined();
+      expect(typedLogger.child).toBeDefined();
     });
 
     test('debug method should work', () => {
       const message = 'test debug message';
-      logger.debug(message);
+      typedLogger.debug(message);
       expect(mockDebug).toHaveBeenCalledWith(message);
     });
 
     test('info method should work', () => {
       const message = 'test info message';
-      logger.info(message);
+      typedLogger.info(message);
       expect(mockInfo).toHaveBeenCalledWith(message);
     });
 
     test('warn method should work', () => {
       const message = 'test warn message';
-      logger.warn(message);
+      typedLogger.warn(message);
       expect(mockWarn).toHaveBeenCalledWith(message);
     });
 
     test('error method should work', () => {
       const message = 'test error message';
       const error = new Error('test error');
-      logger.error(message, { error });
+      typedLogger.error(message, { error });
       expect(mockError).toHaveBeenCalledWith(message, { error });
     });
 
     test('trace method should work', () => {
       const message = 'test trace message';
-      logger.trace(message);
+      typedLogger.trace(message);
       expect(mockTrace).toHaveBeenCalledWith(message);
     });
   });

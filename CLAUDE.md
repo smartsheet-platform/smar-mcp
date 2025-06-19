@@ -139,4 +139,50 @@ Add common development commands here that should be run regularly.
 
 ## Code Conventions
 
-Add code conventions specific to this repository here.
+### Error Handling
+
+This repository follows a consistent error handling pattern:
+
+1. Use the `formatError` helper function from `src/utils/logger.ts` for consistent error formatting
+   ```typescript
+   import { formatError } from "../utils/logger.js";
+   
+   try {
+     // Code that might throw
+   } catch (error) {
+     // Log with full error details
+     logger.error("Error description", formatError(error));
+     
+     // Return user-facing error with just the message
+     return {
+       content: [
+         {
+           type: "text",
+           text: `Error message: ${formatError(error).message}`
+         }
+       ],
+       isError: true
+     };
+   }
+   ```
+
+2. Error logging should include:
+   - A descriptive message of what failed
+   - The structured error object from `formatError()`
+   - Additional context specific to the operation (IDs, parameters, etc.)
+
+3. Never expose full stack traces to the end user, only in logs
+4. Always use `try/catch` blocks for API calls and external integrations
+5. Prefer typed error handling (`catch (error)` instead of `catch (error: any)`)
+
+### RegExp Usage
+
+- Use `RegExp.exec()` instead of `String.match()` for regular expression operations:
+  ```typescript
+  // Preferred approach
+  const regex = /pattern/;
+  const match = regex.exec(inputString);
+  
+  // Avoid this approach
+  const match = inputString.match(/pattern/);
+  ```

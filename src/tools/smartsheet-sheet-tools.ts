@@ -1,6 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
+import { withComponent, formatError } from "../utils/logger.js";
+
+// Create component-specific logger
+const sheetLogger = withComponent('sheet-tools');
 
 export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDeleteTools: boolean) {
 
@@ -15,7 +19,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       },
       async ({ sheetId, include, pageSize, page }) => {
         try {
-          console.info(`Getting sheet with ID: ${sheetId}`);
+          sheetLogger.info(`Getting sheet`, { sheetId, include, pageSize, page });
           const sheet = await api.sheets.getSheet(sheetId, include, undefined, pageSize, page);
           
           return {
@@ -27,12 +31,15 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
             ]
           };
         } catch (error: any) {
-          console.error(`Failed to get sheet with ID: ${sheetId}`, { error });
+          sheetLogger.error(`Failed to get sheet`, { 
+            sheetId, 
+            ...formatError(error)
+          });
           return {
             content: [
               {
                 type: "text",
-                text: `Failed to get sheet: ${error.message}`
+                text: `Failed to get sheet: ${formatError(error).message}`
               }
             ],
             isError: true
@@ -52,8 +59,9 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       },
       async ({ url, include, pageSize, page }) => {
         try {
-          console.info(`Getting sheet with URL: ${url}`);
-          const match = url.match(/\/sheets\/([^?\/]+)/);
+          sheetLogger.info(`Getting sheet by URL`, { url, include, pageSize, page });
+          const regex = /\/sheets\/([^?/]+)/;
+          const match = regex.exec(url);
           const directIdToken = match ? match[1] : null;
           if (!directIdToken) {
             return {
@@ -77,12 +85,15 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
             ]
           };
         } catch (error: any) {
-          console.error(`Failed to get sheet with URL: ${url}`, { error });
+          sheetLogger.error(`Failed to get sheet by URL`, { 
+            url, 
+            ...formatError(error)
+          });
           return {
             content: [
               {
                 type: "text",
-                text: `Failed to get sheet: ${error.message}`
+                text: `Failed to get sheet: ${formatError(error).message}`
               }
             ],
             isError: true
@@ -99,7 +110,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         },
         async ({ sheetId }) => {
           try {
-            console.info(`Getting version for sheet with ID: ${sheetId}`);
+            sheetLogger.info(`Getting sheet version`, { sheetId });
             const version = await api.sheets.getSheetVersion(sheetId);
             
             return {
@@ -111,12 +122,15 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               ]
             };
           } catch (error: any) {
-            console.error(`Failed to get sheet version for sheet ID: ${sheetId}`, { error });
+            sheetLogger.error(`Failed to get sheet version`, { 
+              sheetId, 
+              ...formatError(error)
+            });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get sheet version: ${error.message}`
+                  text: `Failed to get sheet version: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -139,7 +153,14 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         },
         async ({ sheetId, rowId, columnId, include, pageSize, page }) => {
           try {
-            console.info(`Getting history for cell at row ${rowId}, column ${columnId} in sheet ${sheetId}`);
+            sheetLogger.info(`Getting cell history`, { 
+              sheetId,
+              rowId,
+              columnId,
+              include,
+              pageSize,
+              page 
+            });
             const history = await api.sheets.getCellHistory(sheetId, rowId, columnId, include, pageSize, page);
             
             return {
@@ -151,12 +172,17 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               ]
             };
           } catch (error: any) {
-            console.error(`Failed to get cell history for row ${rowId}, column ${columnId} in sheet ${sheetId}`, { error });
+            sheetLogger.error(`Failed to get cell history`, { 
+              sheetId,
+              rowId,
+              columnId,
+              ...formatError(error)
+            });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get cell history: ${error.message}`
+                  text: `Failed to get cell history: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -176,7 +202,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         },
         async ({ sheetId, rowId, include }) => {
           try {
-            console.info(`Getting row ${rowId} in sheet ${sheetId}`);
+            sheetLogger.info(`Getting row`, { sheetId, rowId, include });
             const row = await api.sheets.getRow(sheetId, rowId, include);
             
             return {
@@ -188,12 +214,16 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               ]
             };
           } catch (error: any) {
-            console.error(`Failed to get row ${rowId} in sheet ${sheetId}`, { error });
+            sheetLogger.error(`Failed to get row`, { 
+              sheetId,
+              rowId,
+              ...formatError(error)
+            });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get row: ${error.message}`
+                  text: `Failed to get row: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -224,7 +254,11 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         },
         async ({ sheetId, rows }) => {
           try {
-            console.info(`Updating ${rows.length} rows in sheet ${sheetId}`);
+            sheetLogger.info(`Updating rows`, { 
+              sheetId,
+              rowCount: rows.length,
+              rowIds: rows.map(r => r.id)
+            });
             const result = await api.sheets.updateRows(sheetId, rows);
             
             return {
@@ -236,12 +270,16 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               ]
             };
           } catch (error: any) {
-            console.error(`Failed to update ${rows.length} rows in sheet ${sheetId}`, { error });
+            sheetLogger.error(`Failed to update rows`, { 
+              sheetId,
+              rowCount: rows.length,
+              ...formatError(error)
+            });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to update rows: ${error.message}`
+                  text: `Failed to update rows: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -273,7 +311,10 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         },
         async ({ sheetId, rows }) => {
           try {
-            console.info(`Adding ${rows.length} rows to sheet ${sheetId}`);
+            sheetLogger.info(`Adding rows`, { 
+              sheetId,
+              rowCount: rows.length 
+            });
             const result = await api.sheets.addRows(sheetId, rows);
             
             return {
@@ -285,12 +326,16 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               ]
             };
           } catch (error: any) {
-            console.error(`Failed to add ${rows.length} rows to sheet ${sheetId}`, { error });
+            sheetLogger.error(`Failed to add rows`, { 
+              sheetId,
+              rowCount: rows.length,
+              ...formatError(error)
+            });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to add rows: ${error.message}`
+                  text: `Failed to add rows: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -311,7 +356,12 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
           },
           async ({ sheetId, rowIds, ignoreRowsNotFound }) => {
             try {
-              console.info(`Deleting ${rowIds.length} rows from sheet ${sheetId}`);
+              sheetLogger.info(`Deleting rows`, { 
+                sheetId,
+                rowCount: rowIds.length,
+                rowIds,
+                ignoreRowsNotFound 
+              });
               const result = await api.sheets.deleteRows(sheetId, rowIds, ignoreRowsNotFound);
               
               return {
@@ -323,12 +373,16 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
                 ]
               };
             } catch (error: any) {
-              console.error(`Failed to delete ${rowIds.length} rows from sheet ${sheetId}`, { error });
+              sheetLogger.error(`Failed to delete rows`, { 
+                sheetId,
+                rowCount: rowIds.length,
+                ...formatError(error)
+              });
               return {
                 content: [
                   {
                     type: "text",
-                    text: `Failed to delete rows: ${error.message}`
+                    text: `Failed to delete rows: ${formatError(error).message}`
                   }
                 ],
                 isError: true
@@ -337,7 +391,9 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
           }
         );
       } else {
-        console.warn("Delete operations are disabled. Set ALLOW_DELETE_TOOLS=true to enable them.");
+        sheetLogger.warn("Delete operations are disabled", { 
+          message: "Set ALLOW_DELETE_TOOLS=true to enable them" 
+        });
       }
       
       // Tool: Get Sheet Location
@@ -349,7 +405,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         },
         async ({ sheetId }) => {
           try {
-            console.info(`Getting location for sheet ${sheetId}`);
+            sheetLogger.info(`Getting sheet location`, { sheetId });
             const location = await api.sheets.getSheetLocation(sheetId);
             
             return {
@@ -361,12 +417,15 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               ]
             };
           } catch (error: any) {
-            console.error(`Failed to get location for sheet ${sheetId}`, { error });
+            sheetLogger.error(`Failed to get sheet location`, { 
+              sheetId,
+              ...formatError(error)
+            });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get sheet location: ${error.message}`
+                  text: `Failed to get sheet location: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -386,7 +445,11 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         },
         async ({ sheetId, destinationName, destinationFolderId }) => {
           try {
-            console.info(`Copying sheet ${sheetId} to "${destinationName}"`);
+            sheetLogger.info(`Copying sheet`, { 
+              sheetId,
+              destinationName,
+              destinationFolderId 
+            });
             
             // If no destination folder is specified, get the current folder
             if (!destinationFolderId) {
@@ -394,7 +457,10 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
                 const location = await api.sheets.getSheetLocation(sheetId);
                 destinationFolderId = location.folderId;
               } catch (error) {
-                console.warn("Failed to get sheet location, using default folder", { error });
+                sheetLogger.warn("Failed to get sheet location, using default folder", { 
+                  sheetId,
+                  ...formatError(error)
+                });
               }
             }
             
@@ -409,12 +475,17 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               ]
             };
           } catch (error: any) {
-            console.error(`Failed to copy sheet ${sheetId} to "${destinationName}"`, { error });
+            sheetLogger.error(`Failed to copy sheet`, { 
+              sheetId,
+              destinationName,
+              destinationFolderId,
+              ...formatError(error)
+            });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to copy sheet: ${error.message}`
+                  text: `Failed to copy sheet: ${formatError(error).message}`
                 }
               ],
               isError: true
@@ -440,7 +511,11 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         },
         async ({ name, columns, folderId }) => {
           try {
-            console.info(`Creating new sheet "${name}"`);
+            sheetLogger.info(`Creating new sheet`, { 
+              name,
+              columnCount: columns.length,
+              folderId 
+            });
             const result = await api.sheets.createSheet(name, columns, folderId);
             
             return {
@@ -452,12 +527,17 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               ]
             };
           } catch (error: any) {
-            console.error(`Failed to create sheet "${name}"`, { error });
+            sheetLogger.error(`Failed to create sheet`, { 
+              name,
+              columnCount: columns.length,
+              folderId,
+              ...formatError(error)
+            });
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to create sheet: ${error.message}`
+                  text: `Failed to create sheet: ${formatError(error).message}`
                 }
               ],
               isError: true

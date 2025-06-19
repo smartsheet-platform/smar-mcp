@@ -1,6 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
+import { withComponent, formatError } from "../utils/logger.js";
+
+// Create component-specific logger
+const updateRequestLogger = withComponent('update-request-tools');
 
 export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -25,7 +29,12 @@ export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
       },
       async ({ sheetId, rowIds, columnIds, includeAttachments, includeDiscussions, message, subject, ccMe, sendTo }) => {
         try {
-          console.info(`Creating update request for sheet ${sheetId}`);
+          updateRequestLogger.info(`Creating update request`, { 
+            sheetId,
+            rowCount: rowIds?.length || 0,
+            columnCount: columnIds?.length || 0,
+            recipientCount: sendTo.length
+          });
           const result = await api.sheets.createUpdateRequest(sheetId, {
             rowIds,
             columnIds,
@@ -46,12 +55,15 @@ export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
             ]
           };
         } catch (error: any) {
-          console.error("Failed to create update request", { error });
+          updateRequestLogger.error(`Failed to create update request`, { 
+            sheetId,
+            ...formatError(error)
+          });
           return {
             content: [
               {
                 type: "text",
-                text: `Failed to create update request: ${error.message}`
+                text: `Failed to create update request: ${formatError(error).message}`
               }
             ],
             isError: true

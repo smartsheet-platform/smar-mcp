@@ -5,6 +5,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { SmartsheetAPI } from "./apis/smartsheet-api.js";
 import { config } from "dotenv";
+import { logger } from "./utils/logger.js";
 import { getDiscussionTools } from "./tools/smartsheet-discussion-tools.js";
 import { getFolderTools } from "./tools/smartsheet-folder-tools.js";
 import { getSearchTools } from "./tools/smartsheet-search-tools.js";
@@ -18,12 +19,13 @@ config();
 
 // Control whether deletion operations are enabled
 const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
-console.info(`Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
+logger.info(`Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`, { allowDeleteTools });
   
 // Initialize the MCP server
 const server = new McpServer({
   name: "smartsheet",
   version: "1.0.0",
+  logger: logger
 });
 
 // Initialize the direct API client
@@ -54,10 +56,13 @@ getWorkspaceTools(server, api);
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.info("Smartsheet MCP Server running on stdio");
+  logger.info("Smartsheet MCP Server running on stdio", { transport: "stdio" });
 }
 
 main().catch((error) => {
-  console.error("Fatal error in main()", { error });
+  logger.error("Fatal error in main()", { 
+    error: error.message,
+    stack: error.stack 
+  });
   process.exit(1);
 });

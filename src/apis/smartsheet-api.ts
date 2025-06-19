@@ -6,6 +6,10 @@ import { SmartsheetSheetAPI } from './smartsheet-sheet-api.js';
 import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api.js';
 import { SmartsheetUserAPI } from './smartsheet-user-api.js';
 import packageJson from '../../package.json' with { type: 'json' };
+import { withComponent } from '../utils/logger.js';
+
+// Create API-specific logger
+const apiLogger = withComponent('api');
 
 /**
  * Direct Smartsheet API client that doesn't rely on the SDK
@@ -73,7 +77,11 @@ export class SmartsheetAPI {
           });
         }
         
-        console.info(`API Request: ${method} ${url.toString()}`);
+        apiLogger.debug(`API Request`, { 
+          method, 
+          url: url.toString(),
+          hasData: !!data 
+        });
         
         const response = await axios({
           method,
@@ -95,11 +103,25 @@ export class SmartsheetAPI {
             parseInt(retryAfter, 10) * 1000,
             Math.pow(2, retries) * 1000 + Math.random() * 1000
           );
-          console.error(`[Rate Limit] Retrying in ${delay}ms...`);
+          apiLogger.warn(`API Rate Limit`, { 
+            method,
+            endpoint,
+            retryAttempt: retries + 1,
+            maxRetries,
+            delayMs: delay,
+            retryAfter
+          });
           await new Promise(resolve => setTimeout(resolve, delay));
           retries++;
         } else {
-          console.error(`API Error: ${error.message}`, { error });
+          apiLogger.error(`API Error`, { 
+            method,
+            endpoint,
+            statusCode: error.response?.status,
+            errorCode: error.response?.data?.errorCode,
+            message: error.message,
+            stack: error instanceof Error ? error.stack : undefined
+          });
           throw this.formatError(error);
         }
       }

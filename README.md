@@ -347,6 +347,7 @@ const result = await use_mcp_tool({
 
 - `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
 - `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
+- `LOG_LEVEL`: Configures the logging verbosity. Available levels: error, warn, info, debug, trace (default: info)
 
 ## Development
 
@@ -364,9 +365,10 @@ npm run build
 ### Project Structure
 
 - `src/index.ts`: Main entry point and MCP tool definitions
-- `src/smartsheet-direct-api.ts`: Direct API client for Smartsheet
-- `src/smartsheet-utils.ts`: Utility functions for common operations
-- `src/smartsheet-workflows.ts`: Implementation of complex workflows
+- `src/apis/`: Directory containing API client implementations
+- `src/tools/`: Directory containing MCP tool implementations
+- `src/utils/`: Utility functions and helper modules
+  - `src/utils/logger.ts`: Centralized logging module
 - `src/smartsheet-types`: Classes representing Smartsheet API objects
 - `tests/`: Test files for various functionality
 - `scripts/`: Utility scripts

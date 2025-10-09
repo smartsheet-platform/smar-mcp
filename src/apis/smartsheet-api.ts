@@ -21,8 +21,14 @@ export class SmartsheetAPI {
   public discussions: SmartsheetDiscussionAPI;
   /** 
    * Creates a new SmartsheetAPI instance
-   * @param accessToken Smartsheet API access token
-   * @param baseUrl Smartsheet API base URL
+   * @param accessToken Smartsheet API access token (from SMARTSHEET_API_KEY env var)
+   * @param baseUrl Smartsheet API base URL (from SMARTSHEET_ENDPOINT env var)
+   * 
+   * Supported API endpoints based on deployment region:
+   * - US Commercial: https://api.smartsheet.com/2.0
+   * - EU: https://api.smartsheet.eu/2.0
+   * - US Gov (FedRAMP): https://api.smartsheetgov.com/2.0
+   * - Test/Sandbox: https://api.test.smartsheet.com/2.0
    */
   constructor(accessToken?: string, baseUrl?: string) {
     this.baseUrl = baseUrl || '';

@@ -39,12 +39,21 @@ MCP is a new technology. This integration relies on a SMARTSHEET API token allow
    npm install
    ```
 
-3. Create a `.env` file in the project root with your Smartsheet API token:
+3. Create a `.env` file in the project root with your Smartsheet configuration:
    ```
-   SMARTSHEET_API_KEY=your_smartsheet_api_token
+   SMARTSHEET_API_KEY=your_smartsheet_api_token_here
+   SMARTSHEET_ENDPOINT=https://api.smartsheet.com/2.0
    ```
 
-   You can obtain a Smartsheet API token from the [Smartsheet Developer Portal](https://developers.smartsheet.com/).
+   **Configuration details:**
+   - **API Token**: Obtain from the [Smartsheet Developer Portal](https://developers.smartsheet.com/)
+   - **API Endpoint**: Choose based on your deployment:
+     - US Commercial: `https://api.smartsheet.com/2.0` (default)
+     - EU: `https://api.smartsheet.eu/2.0`
+     - US Gov (FedRAMP): `https://api.smartsheetgov.com/2.0`
+     - Test/Sandbox: `https://api.test.smartsheet.com/2.0`
+   
+   See `.env.example` for a complete template with detailed endpoint documentation.
 
 4. Build the project:
    ```bash
@@ -79,6 +88,12 @@ You can also run the Smartsheet MCP Server using Docker, which provides a consis
    SMARTSHEET_ENDPOINT=https://api.smartsheet.com/2.0
    ALLOW_DELETE_TOOLS=false
    ```
+   
+   **Endpoint Selection:**
+   - For most users: `https://api.smartsheet.com/2.0` (US Commercial)
+   - For EU users: `https://api.smartsheet.eu/2.0`
+   - For Gov users: `https://api.smartsheetgov.com/2.0` (US Gov FedRAMP)
+   - For testing: `https://api.test.smartsheet.com/2.0`
 
 4. Build and run with Docker Compose:
    ```bash
@@ -448,8 +463,32 @@ const result = await use_mcp_tool({
 
 ## Environment Variables
 
-- `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
-- `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
+The following environment variables are used to configure the Smartsheet MCP Server:
+
+### Required Variables
+
+- **`SMARTSHEET_API_KEY`**: Your Smartsheet API access token (required)
+  - Obtain from: [Smartsheet Developer Portal](https://developers.smartsheet.com/)
+  - Example: `SMARTSHEET_API_KEY=your_token_here`
+
+- **`SMARTSHEET_ENDPOINT`**: The Smartsheet API endpoint URL (required)
+  - Choose based on your Smartsheet deployment region:
+    - **US Commercial**: `https://api.smartsheet.com/2.0` (default for most users)
+    - **EU**: `https://api.smartsheet.eu/2.0`
+    - **US Gov (FedRAMP)**: `https://api.smartsheetgov.com/2.0`
+    - **Test/Sandbox**: `https://api.test.smartsheet.com/2.0`
+  - Example: `SMARTSHEET_ENDPOINT=https://api.smartsheet.com/2.0`
+
+### Optional Variables
+
+- **`ALLOW_DELETE_TOOLS`**: Enable/disable deletion operations (default: `false`)
+  - Set to `'true'` to enable deletion operations like `delete_rows`
+  - When disabled, delete tools will not be available for use
+  - Example: `ALLOW_DELETE_TOOLS=true`
+
+### Configuration File
+
+All environment variables should be set in a `.env` file in the project root. See `.env.example` for a complete template with all available endpoints documented.
 
 ## Development
 

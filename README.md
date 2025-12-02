@@ -25,6 +25,7 @@ MCP is a new technology. This integration relies on a SMARTSHEET API token allow
 - Create, update, and delete sheets and rows
 - Create version backups of sheets at specific timestamps
 - Formatted responses optimized for AI consumption
+- Supports both STDIO and HTTP transports
 
 ## Installation
 
@@ -53,9 +54,30 @@ MCP is a new technology. This integration relies on a SMARTSHEET API token allow
 
 ## Usage
 
-There are several ways to run the MCP server with the `.env` file loaded:
+The server supports two transport modes: **STDIO** (default) and **HTTP**.
 
-### Using npm scripts (recommended)
+### Running via npx
+
+You can run the server directly without cloning using npx:
+
+```bash
+# STDIO mode (default)
+npx @matanyall/smartsheet-mcp
+
+# HTTP mode
+npx @matanyall/smartsheet-mcp --http
+
+# HTTP mode with custom port
+npx @matanyall/smartsheet-mcp --http --port 8080
+```
+
+Make sure to set the `SMARTSHEET_API_KEY` environment variable before running.
+
+### STDIO Transport (default)
+
+STDIO is the traditional MCP transport, suitable for local integrations like Claude Desktop.
+
+#### Using npm scripts (recommended)
 
 Start the server with environment variables loaded from the `.env` file:
 
@@ -71,25 +93,61 @@ Or build and start in one command:
 npm run dev
 ```
 
-### Using node directly
-
-You can also run the server directly with Node.js and the `-r` flag:
+#### Using node directly
 
 ```bash
 node -r dotenv/config build/index.js
 ```
 
-This ensures that dotenv is loaded before the application code runs.
+The server will start and display: "Smartsheet MCP Server running on stdio"
 
-Alternatively, you can run without the `-r` flag:
+### HTTP Transport
+
+HTTP transport allows remote access to the MCP server over HTTP, suitable for cloud deployments and remote integrations.
+
+#### Using npm scripts
 
 ```bash
-node build/index.js
+npm run start:http
 ```
 
-In this case, the application code will load dotenv itself (we've included `import { config } from "dotenv"; config();` at the top of the entry file).
+Or build and start in one command:
 
-The server will start and display: "Smartsheet MCP Server running on stdio"
+```bash
+npm run dev:http
+```
+
+#### Using node directly
+
+```bash
+node -r dotenv/config build/index.js --http
+```
+
+#### Custom port
+
+By default, the HTTP server runs on port 3000. To use a custom port:
+
+```bash
+node -r dotenv/config build/index.js --http --port 8080
+```
+
+Or via environment variables:
+
+```bash
+MCP_TRANSPORT=http MCP_PORT=8080 node -r dotenv/config build/index.js
+```
+
+The server will start and display: "Smartsheet MCP Server running on http://localhost:3000/mcp"
+
+#### HTTP Endpoints
+
+The HTTP server exposes the following endpoints at `/mcp`:
+
+- **POST /mcp** - Handle MCP requests (initialize, tool calls, etc.)
+- **GET /mcp** - SSE stream for server notifications (requires `mcp-session-id` header)
+- **DELETE /mcp** - Close a session (requires `mcp-session-id` header)
+
+Sessions are managed via the `mcp-session-id` header returned after initialization.
 
 ## Available MCP Tools
 
@@ -347,6 +405,8 @@ const result = await use_mcp_tool({
 
 - `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
 - `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
+- `MCP_TRANSPORT`: Set to 'http' to use HTTP transport instead of STDIO (default: stdio)
+- `MCP_PORT`: Port for HTTP transport (default: 3000)
 
 ## Development
 

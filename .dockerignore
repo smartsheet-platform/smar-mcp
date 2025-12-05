@@ -1,0 +1,11 @@
+node_modules
+build
+.env
+.git
+.github
+*.md
+*.log
+.vscode
+.husky
+coverage
+*.tgz

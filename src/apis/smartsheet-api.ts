@@ -5,6 +5,19 @@ import { SmartsheetSearchAPI } from './smartsheet-search-api.js';
 import { SmartsheetSheetAPI } from './smartsheet-sheet-api.js';
 import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api.js';
 import { SmartsheetUserAPI } from './smartsheet-user-api.js';
+import { SmartsheetReportAPI } from './smartsheet-report-api.js';
+import { SmartsheetColumnAPI } from './smartsheet-column-api.js';
+import { SmartsheetAttachmentAPI } from './smartsheet-attachment-api.js';
+import { SmartsheetWebhookAPI } from './smartsheet-webhook-api.js';
+import { SmartsheetShareAPI } from './smartsheet-share-api.js';
+import { SmartsheetCrossSheetAPI } from './smartsheet-crosssheet-api.js';
+import { SmartsheetBulkAPI } from './smartsheet-bulk-api.js';
+import { SmartsheetExportAPI } from './smartsheet-export-api.js';
+import { SmartsheetSummaryAPI } from './smartsheet-summary-api.js';
+import { SmartsheetTemplateAPI } from './smartsheet-template-api.js';
+import { SmartsheetFavoritesAPI } from './smartsheet-favorites-api.js';
+import { SmartsheetGroupsAPI } from './smartsheet-groups-api.js';
+import { SmartsheetEventsAPI } from './smartsheet-events-api.js';
 import packageJson from '../../package.json' with { type: 'json' };
 
 /**
@@ -19,6 +32,19 @@ export class SmartsheetAPI {
   public users: SmartsheetUserAPI;
   public search: SmartsheetSearchAPI;
   public discussions: SmartsheetDiscussionAPI;
+  public reports: SmartsheetReportAPI;
+  public columns: SmartsheetColumnAPI;
+  public attachments: SmartsheetAttachmentAPI;
+  public webhooks: SmartsheetWebhookAPI;
+  public shares: SmartsheetShareAPI;
+  public crossSheet: SmartsheetCrossSheetAPI;
+  public bulk: SmartsheetBulkAPI;
+  public export: SmartsheetExportAPI;
+  public summary: SmartsheetSummaryAPI;
+  public templates: SmartsheetTemplateAPI;
+  public favorites: SmartsheetFavoritesAPI;
+  public groups: SmartsheetGroupsAPI;
+  public events: SmartsheetEventsAPI;
   /** 
    * Creates a new SmartsheetAPI instance
    * @param accessToken Smartsheet API access token
@@ -33,10 +59,23 @@ export class SmartsheetAPI {
     this.users = new SmartsheetUserAPI(this);
     this.search = new SmartsheetSearchAPI(this);
     this.discussions = new SmartsheetDiscussionAPI(this);
-    
+    this.reports = new SmartsheetReportAPI(this);
+    this.columns = new SmartsheetColumnAPI(this);
+    this.attachments = new SmartsheetAttachmentAPI(this);
+    this.webhooks = new SmartsheetWebhookAPI(this);
+    this.shares = new SmartsheetShareAPI(this);
+    this.crossSheet = new SmartsheetCrossSheetAPI(this);
+    this.bulk = new SmartsheetBulkAPI(this);
+    this.export = new SmartsheetExportAPI(this);
+    this.summary = new SmartsheetSummaryAPI(this);
+    this.templates = new SmartsheetTemplateAPI(this);
+    this.favorites = new SmartsheetFavoritesAPI(this);
+    this.groups = new SmartsheetGroupsAPI(this);
+    this.events = new SmartsheetEventsAPI(this);
+
     if (this.accessToken == '') {
       throw new Error('SMARTSHEET_API_KEY environment variable is not set');
-    } 
+    }
 
     if (this.baseUrl == '') {
       throw new Error('SMARTSHEET_ENDPOINT environment variable is not set');

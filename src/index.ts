@@ -12,19 +12,23 @@ import { getSheetTools } from "./tools/smartsheet-sheet-tools.js";
 import { getUpdateRequestTools } from "./tools/smartsheet-update-request-tools.js";
 import { getUserTools } from "./tools/smartsheet-user-tools.js";
 import { getWorkspaceTools } from "./tools/smartsheet-workspace-tools.js";
+import { initLogger, setConnected, logger } from "./utils/logger.js";
 
 // Load environment variables
 config();
 
 // Control whether deletion operations are enabled
 const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
-console.info(`Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
+logger.info(`Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
   
 // Initialize the MCP server
 const server = new McpServer({
   name: "smartsheet",
   version: "1.0.0",
 });
+
+// Initialize the logger with the server
+initLogger(server);
 
 // Initialize the direct API client
 const api = new SmartsheetAPI(process.env.SMARTSHEET_API_KEY, process.env.SMARTSHEET_ENDPOINT);
@@ -54,10 +58,11 @@ getWorkspaceTools(server, api);
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.info("Smartsheet MCP Server running on stdio");
+  setConnected();
+  logger.info("Smartsheet MCP Server running on stdio");
 }
 
 main().catch((error) => {
-  console.error("Fatal error in main()", { error });
+  logger.error(`Fatal error in main(): ${error}`);
   process.exit(1);
 });

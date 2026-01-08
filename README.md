@@ -352,8 +352,10 @@ const result = await use_mcp_tool({
 
 ### Prerequisites
 
-- Node.js 16 or higher
-- npm 7 or higher
+- Node.js 22.14 or higher (or Node.js 24.10+)
+- npm 10 or higher
+
+**Note:** The Node.js version requirement is due to semantic-release v25 and @semantic-release/npm v13. See [docs/SEMANTIC_RELEASE_UPGRADE.md](docs/SEMANTIC_RELEASE_UPGRADE.md) for details.
 
 ### Building
 

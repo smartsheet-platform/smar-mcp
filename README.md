@@ -363,6 +363,32 @@ const result = await use_mcp_tool({
 npm run build
 ```
 
+### Logging
+
+This project uses a centralized logging utility (`src/utils/logger.ts`) that provides consistent logging across the codebase:
+
+- **Before server connection**: Logs are written to stderr to avoid interfering with MCP's stdio protocol
+- **After server connection**: Logs are sent via MCP's `sendLoggingMessage` API for proper protocol integration
+- **Log levels**: `debug`, `info`, `notice`, `warning`, `error`, `critical`
+
+When developing, always use the logger utility instead of `console.*` methods:
+
+```typescript
+import { logger } from '../utils/logger.js';
+
+// Good
+logger.info('Processing sheet data');
+logger.warning('Rate limit approaching');
+logger.error('Failed to fetch data');
+
+// Bad - don't use console.* directly
+console.log('Processing sheet data');
+console.warn('Rate limit approaching');
+console.error('Failed to fetch data');
+```
+
+This ensures logs are properly routed through the MCP protocol and visible in Claude Desktop's MCP logs.
+
 ### Project Structure
 
 - `src/index.ts`: Main entry point and MCP tool definitions

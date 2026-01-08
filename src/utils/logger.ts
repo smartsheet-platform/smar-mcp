@@ -1,5 +1,27 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
+/**
+ * Centralized logging utility for the Smartsheet MCP Server.
+ * 
+ * This logger provides consistent logging across the codebase and ensures proper
+ * integration with the MCP protocol:
+ * 
+ * - Before server connection: Logs to stderr (to avoid corrupting MCP's stdio protocol)
+ * - After server connection: Sends logs via MCP's sendLoggingMessage API
+ * 
+ * Usage:
+ * ```typescript
+ * import { logger } from '../utils/logger.js';
+ * 
+ * logger.debug('Detailed diagnostic information');
+ * logger.info('Normal operation messages');
+ * logger.warning('Warning messages');
+ * logger.error('Error messages');
+ * ```
+ * 
+ * See docs/LOGGING.md for more details.
+ */
+
 type LogLevel = "debug" | "info" | "notice" | "warning" | "error" | "critical" | "alert" | "emergency";
 
 let _server: McpServer | null = null;

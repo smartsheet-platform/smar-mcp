@@ -1,110 +1,229 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
+import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 
 export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
+  server.tool("list_workflows", {
+    // Tool: List Workflow Runs
+    server.tool(
+      "list_workflow_runs",
+      "Lists all workflow runs in a repository",
+    parameters: {
+      owner: {
+        type: "string",
+        description: "Repository owner (username or organization)",
+      },
+      repo: {
+        type: "string",
+        description: "Repository name",
+      },
+      page: {
+        type: "number",
+        minimum: 1,
+        description: "Page number for pagination",
+      },
+      per_page: {
+        type: "number",
+        maximum: 100,
+        minimum: 1,
+        description: "Number of results per page",
+      },
+    },
+    inputSchema: z.object({
+      owner: z.string().describe("Repository owner"),
+      repo: z.string().describe("Repository name"),
+      page: z.number().optional(),
+      per_page: z.number().optional(),
+    }),
+  });
 
-    // Tool: Get Workspaces
+  server.tool("list_workflow_runs", {
+    // Tool: List Workflows
     server.tool(
-        "get_workspaces",
-        "Retrieves my Workspaces",
-        {},
-        async ({ }) => {
-          try {
-            console.info("Getting workspaces");
-            const workspace = await api.workspaces.getWorkspaces();
-    
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: JSON.stringify(workspace, null, 2)
-                }
-              ]
-            };
-          } catch (error: any) {
-            console.error("Failed to get workspaces", { error });
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: `Failed to get workspaces: ${error.message}`
-                }
-              ],
-              isError: true
-            };
-          }
-        }
-    );
-    
-    // Tool: Get Workspace
-    server.tool(
-        "get_workspace",
-        "Retrieves the current state of a Workspace, including its contents which can be sheets, reports, or other folders",
-        {
-          workspaceId: z.string().describe("The ID of the workspace to retrieve")
-        },
-        async ({ workspaceId}) => {
-          try {
-            console.info(`Getting workspace with ID: ${workspaceId}`);
-            const workspace = await api.workspaces.getWorkspace(workspaceId);
-    
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: JSON.stringify(workspace, null, 2)
-                }
-              ]
-            };
-          } catch (error: any) {
-            console.error(`Failed to get workspace with ID: ${workspaceId}`, { error });
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: `Failed to get workspace: ${error.message}`
-                }
-              ],
-              isError: true
-            };
-          }
-        }
-    );
-    
-    // Tool: Create workspace
-    server.tool(
-        "create_workspace",
-        "Creates a new workspace",
-        {
-          workspaceName: z.string().describe("The name of the new workspace")
-        },
-        async ({ workspaceName }) => {
-          try {
-            console.info(`Creating workspace: ${workspaceName}`);
-            const workspace = await api.workspaces.createWorkspace(workspaceName);
-    
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: JSON.stringify(workspace, null, 2)
-                }
-              ]
-            };
-          } catch (error: any) {
-            console.error("Failed to create workspace", { error });
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: `Failed to create_workspace: ${error.message}`
-                }
-              ],
-              isError: true
-            };
-          }
-        }
-    );
+      "list_workflows",
+      "Lists all workflows in a repository",
+    parameters: {
+      owner: {
+        type: "string",
+        description: "Repository owner (username or organization)",
+      },
+      repo: {
+        type: "string",
+        description: "Repository name",
+      },
+      workflow_id: {
+        type: "string",
+        description: "The workflow ID or filename",
+      },
+      page: {
+        type: "number",
+        minimum: 1,
+        description: "Page number for pagination",
+      },
+      per_page: {
+        type: "number",
+        maximum: 100,
+        minimum: 1,
+        description: "Number of results per page",
+      },
+    },
+    inputSchema: z.object({
+      owner: z.string().describe("Repository owner"),
+      repo: z.string().describe("Repository name"),
+      workflow_id: z.string().describe("The workflow ID or filename"),
+      page: z.number().optional(),
+      per_page: z.number().optional(),
+    }),
+  });
 
+  server.tool("list_workflow_run_artifacts", {
+    // Tool: List Workflow Run Artifacts
+    server.tool(
+      "list_workflow_run_artifacts",
+      "Lists all artifacts for a specific workflow run",
+    parameters: {
+      owner: {
+        type: "string",
+        description: "Repository owner (username or organization)",
+      },
+      repo: {
+        type: "string",
+        description: "Repository name",
+      },
+      run_id: {
+        type: "number",
+        description: "The workflow run ID",
+      },
+      page: {
+        type: "number",
+        minimum: 1,
+        description: "Page number for pagination",
+      },
+      per_page: {
+        type: "number",
+        maximum: 100,
+        minimum: 1,
+        description: "Number of results per page",
+      },
+    },
+    inputSchema: z.object({
+      owner: z.string().describe("Repository owner"),
+      repo: z.string().describe("Repository name"),
+      run_id: z.number().describe("The workflow run ID"),
+      page: z.number().optional(),
+      per_page: z.number().optional(),
+    }),
+  });
+
+  server.tool("list_workflow_run_artifacts", {
+    // Tool: List Workflows (continued)
+    {
+      owner: z.string().describe("Repository owner"),
+      repo: z.string().describe("Repository name"),
+    parameters: {
+      owner: {
+        type: "string",
+        description: "Repository owner (username or organization)",
+      },
+      repo: {
+        type: "string",
+        description: "Repository name",
+      },
+      run_id: {
+        type: "number",
+        description: "The workflow run ID",
+      },
+      page: {
+        type: "number",
+        minimum: 1,
+        description: "Page number for pagination",
+      },
+      per_page: {
+        type: "number",
+        maximum: 100,
+        minimum: 1,
+        description: "Number of results per page",
+      },
+    },
+    inputSchema: z.object({
+      owner: z.string().describe("Repository owner"),
+      repo: z.string().describe("Repository name"),
+      run_id: z.number().describe("The workflow run ID"),
+      page: z.number().optional(),
+      per_page: z.number().optional(),
+    }),
+  });
+
+  server.tool("list_workflow_runs", {
+    // Tool: List Workflow Runs (continued)
+    {
+      owner: z.string().describe("Repository owner"),
+      repo: z.string().describe("Repository name"),
+    parameters: {
+      owner: {
+        type: "string",
+        description: "Repository owner (username or organization)",
+      },
+      repo: {
+        type: "string",
+        description: "Repository name",
+      },
+      workflow_id: {
+        type: "string",
+        description: "The workflow ID or filename",
+      },
+      page: {
+        type: "number",
+        minimum: 1,
+        description: "Page number for pagination",
+      },
+      per_page: {
+        type: "number",
+        maximum: 100,
+        minimum: 1,
+        description: "Number of results per page",
+      },
+    },
+    inputSchema: z.object({
+      owner: z.string().describe("Repository owner"),
+      repo: z.string().describe("Repository name"),
+      workflow_id: z.string().describe("The workflow ID or filename"),
+      page: z.number().optional(),
+      per_page: z.number().optional(),
+    }),
+  });
+
+  server.tool("list_workflows", {
+    // Tool: List Workflows (continued)
+    {
+      owner: z.string().describe("Repository owner"),
+      repo: z.string().describe("Repository name"),
+    parameters: {
+      owner: {
+        type: "string",
+        description: "Repository owner (username or organization)",
+      },
+      repo: {
+        type: "string",
+        description: "Repository name",
+      },
+      page: {
+        type: "number",
+        minimum: 1,
+        description: "Page number for pagination",
+      },
+      per_page: {
+        type: "number",
+        maximum: 100,
+        minimum: 1,
+        description: "Number of results per page",
+      },
+    },
+    inputSchema: z.object({
+      owner: z.string().describe("Repository owner"),
+      repo: z.string().describe("Repository name"),
+      page: z.number().optional(),
+      per_page: z.number().optional(),
+    }),
+  });
 }

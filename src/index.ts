@@ -13,13 +13,15 @@ import { getUpdateRequestTools } from "./tools/smartsheet-update-request-tools.j
 import { getUserTools } from "./tools/smartsheet-user-tools.js";
 import { getWorkspaceTools } from "./tools/smartsheet-workspace-tools.js";
 
+import { Logger } from "./utils/logger.js";
+
 // Load environment variables
 config();
 
 // Control whether deletion operations are enabled
 const allowDeleteTools = process.env.ALLOW_DELETE_TOOLS === 'true';
-console.info(`Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
-  
+Logger.info(`Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`);
+
 // Initialize the MCP server
 const server = new McpServer({
   name: "smartsheet",
@@ -48,16 +50,16 @@ getUpdateRequestTools(server, api);
 getUserTools(server, api);
 
 // Tool: Workspace tools
-getWorkspaceTools(server, api); 
+getWorkspaceTools(server, api);
 
 // Start the server
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.info("Smartsheet MCP Server running on stdio");
+  Logger.info("Smartsheet MCP Server running on stdio");
 }
 
 main().catch((error) => {
-  console.error("Fatal error in main()", { error });
+  Logger.error("Fatal error in main()", { error });
   process.exit(1);
 });

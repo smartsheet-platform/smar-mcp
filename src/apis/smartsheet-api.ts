@@ -6,6 +6,8 @@ import { SmartsheetSheetAPI } from './smartsheet-sheet-api.js';
 import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api.js';
 import { SmartsheetUserAPI } from './smartsheet-user-api.js';
 import packageJson from '../../package.json' with { type: 'json' };
+import { Logger } from '../utils/logger.js';
+import { SmartsheetErrorMapper } from '../utils/error-mapper.js';
 
 /**
  * Direct Smartsheet API client that doesn't rely on the SDK
@@ -39,10 +41,10 @@ export class SmartsheetAPI {
     this.users = new SmartsheetUserAPI(this);
     this.search = new SmartsheetSearchAPI(this);
     this.discussions = new SmartsheetDiscussionAPI(this);
-    
+
     if (this.accessToken == '') {
       throw new Error('SMARTSHEET_API_KEY environment variable is not set');
-    } 
+    }
 
     if (this.baseUrl == '') {
       throw new Error('SMARTSHEET_ENDPOINT environment variable is not set');
@@ -58,18 +60,18 @@ export class SmartsheetAPI {
    * @returns API response
    */
   async request<T>(
-    method: string, 
-    endpoint: string, 
-    data?: any, 
+    method: string,
+    endpoint: string,
+    data?: any,
     queryParams?: Record<string, any>
   ): Promise<T> {
     const maxRetries = 3;
     let retries = 0;
-    
+
     while (retries <= maxRetries) {
       try {
         const url = new URL(`${this.baseUrl}${endpoint}`);
-        
+
         // Add query parameters if provided
         if (queryParams) {
           Object.entries(queryParams).forEach(([key, value]) => {
@@ -78,9 +80,9 @@ export class SmartsheetAPI {
             }
           });
         }
-        
-        console.info(`API Request: ${method} ${url.toString()}`);
-        
+
+        Logger.info(`API Request: ${method} ${url.toString()}`);
+
         const response = await axios({
           method,
           url: url.toString(),
@@ -91,7 +93,7 @@ export class SmartsheetAPI {
             'User-Agent': `smar-mcp/${packageJson.version}`,
           }
         });
-        
+
         return response.data;
       } catch (error: any) {
         // Check if rate limited
@@ -101,33 +103,33 @@ export class SmartsheetAPI {
             parseInt(retryAfter, 10) * 1000,
             Math.pow(2, retries) * 1000 + Math.random() * 1000
           );
-          console.error(`[Rate Limit] Retrying in ${delay}ms...`);
+          Logger.warn(`[Rate Limit] Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           retries++;
         } else {
-          console.error(`API Error: ${error.message}`, { error });
+          Logger.error(`API Error: ${error.message}`, { error: error.message });
           throw this.formatError(error);
         }
       }
     }
-    
+
     throw new Error('Maximum retries exceeded');
   }
-  
+
   /**
    * Formats an error for consistent error handling
    * @param error Error to format
    * @returns Formatted error
    */
   private formatError(error: any): Error {
-    const errorMessage = error.response?.data?.message || error.message;
+    const errorMessage = SmartsheetErrorMapper.getErrorMessage(error);
     const formattedError = new Error(errorMessage);
-    
+
     // Add additional properties
     (formattedError as any).statusCode = error.response?.status;
     (formattedError as any).errorCode = error.response?.data?.errorCode;
     (formattedError as any).detail = error.response?.data?.detail;
-    
+
     return formattedError;
   }
 }

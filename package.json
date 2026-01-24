@@ -59,6 +59,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.6",
+    "@babel/preset-typescript": "^7.28.5",
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^17.8.1",
     "@semantic-release/changelog": "^6.0.3",
@@ -68,6 +70,7 @@
     "@types/node": "^22.13.10",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "babel-jest": "^29.7.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^8.0.3",

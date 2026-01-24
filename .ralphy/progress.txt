@@ -3,3 +3,4 @@
 - Modified `.github/workflows/release.yml` to run `npm test`.
 - Added a dummy test to make the test suite pass.
 - Installed `@types/jest`.
+- Updated `.lintstagedrc.json` to run `npm run lint:fix`.

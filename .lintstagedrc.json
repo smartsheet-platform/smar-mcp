@@ -1,6 +1,6 @@
 {
   "*.{js,ts}": [
-    "echo 'Linting would run here'"
+    "npm run lint:fix"
   ],
   "*.{json,md}": [
     "echo 'Formatting would run here'"

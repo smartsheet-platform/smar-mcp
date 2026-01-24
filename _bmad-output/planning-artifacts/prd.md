@@ -139,7 +139,7 @@ Before validating Phase 1 features, we must ensure the codebase is maintainable 
 1.  **Action**: Differentiated `find_rows` and `search_in_sheet`. Renamed `find_rows` to `find_rows_by_column_value` and updated descriptions to clarify the difference.
 
 **Priority 3: Delete Protection**
-1.  **Action**: Verify `allowDeleteTools` configuration.
+1.  **Action**: Verified `allowDeleteTools` configuration. The `delete_rows` tool is correctly registered based on the `ALLOW_DELETE_TOOLS` environment variable.
 
 **Priority 4: Phase 2**
 1.  **Action**: Design Advanced Filtering.

@@ -10,7 +10,10 @@ export default {
   ],
   transform: {
     '^.+\\.ts$': ['ts-jest', {
-      useESM: true
+      useESM: true,
+      tsconfig: {
+        "module": "esnext"
+      }
     }]
   },
   moduleNameMapper: {

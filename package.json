@@ -11,7 +11,7 @@
 		"build": "tsc && chmod +x build/index.js",
 		"start": "node -r dotenv/config build/index.js",
 		"dev": "npm run build && npm run start",
-		"test": "jest",
+		"test": "node --expose-gc --max-old-space-size=8192 node_modules/.bin/jest --logHeapUsage",
 		"setup-claude": "node -r dotenv/config scripts/setup-claude-config.js",
 		"prepare": "npm run build",
 		"prepublishOnly": "npm run build",

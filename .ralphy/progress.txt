@@ -4,3 +4,4 @@
 - Added a dummy test to make the test suite pass.
 - Installed `@types/jest`.
 - Updated `.lintstagedrc.json` to run `npm run lint:fix`.
+- Differentiated `find_rows` and `search_in_sheet` by renaming `find_rows` to `find_rows_by_column_value` and updating descriptions.

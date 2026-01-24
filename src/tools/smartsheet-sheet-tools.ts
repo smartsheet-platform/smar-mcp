@@ -473,14 +473,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
     }
   );
 
-  // Tool: Find Rows (Discovery)
   server.tool(
-    "find_rows",
-    "Finds rows in a sheet where a specific column has a specific value (Linear Scan)",
+    "find_rows_by_column_value",
+    "Finds rows in a sheet where a specific column has a specific value (case-insensitive, linear scan)",
     {
       sheetId: z.string().describe("The ID of the sheet"),
       columnId: z.number().describe("The ID of the column to search"),
-      value: z.string().describe("The value to search for (case-insensitive)"),
+      value: z.string().describe("The value to search for"),
     },
     async ({ sheetId, columnId, value }) => {
       try {

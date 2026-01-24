@@ -40,7 +40,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
 
     server.tool(
         "search_in_sheet",
-        "Search cell data and summary fields for a specific sheet",
+        "Search all cell data and summary fields in a specific sheet. For a more targeted search in a specific column, use 'find_rows_by_column_value'.",
         {
             sheetId: z.string().describe("The ID of the sheet to retrieve"),
             query: z.string().describe("Text to search for in sheet names, cell data, or summary fields"),

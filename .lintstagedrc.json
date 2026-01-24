@@ -1,8 +1,4 @@
 {
-  "*.{js,ts}": [
-    "npm run lint:fix"
-  ],
-  "*.{json,md}": [
-    "echo 'Formatting would run here'"
-  ]
+  "*.{js,ts}": ["npm run lint:fix", "prettier --write"],
+  "*.{json,md,yml,yaml}": ["prettier --write"]
 }

@@ -6,3 +6,4 @@
 - Updated `.lintstagedrc.json` to run `npm run lint:fix`.
 - Differentiated `find_rows` and `search_in_sheet` by renaming `find_rows` to `find_rows_by_column_value` and updating descriptions.
 - Verified `allowDeleteTools` configuration.
+- Designed Advanced Filtering feature.

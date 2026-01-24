@@ -142,4 +142,27 @@ Before validating Phase 1 features, we must ensure the codebase is maintainable 
 1.  **Action**: Verified `allowDeleteTools` configuration. The `delete_rows` tool is correctly registered based on the `ALLOW_DELETE_TOOLS` environment variable.
 
 **Priority 4: Phase 2**
-1.  **Action**: Design Advanced Filtering.
+1.  **Action**: Designed Advanced Filtering. See design below.
+
+    **New Tool: `query_sheet`**
+
+    This tool will provide a powerful way to query sheets using a SQL-like syntax.
+
+    **Parameters:**
+
+    *   `sheetId`: The ID of the sheet to query.
+    *   `query`: A SQL-like query string.
+
+    **Supported Syntax:**
+
+    The query syntax will be a subset of SQL, supporting the following clauses:
+
+    *   `SELECT`: Specify which columns to return.
+    *   `WHERE`: Filter rows based on conditions.
+    *   `ORDER BY`: Sort the results.
+
+    **Example Queries:**
+
+    *   `SELECT * WHERE "Task Name" = "Finish the TPS reports"`
+    *   `SELECT "Assignee", "Status" WHERE "Due Date" < "2024-01-01"`
+    *   `SELECT * ORDER BY "Priority" DESC`

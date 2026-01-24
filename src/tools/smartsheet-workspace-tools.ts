@@ -3,227 +3,91 @@ import { z } from "zod";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 
 export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
-  server.tool("list_workflows", {
-    // Tool: List Workflow Runs
-    server.tool(
-      "list_workflow_runs",
-      "Lists all workflow runs in a repository",
-    parameters: {
-      owner: {
-        type: "string",
-        description: "Repository owner (username or organization)",
-      },
-      repo: {
-        type: "string",
-        description: "Repository name",
-      },
-      page: {
-        type: "number",
-        minimum: 1,
-        description: "Page number for pagination",
-      },
-      per_page: {
-        type: "number",
-        maximum: 100,
-        minimum: 1,
-        description: "Number of results per page",
-      },
-    },
-    inputSchema: z.object({
-      owner: z.string().describe("Repository owner"),
-      repo: z.string().describe("Repository name"),
-      page: z.number().optional(),
-      per_page: z.number().optional(),
-    }),
-  });
+  server.tool(
+    "list_workspaces",
+    "Lists all workspaces",
+    {},
+    z.object({}),
+    async () => {
+      const result = await api.workspaces.listWorkspaces();
+      return result;
+    }
+  );
 
-  server.tool("list_workflow_runs", {
-    // Tool: List Workflows
-    server.tool(
-      "list_workflows",
-      "Lists all workflows in a repository",
-    parameters: {
-      owner: {
-        type: "string",
-        description: "Repository owner (username or organization)",
-      },
-      repo: {
-        type: "string",
-        description: "Repository name",
-      },
-      workflow_id: {
-        type: "string",
-        description: "The workflow ID or filename",
-      },
-      page: {
-        type: "number",
-        minimum: 1,
-        description: "Page number for pagination",
-      },
-      per_page: {
-        type: "number",
-        maximum: 100,
-        minimum: 1,
-        description: "Number of results per page",
-      },
-    },
-    inputSchema: z.object({
-      owner: z.string().describe("Repository owner"),
-      repo: z.string().describe("Repository name"),
-      workflow_id: z.string().describe("The workflow ID or filename"),
-      page: z.number().optional(),
-      per_page: z.number().optional(),
-    }),
-  });
-
-  server.tool("list_workflow_run_artifacts", {
-    // Tool: List Workflow Run Artifacts
-    server.tool(
-      "list_workflow_run_artifacts",
-      "Lists all artifacts for a specific workflow run",
-    parameters: {
-      owner: {
-        type: "string",
-        description: "Repository owner (username or organization)",
-      },
-      repo: {
-        type: "string",
-        description: "Repository name",
-      },
-      run_id: {
-        type: "number",
-        description: "The workflow run ID",
-      },
-      page: {
-        type: "number",
-        minimum: 1,
-        description: "Page number for pagination",
-      },
-      per_page: {
-        type: "number",
-        maximum: 100,
-        minimum: 1,
-        description: "Number of results per page",
-      },
-    },
-    inputSchema: z.object({
-      owner: z.string().describe("Repository owner"),
-      repo: z.string().describe("Repository name"),
-      run_id: z.number().describe("The workflow run ID"),
-      page: z.number().optional(),
-      per_page: z.number().optional(),
-    }),
-  });
-
-  server.tool("list_workflow_run_artifacts", {
-    // Tool: List Workflows (continued)
+  server.tool(
+    "get_workspace",
+    "Gets a single workspace",
     {
-      owner: z.string().describe("Repository owner"),
-      repo: z.string().describe("Repository name"),
-    parameters: {
-      owner: {
-        type: "string",
-        description: "Repository owner (username or organization)",
-      },
-      repo: {
-        type: "string",
-        description: "Repository name",
-      },
-      run_id: {
+      workspaceId: {
         type: "number",
-        description: "The workflow run ID",
-      },
-      page: {
-        type: "number",
-        minimum: 1,
-        description: "Page number for pagination",
-      },
-      per_page: {
-        type: "number",
-        maximum: 100,
-        minimum: 1,
-        description: "Number of results per page",
+        description: "The ID of the workspace",
       },
     },
-    inputSchema: z.object({
-      owner: z.string().describe("Repository owner"),
-      repo: z.string().describe("Repository name"),
-      run_id: z.number().describe("The workflow run ID"),
-      page: z.number().optional(),
-      per_page: z.number().optional(),
+    z.object({
+      workspaceId: z.number().describe("The ID of the workspace"),
     }),
-  });
+    async ({ workspaceId }) => {
+      const result = await api.workspaces.getWorkspace(workspaceId);
+      return result;
+    }
+  );
 
-  server.tool("list_workflow_runs", {
-    // Tool: List Workflow Runs (continued)
+  server.tool(
+    "create_workspace",
+    "Creates a new workspace",
     {
-      owner: z.string().describe("Repository owner"),
-      repo: z.string().describe("Repository name"),
-    parameters: {
-      owner: {
+      name: {
         type: "string",
-        description: "Repository owner (username or organization)",
-      },
-      repo: {
-        type: "string",
-        description: "Repository name",
-      },
-      workflow_id: {
-        type: "string",
-        description: "The workflow ID or filename",
-      },
-      page: {
-        type: "number",
-        minimum: 1,
-        description: "Page number for pagination",
-      },
-      per_page: {
-        type: "number",
-        maximum: 100,
-        minimum: 1,
-        description: "Number of results per page",
+        description: "The name of the new workspace",
       },
     },
-    inputSchema: z.object({
-      owner: z.string().describe("Repository owner"),
-      repo: z.string().describe("Repository name"),
-      workflow_id: z.string().describe("The workflow ID or filename"),
-      page: z.number().optional(),
-      per_page: z.number().optional(),
+    z.object({
+      name: z.string().describe("The name of the new workspace"),
     }),
-  });
+    async ({ name }) => {
+      const result = await api.workspaces.createWorkspace(name);
+      return result;
+    }
+  );
 
-  server.tool("list_workflows", {
-    // Tool: List Workflows (continued)
+  server.tool(
+    "update_workspace",
+    "Updates a workspace",
     {
-      owner: z.string().describe("Repository owner"),
-      repo: z.string().describe("Repository name"),
-    parameters: {
-      owner: {
-        type: "string",
-        description: "Repository owner (username or organization)",
-      },
-      repo: {
-        type: "string",
-        description: "Repository name",
-      },
-      page: {
+      workspaceId: {
         type: "number",
-        minimum: 1,
-        description: "Page number for pagination",
+        description: "The ID of the workspace to update",
       },
-      per_page: {
-        type: "number",
-        maximum: 100,
-        minimum: 1,
-        description: "Number of results per page",
+      name: {
+        type: "string",
+        description: "The new name of the workspace",
       },
     },
-    inputSchema: z.object({
-      owner: z.string().describe("Repository owner"),
-      repo: z.string().describe("Repository name"),
-      page: z.number().optional(),
-      per_page: z.number().optional(),
+    z.object({
+      workspaceId: z.number().describe("The ID of the workspace to update"),
+      name: z.string().describe("The new name of the workspace"),
     }),
-  });
+    async ({ workspaceId, name }) => {
+      const result = await api.workspaces.updateWorkspace(workspaceId, name);
+      return result;
+    }
+  );
+
+  server.tool(
+    "delete_workspace",
+    "Deletes a workspace",
+    {
+      workspaceId: {
+        type: "number",
+        description: "The ID of the workspace to delete",
+      },
+    },
+    z.object({
+      workspaceId: z.number().describe("The ID of the workspace to delete"),
+    }),
+    async ({ workspaceId }) => {
+      const result = await api.workspaces.deleteWorkspace(workspaceId);
+      return result;
+    }
+  );
 }

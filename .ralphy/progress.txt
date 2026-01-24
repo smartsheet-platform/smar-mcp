@@ -1,0 +1,2 @@
+- Created `.eslintrc.json` and configured it for TypeScript.
+- Fixed all linting errors.

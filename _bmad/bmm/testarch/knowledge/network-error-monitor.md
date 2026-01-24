@@ -86,7 +86,7 @@ test(
 
     // Monitoring disabled - test won't fail on 400
     await expect(page.getByText('Invalid input')).toBeVisible();
-  }
+  },
 );
 
 // Or opt-out entire describe block
@@ -148,7 +148,7 @@ export const test = base.extend(
       /idv\/session-templates\/list/, // IDV service returns 404 when not configured
       /sentry\.io\/api/, // External Sentry errors should not fail tests
     ],
-  })
+  }),
 );
 ```
 
@@ -161,7 +161,7 @@ import { createNetworkErrorMonitorFixture } from '@seontechnologies/playwright-u
 const networkErrorMonitor = base.extend(
   createNetworkErrorMonitorFixture({
     excludePatterns: [/analytics\.google\.com/, /cdn\.example\.com/],
-  })
+  }),
 );
 
 export const test = mergeTests(authFixture, networkErrorMonitor);
@@ -181,7 +181,7 @@ const networkErrorMonitor = base.extend(
   createNetworkErrorMonitorFixture({
     excludePatterns: [], // Required when using maxTestsPerError
     maxTestsPerError: 1, // Only first test fails per error pattern, rest just log
-  })
+  }),
 );
 ```
 
@@ -254,7 +254,7 @@ import { test as networkErrorMonitorFixture } from '@seontechnologies/playwright
 
 export const test = mergeTests(
   authFixture,
-  networkErrorMonitorFixture
+  networkErrorMonitorFixture,
   // Add other fixtures
 );
 

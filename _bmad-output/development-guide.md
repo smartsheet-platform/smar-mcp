@@ -1,11 +1,13 @@
 # Development Guide
 
 ## Prerequisites
+
 - **Node.js**: v16 or higher
 - **npm**: v7 or higher
 - **Smartsheet API Key**: Obtained from Smartsheet Developer Tools.
 
 ## Environment Setup
+
 1. Clone the repository.
 2. Copy `.env.example` to `.env`.
 3. Add your API Key:
@@ -15,6 +17,7 @@
    ```
 
 ## Build and Run
+
 - **Install Dependencies**:
   ```bash
   npm install
@@ -30,6 +33,7 @@
   _Note: This runs over stdio, so it's meant to be called by an MCP client (like Claude Desktop)._
 
 ## Testing
+
 - **Run Unit/Integration Tests**:
   ```bash
   npm test
@@ -40,6 +44,7 @@
   ```
 
 ## Adding a New Tool
+
 1. Create a new file in `src/tools/`.
 2. Define the tool using `server.tool()`.
 3. Add z schema for arguments.

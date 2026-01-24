@@ -1,29 +1,29 @@
 # Test Architect workflow: test-review
 name: testarch-test-review
-description: "Review test quality using comprehensive knowledge base and best practices validation"
-author: "BMad"
+description: 'Review test quality using comprehensive knowledge base and best practices validation'
+author: 'BMad'
 
 # Critical variables from config
-config_source: "{project-root}/_bmad/bmm/config.yaml"
-output_folder: "{config_source}:output_folder"
-user_name: "{config_source}:user_name"
-communication_language: "{config_source}:communication_language"
-document_output_language: "{config_source}:document_output_language"
+config_source: '{project-root}/_bmad/bmm/config.yaml'
+output_folder: '{config_source}:output_folder'
+user_name: '{config_source}:user_name'
+communication_language: '{config_source}:communication_language'
+document_output_language: '{config_source}:document_output_language'
 date: system-generated
 
 # Workflow components
-installed_path: "{project-root}/_bmad/bmm/workflows/testarch/test-review"
-instructions: "{installed_path}/instructions.md"
-validation: "{installed_path}/checklist.md"
-template: "{installed_path}/test-review-template.md"
+installed_path: '{project-root}/_bmad/bmm/workflows/testarch/test-review'
+instructions: '{installed_path}/instructions.md'
+validation: '{installed_path}/checklist.md'
+template: '{installed_path}/test-review-template.md'
 
 # Variables and inputs
 variables:
-  test_dir: "{project-root}/tests" # Root test directory
-  review_scope: "single" # single (one file), directory (folder), suite (all tests)
+  test_dir: '{project-root}/tests' # Root test directory
+  review_scope: 'single' # single (one file), directory (folder), suite (all tests)
 
 # Output configuration
-default_output_file: "{output_folder}/test-review.md"
+default_output_file: '{output_folder}/test-review.md'
 
 # Required tools
 required_tools:

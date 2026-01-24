@@ -258,7 +258,9 @@ test.describe('Network Retry Logic', () => {
 
     // Assert: Error UI displayed after exhausting retries
     await expect(page.getByTestId('error-message')).toBeVisible();
-    await expect(page.getByTestId('error-message')).toContainText(/unable.*load|failed.*after.*retries/i);
+    await expect(page.getByTestId('error-message')).toContainText(
+      /unable.*load|failed.*after.*retries/i,
+    );
 
     // Assert: Data not displayed
     await expect(page.getByTestId('product-list')).not.toBeVisible();
@@ -435,7 +437,9 @@ test.describe('Error Telemetry', () => {
     });
 
     // Mock failing API
-    await page.route('**/api/users', (route) => route.fulfill({ status: 403, body: { error: 'Forbidden' } }));
+    await page.route('**/api/users', (route) =>
+      route.fulfill({ status: 403, body: { error: 'Forbidden' } }),
+    );
 
     // Act
     await page.goto('/users');
@@ -628,7 +632,9 @@ test.describe('Service Unavailability', () => {
 
   test('should show fallback UI when analytics service fails', async ({ page }) => {
     // Mock analytics service down (non-critical)
-    await page.route('**/analytics/track', (route) => route.fulfill({ status: 503, body: 'Service unavailable' }));
+    await page.route('**/analytics/track', (route) =>
+      route.fulfill({ status: 503, body: 'Service unavailable' }),
+    );
 
     // Act: Navigate normally
     await page.goto('/dashboard');

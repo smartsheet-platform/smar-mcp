@@ -1,18 +1,16 @@
 {
-    "workflow_version": "1.2.0",
-    "timestamps": {
-        "started": "2026-01-11T18:07:00-05:00",
-        "last_updated": "2026-01-11T18:07:00-05:00"
-    },
-    "mode": "initial_scan",
-    "scan_level": "deep",
-    "project_root": "/Users/mdrissel/Documents/Cline/smar-mcp",
-    "output_folder": "/Users/mdrissel/Documents/Cline/smar-mcp/_bmad-output",
-    "completed_steps": [],
-    "current_step": "step_1",
-    "findings": {},
-    "outputs_generated": [
-        "project-scan-report.json"
-    ],
-    "resume_instructions": "Starting from step 1"
+  "workflow_version": "1.2.0",
+  "timestamps": {
+    "started": "2026-01-11T18:07:00-05:00",
+    "last_updated": "2026-01-11T18:07:00-05:00"
+  },
+  "mode": "initial_scan",
+  "scan_level": "deep",
+  "project_root": "/Users/mdrissel/Documents/Cline/smar-mcp",
+  "output_folder": "/Users/mdrissel/Documents/Cline/smar-mcp/_bmad-output",
+  "completed_steps": [],
+  "current_step": "step_1",
+  "findings": {},
+  "outputs_generated": ["project-scan-report.json"],
+  "resume_instructions": "Starting from step 1"
 }

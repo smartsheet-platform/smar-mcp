@@ -288,7 +288,9 @@ Generates failing acceptance tests BEFORE implementation following TDD's red-gre
        await page.click('[data-testid="login-button"]');
 
        // THEN: Error message is displayed
-       await expect(page.locator('[data-testid="error-message"]')).toHaveText('Invalid email or password');
+       await expect(page.locator('[data-testid="error-message"]')).toHaveText(
+         'Invalid email or password',
+       );
      });
    });
    ```

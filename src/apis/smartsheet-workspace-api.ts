@@ -34,7 +34,7 @@ export class SmartsheetWorkspaceAPI {
    */
   async createWorkspace(workspaceName: string): Promise<any> {
     const data = {
-      name: workspaceName
+      name: workspaceName,
     };
 
     return this.api.request('POST', `/workspaces`, data);
@@ -57,9 +57,9 @@ export class SmartsheetWorkspaceAPI {
    */
   async createWorkspaceFolder(workspaceId: string, folderName: string): Promise<any> {
     const data = {
-      name: folderName
+      name: folderName,
     };
-    
+
     return this.api.request('POST', `/workspaces/${workspaceId}/folders`, data);
   }
 }

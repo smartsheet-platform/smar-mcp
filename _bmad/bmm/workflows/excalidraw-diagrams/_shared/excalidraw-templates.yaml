@@ -13,7 +13,7 @@ flowchart:
       type: ellipse
       width: 120
       height: 60
-      label: "Start"
+      label: 'Start'
     process:
       type: rectangle
       width: 160
@@ -27,7 +27,7 @@ flowchart:
       type: ellipse
       width: 120
       height: 60
-      label: "End"
+      label: 'End'
 
 diagram:
   viewport:
@@ -109,19 +109,19 @@ dataflow:
       type: ellipse
       width: 140
       height: 80
-      label: "Process"
+      label: 'Process'
     datastore:
       type: rectangle
       width: 140
       height: 80
-      label: "Data Store"
+      label: 'Data Store'
     external:
       type: rectangle
       width: 120
       height: 80
       strokeWidth: 3
-      label: "External Entity"
+      label: 'External Entity'
     dataflow:
       type: arrow
       strokeWidth: 2
-      label: "Data Flow"
+      label: 'Data Flow'

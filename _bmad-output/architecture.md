@@ -1,9 +1,11 @@
 # System Architecture
 
 ## Executive Summary
+
 This project implements a Model Context Protocol (MCP) server for Smartsheet. It acts as a bridge between AI agents (Anthropic Claude, etc.) and the Smartsheet Platform.
 
 ## Architecture Pattern
+
 **Layered Architecture (Monolith)**
 
 The application is structured in three distinct layers:
@@ -25,6 +27,7 @@ The application is structured in three distinct layers:
     - Handles authentication headers and base URLs.
 
 ## Data Flow Diagram
+
 ```mermaid
 graph TD
     Agent[AI Agent] <-->|MCP Protocol (Stdio)| Server[MCP Server (index.ts)]
@@ -34,6 +37,7 @@ graph TD
 ```
 
 ## Security Design
+
 - **Authentication**: Usage of `SMARTSHEET_API_KEY` environment variable.
 - **Authorization**: Inherits permissions of the API token user.
 - **Input Validation**: Strict Zod schemas prevent malformed requests to the API.

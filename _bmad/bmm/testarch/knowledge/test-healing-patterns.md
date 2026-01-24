@@ -100,7 +100,11 @@ export function suggestBetterSelector(badSelector: string): string {
 ```typescript
 // tests/healing/selector-healing.spec.ts
 import { test, expect } from '@playwright/test';
-import { isSelectorFailure, extractSelector, suggestBetterSelector } from '../../src/testing/healing/selector-healing';
+import {
+  isSelectorFailure,
+  extractSelector,
+  suggestBetterSelector,
+} from '../../src/testing/healing/selector-healing';
 
 test('heal stale selector failures automatically', async ({ page }) => {
   await page.goto('/dashboard');
@@ -171,7 +175,12 @@ export function isTimingFailure(error: Error): boolean {
  * Detect hard wait anti-pattern
  */
 export function hasHardWait(testCode: string): boolean {
-  const hardWaitPatterns = [/page\.waitForTimeout\(/, /cy\.wait\(\d+\)/, /await.*sleep\(/, /setTimeout\(/];
+  const hardWaitPatterns = [
+    /page\.waitForTimeout\(/,
+    /cy\.wait\(\d+\)/,
+    /await.*sleep\(/,
+    /setTimeout\(/,
+  ];
 
   return hardWaitPatterns.some((pattern) => pattern.test(testCode));
 }
@@ -220,7 +229,11 @@ await responsePromise
 ```typescript
 // tests/healing/timing-healing.spec.ts
 import { test, expect } from '@playwright/test';
-import { isTimingFailure, hasHardWait, suggestDeterministicWait } from '../../src/testing/healing/timing-healing';
+import {
+  isTimingFailure,
+  hasHardWait,
+  suggestDeterministicWait,
+} from '../../src/testing/healing/timing-healing';
 
 test('heal race condition with network-first pattern', async ({ page, context }) => {
   // Setup interception BEFORE navigation (prevent race)
@@ -518,7 +531,12 @@ export function detectHardWaits(testCode: string): Array<{ line: number; code: s
   const violations: Array<{ line: number; code: string }> = [];
 
   lines.forEach((line, index) => {
-    if (line.includes('page.waitForTimeout(') || /cy\.wait\(\d+\)/.test(line) || line.includes('sleep(') || line.includes('setTimeout(')) {
+    if (
+      line.includes('page.waitForTimeout(') ||
+      /cy\.wait\(\d+\)/.test(line) ||
+      line.includes('sleep(') ||
+      line.includes('setTimeout(')
+    ) {
       violations.push({ line: index + 1, code: line.trim() });
     }
   });

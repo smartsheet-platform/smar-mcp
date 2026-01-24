@@ -1,7 +1,9 @@
 # Security Evaluation Report for smar-mcp
 
 ## Date: 12/14/2025
+
 ## Project: @smartsheet/smar-mcp v1.6.0
+
 ## Purpose: MCP server for Smartsheet API integration
 
 ---
@@ -47,6 +49,7 @@
 ### Project Context Analysis:
 
 This project is an MCP (Model Context Protocol) server for interacting with the Smartsheet API. It provides tools for:
+
 - Searching Smartsheet data
 - Retrieving and updating Smartsheet sheets
 - Integration with AI/automation platforms like Claude
@@ -81,14 +84,17 @@ This project is an MCP (Model Context Protocol) server for interacting with the 
 ## Recommendations
 
 ### Option 1: Accept Current State (RECOMMENDED)
+
 - **Rationale**: The remaining vulnerabilities are in npm's bundled dependencies that cannot be fixed without breaking changes. They do not affect the actual smar-mcp codebase or its intended functionality as an MCP server.
 - **Action**: No further action needed. The project is safe to use for its intended purpose.
 
 ### Option 2: Force Update (NOT RECOMMENDED)
+
 - **Rationale**: Running `npm audit fix --force` would update semantic-release and @semantic-release/npm to major versions, potentially breaking the deployment workflow.
 - **Action**: Only proceed if you're willing to test the deployment workflow thoroughly after updating. This could break semantic-release conventions.
 
 ### Option 3: Manual Dependency Updates (NOT RECOMMENDED)
+
 - **Rationale**: Manually updating npm's bundled dependencies is complex and error-prone. These packages are managed by npm itself.
 - **Action**: Not feasible for end users to implement safely.
 
@@ -97,16 +103,19 @@ This project is an MCP (Model Context Protocol) server for interacting with the 
 ## Security Evaluation Summary
 
 **Vulnerabilities in project dependencies**: 0
+
 - All direct dependencies (axios, @modelcontextprotocol/sdk) were updated successfully
 - The remaining vulnerabilities are in npm's internal bundled dependencies that cannot be fixed without breaking changes
 
 **Vulnerabilities affecting actual project code**: 0
+
 - No SQL injection patterns found
 - No XSS vulnerabilities detected
 - No command injection in the MCP server implementation
 - No unsafe random boundary usage in form-data
 
 **Project-specific security concerns**: None identified
+
 - The project appears to be using dependencies safely for its intended purpose
 - No evidence of direct use of vulnerable npm CLI flags (-c/--cmd)
 - No IP address processing that would trigger SSRF issues

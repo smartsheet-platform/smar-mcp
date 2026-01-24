@@ -12,11 +12,11 @@ variables:
   # Disable git depth for accurate change detection
   GIT_DEPTH: 0
   # Use npm ci for faster, deterministic installs
-  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+  npm_config_cache: '$CI_PROJECT_DIR/.npm'
   # Playwright browser cache
-  PLAYWRIGHT_BROWSERS_PATH: "$CI_PROJECT_DIR/.cache/ms-playwright"
+  PLAYWRIGHT_BROWSERS_PATH: '$CI_PROJECT_DIR/.cache/ms-playwright'
   # Default Node version when .nvmrc is missing
-  DEFAULT_NODE_VERSION: "24"
+  DEFAULT_NODE_VERSION: '24'
 
 # Caching configuration
 cache:

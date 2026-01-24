@@ -24,11 +24,11 @@ export class SmartsheetAPI {
   public users: SmartsheetUserAPI;
   public search: SmartsheetSearchAPI;
   public discussions: SmartsheetDiscussionAPI;
-  /** 
+  /**
    * Creates a new SmartsheetAPI instance
    * @param accessToken Smartsheet API access token (from SMARTSHEET_API_KEY env var)
    * @param baseUrl Smartsheet API base URL (from SMARTSHEET_ENDPOINT env var)
-   * 
+   *
    * Supported API endpoints based on deployment region:
    * - US Commercial: https://api.smartsheet.com/2.0
    * - EU: https://api.smartsheet.eu/2.0
@@ -66,7 +66,7 @@ export class SmartsheetAPI {
     method: string,
     endpoint: string,
     data?: any,
-    queryParams?: Record<string, any>
+    queryParams?: Record<string, any>,
   ): Promise<T> {
     const maxRetries = 3;
     let retries = 0;
@@ -91,10 +91,10 @@ export class SmartsheetAPI {
           url: url.toString(),
           data,
           headers: {
-            'Authorization': `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json',
             'User-Agent': `smar-mcp/${packageJson.version}`,
-          }
+          },
         });
 
         return response.data;
@@ -104,10 +104,10 @@ export class SmartsheetAPI {
           const retryAfter = error.response.headers['retry-after'] || 1;
           const delay = Math.max(
             parseInt(retryAfter, 10) * 1000,
-            Math.pow(2, retries) * 1000 + Math.random() * 1000
+            Math.pow(2, retries) * 1000 + Math.random() * 1000,
           );
           Logger.warn(`[Rate Limit] Retrying in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
           retries++;
         } else {
           Logger.error(`API Error: ${error.message}`, { error: error.message });

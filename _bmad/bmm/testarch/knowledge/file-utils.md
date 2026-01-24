@@ -160,7 +160,7 @@ const pdfResult = await readPDF({ filePath: downloadPath });
 
 expect(pdfResult.pagesCount).toBe(1);
 expect(pdfResult.info.extractionNotes).toContain(
-  'Text extraction from vector-based PDFs is not supported.'
+  'Text extraction from vector-based PDFs is not supported.',
 );
 ```
 
@@ -191,7 +191,7 @@ test('should validate ZIP archive', async () => {
   // Check file list
   expect(Array.isArray(zipResult.content.entries)).toBe(true);
   expect(zipResult.content.entries).toContain(
-    'Case_53125_10-19-22_AM/Case_53125_10-19-22_AM_case_data.csv'
+    'Case_53125_10-19-22_AM/Case_53125_10-19-22_AM_case_data.csv',
   );
 
   // Extract specific file
@@ -330,10 +330,10 @@ expect(headers).toContain('age');
 {
   content: {
     worksheets: Array<{
-      name: string,                       // Sheet name
-      rows: Array<Array<any>>,            // All rows including headers
-      headers?: string[]                  // First row as headers (if present)
-    }>
+      name: string; // Sheet name
+      rows: Array<Array<any>>; // All rows including headers
+      headers?: string[]; // First row as headers (if present)
+    }>;
   }
 }
 ```
@@ -404,7 +404,7 @@ await expect
         return false;
       }
     },
-    { timeout: 5000, intervals: [100, 200, 500] }
+    { timeout: 5000, intervals: [100, 200, 500] },
   )
   .toBe(true);
 

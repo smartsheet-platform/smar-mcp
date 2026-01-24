@@ -199,10 +199,23 @@ export type PriorityFactors = {
  * Mirrors the priority decision tree with objective criteria
  */
 export function calculatePriority(factors: PriorityFactors): Priority {
-  const { revenueImpact, userImpact, securityRisk, complianceRequired, previousFailure, complexity, usage } = factors;
+  const {
+    revenueImpact,
+    userImpact,
+    securityRisk,
+    complianceRequired,
+    previousFailure,
+    complexity,
+    usage,
+  } = factors;
 
   // P0: Revenue-critical, security, or compliance
-  if (revenueImpact === 'critical' || securityRisk || complianceRequired || (previousFailure && revenueImpact === 'high')) {
+  if (
+    revenueImpact === 'critical' ||
+    securityRisk ||
+    complianceRequired ||
+    (previousFailure && revenueImpact === 'high')
+  ) {
     return 'P0';
   }
 
@@ -219,7 +232,10 @@ export function calculatePriority(factors: PriorityFactors): Priority {
   }
 
   // P1: High revenue OR high complexity with regular usage
-  if ((revenueImpact === 'high' && usage === 'regular') || (complexity === 'high' && usage === 'frequent')) {
+  if (
+    (revenueImpact === 'high' && usage === 'regular') ||
+    (complexity === 'high' && usage === 'frequent')
+  ) {
     return 'P1';
   }
 

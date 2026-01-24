@@ -48,7 +48,9 @@ test('user can view dashboard', async ({ page, apiRequest }) => {
   await apiRequest.post('/api/users', { data: user });
 
   // Network-first: Intercept BEFORE navigate
-  const dashboardPromise = page.waitForResponse((resp) => resp.url().includes('/api/dashboard') && resp.status() === 200);
+  const dashboardPromise = page.waitForResponse(
+    (resp) => resp.url().includes('/api/dashboard') && resp.status() === 200,
+  );
 
   await page.goto('/dashboard');
 

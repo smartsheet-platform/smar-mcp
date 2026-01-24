@@ -217,11 +217,11 @@ const checkNumberOfTodosInLocalStorage = functionTestStep(
     await log.info(`Verifying todo count: ${expected}`);
     const result = await page.waitForFunction(
       (e) => JSON.parse(localStorage['react-todos']).length === e,
-      expected
+      expected,
     );
     await log.success(`Verified todo count: ${expected}`);
     return result;
-  }
+  },
 );
 ```
 
@@ -248,10 +248,13 @@ log.configure({
 // Extend base test with file logging context capture
 export const test = base.extend({
   // Auto-capture test context for file logging
-  autoTestContext: [async ({}, use, testInfo) => {
-    captureTestContext(testInfo);
-    await use(undefined);
-  }, { auto: true }],
+  autoTestContext: [
+    async ({}, use, testInfo) => {
+      captureTestContext(testInfo);
+      await use(undefined);
+    },
+    { auto: true },
+  ],
 });
 ```
 

@@ -1,19 +1,18 @@
 #!/usr/bin/env node
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import { SmartsheetAPI } from "./apis/smartsheet-api.js";
-import { config } from "dotenv";
-import { getDiscussionTools } from "./tools/smartsheet-discussion-tools.js";
-import { getFolderTools } from "./tools/smartsheet-folder-tools.js";
-import { getSearchTools } from "./tools/smartsheet-search-tools.js";
-import { getSheetTools } from "./tools/smartsheet-sheet-tools.js";
-import { getUpdateRequestTools } from "./tools/smartsheet-update-request-tools.js";
-import { getUserTools } from "./tools/smartsheet-user-tools.js";
-import { getWorkspaceTools } from "./tools/smartsheet-workspace-tools.js";
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { SmartsheetAPI } from './apis/smartsheet-api.js';
+import { config } from 'dotenv';
+import { getDiscussionTools } from './tools/smartsheet-discussion-tools.js';
+import { getFolderTools } from './tools/smartsheet-folder-tools.js';
+import { getSearchTools } from './tools/smartsheet-search-tools.js';
+import { getSheetTools } from './tools/smartsheet-sheet-tools.js';
+import { getUpdateRequestTools } from './tools/smartsheet-update-request-tools.js';
+import { getUserTools } from './tools/smartsheet-user-tools.js';
+import { getWorkspaceTools } from './tools/smartsheet-workspace-tools.js';
 
-import { Logger } from "./utils/logger.js";
+import { Logger } from './utils/logger.js';
 
 // Load environment variables
 config();
@@ -24,8 +23,8 @@ Logger.info(`Delete operations are ${allowDeleteTools ? 'enabled' : 'disabled'}`
 
 // Initialize the MCP server
 const server = new McpServer({
-  name: "smartsheet",
-  version: "1.0.0",
+  name: 'smartsheet',
+  version: '1.0.0',
 });
 
 // Initialize the direct API client
@@ -56,10 +55,10 @@ getWorkspaceTools(server, api);
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  Logger.info("Smartsheet MCP Server running on stdio");
+  Logger.info('Smartsheet MCP Server running on stdio');
 }
 
 main().catch((error) => {
-  Logger.error("Fatal error in main()", { error });
+  Logger.error('Fatal error in main()', { error });
   process.exit(1);
 });

@@ -167,7 +167,14 @@ import { test as networkRecorderFixture } from '@seontechnologies/playwright-uti
 import { test as customFixtures } from './custom-fixtures';
 
 // Merge everything
-export const test = mergeTests(apiRequestFixture, authFixture, interceptFixture, recurseFixture, networkRecorderFixture, customFixtures);
+export const test = mergeTests(
+  apiRequestFixture,
+  authFixture,
+  interceptFixture,
+  recurseFixture,
+  networkRecorderFixture,
+  customFixtures,
+);
 
 export { expect } from '@playwright/test';
 ```

@@ -15,10 +15,10 @@
 #   - {file-path}: File created/found (e.g., "docs/product-brief.md")
 #   - skipped: Optional/conditional workflow that was skipped
 
-generated: "{{generated}}"
-project: "{{project_name}}"
-project_type: "{{project_type}}"
-selected_track: "{{selected_track}}"
-field_type: "{{field_type}}"
-workflow_path: "{{workflow_path_file}}"
-workflow_status: "{{workflow_items}}"
+generated: '{{generated}}'
+project: '{{project_name}}'
+project_type: '{{project_type}}'
+selected_track: '{{selected_track}}'
+field_type: '{{field_type}}'
+workflow_path: '{{workflow_path_file}}'
+workflow_status: '{{workflow_items}}'

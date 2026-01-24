@@ -215,7 +215,11 @@ export const test = base.extend<DebugFixture>({
       fs.writeFileSync(path.join(artifactDir, 'console.log'), consoleLogs.join('\n'), 'utf-8');
 
       // Save network summary
-      fs.writeFileSync(path.join(artifactDir, 'network.json'), JSON.stringify(networkRequests, null, 2), 'utf-8');
+      fs.writeFileSync(
+        path.join(artifactDir, 'network.json'),
+        JSON.stringify(networkRequests, null, 2),
+        'utf-8',
+      );
 
       console.log(`Debug artifacts saved to: ${artifactDir}`);
     }
@@ -229,7 +233,10 @@ export const test = base.extend<DebugFixture>({
 // tests/e2e/payment-with-debug.spec.ts
 import { test, expect } from '../support/fixtures/debug-fixture';
 
-test('payment flow captures debug artifacts on failure', async ({ page, captureDebugArtifacts }) => {
+test('payment flow captures debug artifacts on failure', async ({
+  page,
+  captureDebugArtifacts,
+}) => {
   await page.goto('/checkout');
 
   // Test will automatically capture console + network on failure

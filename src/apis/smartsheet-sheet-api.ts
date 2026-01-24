@@ -1,5 +1,5 @@
-import { SmartsheetAPI } from "./smartsheet-api.js";
-import { Logger } from "../utils/logger.js";
+import { SmartsheetAPI } from './smartsheet-api.js';
+import { Logger } from '../utils/logger.js';
 
 /**
  * Sheet-specific API methods for Smartsheet
@@ -17,8 +17,19 @@ export class SmartsheetSheetAPI {
    * @param include Optional comma-separated list of elements to include
    * @returns Sheet data
    */
-  async getSheet(sheetId: string, include?: string, exclude?: string, pageSize?: number, page?: number): Promise<any> {
-    return this.api.request('GET', `/sheets/${sheetId}`, undefined, { include, exclude, pageSize, page });
+  async getSheet(
+    sheetId: string,
+    include?: string,
+    exclude?: string,
+    pageSize?: number,
+    page?: number,
+  ): Promise<any> {
+    return this.api.request('GET', `/sheets/${sheetId}`, undefined, {
+      include,
+      exclude,
+      pageSize,
+      page,
+    });
   }
 
   /**
@@ -27,8 +38,19 @@ export class SmartsheetSheetAPI {
    * @param include Optional comma-separated list of elements to include
    * @returns Sheet data
    */
-  async getSheetByDirectIdToken(directIdToken: string, include?: string, exclude?: string, pageSize?: number, page?: number): Promise<any> {
-    return this.api.request('GET', `/sheets/${directIdToken}`, undefined, { include, exclude, pageSize, page });
+  async getSheetByDirectIdToken(
+    directIdToken: string,
+    include?: string,
+    exclude?: string,
+    pageSize?: number,
+    page?: number,
+  ): Promise<any> {
+    return this.api.request('GET', `/sheets/${directIdToken}`, undefined, {
+      include,
+      exclude,
+      pageSize,
+      page,
+    });
   }
 
   /**
@@ -56,13 +78,18 @@ export class SmartsheetSheetAPI {
     columnId: string,
     include?: string,
     pageSize?: number,
-    page?: number
+    page?: number,
   ): Promise<any> {
-    return this.api.request('GET', `/sheets/${sheetId}/rows/${rowId}/columns/${columnId}/history`, undefined, {
-      include,
-      pageSize,
-      page
-    });
+    return this.api.request(
+      'GET',
+      `/sheets/${sheetId}/rows/${rowId}/columns/${columnId}/history`,
+      undefined,
+      {
+        include,
+        pageSize,
+        page,
+      },
+    );
   }
 
   /**
@@ -73,7 +100,10 @@ export class SmartsheetSheetAPI {
    * @returns Row data
    */
   async getRow(sheetId: string, rowId: string, include?: string, exclude?: string): Promise<any> {
-    return this.api.request('GET', `/sheets/${sheetId}/rows/${rowId}`, undefined, { include, exclude });
+    return this.api.request('GET', `/sheets/${sheetId}/rows/${rowId}`, undefined, {
+      include,
+      exclude,
+    });
   }
 
   /**
@@ -96,11 +126,11 @@ export class SmartsheetSheetAPI {
     sheetId: string,
     rows: any[],
     options?: {
-      parentId?: string | number,
-      siblingId?: string | number,
-      toTop?: boolean,
-      toBottom?: boolean
-    }
+      parentId?: string | number;
+      siblingId?: string | number;
+      toTop?: boolean;
+      toBottom?: boolean;
+    },
   ): Promise<any> {
     return this.api.request('POST', `/sheets/${sheetId}/rows`, rows, options);
   }
@@ -112,10 +142,14 @@ export class SmartsheetSheetAPI {
    * @param ignoreRowsNotFound Whether to ignore rows that don't exist
    * @returns Delete result
    */
-  async deleteRows(sheetId: string, rowIds: string[], ignoreRowsNotFound: boolean = true): Promise<any> {
+  async deleteRows(
+    sheetId: string,
+    rowIds: string[],
+    ignoreRowsNotFound: boolean = true,
+  ): Promise<any> {
     return this.api.request('DELETE', `/sheets/${sheetId}/rows`, undefined, {
       ids: rowIds.join(','),
-      ignoreRowsNotFound: ignoreRowsNotFound.toString()
+      ignoreRowsNotFound: ignoreRowsNotFound.toString(),
     });
   }
 
@@ -129,7 +163,7 @@ export class SmartsheetSheetAPI {
     return {
       folderId: sheet.parentId,
       folderType: sheet.parentType,
-      workspaceId: sheet.workspaceId
+      workspaceId: sheet.workspaceId,
     };
   }
 
@@ -145,10 +179,10 @@ export class SmartsheetSheetAPI {
     sheetId: string,
     destinationName: string,
     destinationFolderId?: string,
-    workspaceId?: string
+    workspaceId?: string,
   ): Promise<any> {
     const data: any = {
-      newName: destinationName
+      newName: destinationName,
     };
 
     if (destinationFolderId) {
@@ -162,7 +196,7 @@ export class SmartsheetSheetAPI {
     } else {
       // Default to 'home' if no folder or workspace specified
       data.destinationType = 'home';
-      Logger.info("Copying sheet to home");
+      Logger.info('Copying sheet to home');
     }
 
     const result = await this.api.request('POST', `/sheets/${sheetId}/copy`, data);
@@ -180,7 +214,7 @@ export class SmartsheetSheetAPI {
   async createSheet(name: string, columns: any[], folderId?: string): Promise<any> {
     const data = {
       name,
-      columns
+      columns,
     };
 
     let endpoint = '/sheets';
@@ -210,7 +244,7 @@ export class SmartsheetSheetAPI {
       sendTo: { email: string }[];
       subject?: string;
       ccMe?: boolean;
-    }
+    },
   ): Promise<any> {
     return this.api.request('POST', `/sheets/${sheetId}/updaterequests`, options);
   }

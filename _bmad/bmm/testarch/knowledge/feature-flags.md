@@ -257,7 +257,9 @@ test.describe('Checkout Flow - Feature Flag Variations', () => {
 
   test('should handle flag evaluation errors gracefully', async ({ page, request }) => {
     // Arrange: Simulate flag service unavailable
-    await page.route('**/api/feature-flags/evaluate', (route) => route.fulfill({ status: 500, body: 'Service Unavailable' }));
+    await page.route('**/api/feature-flags/evaluate', (route) =>
+      route.fulfill({ status: 500, body: 'Service Unavailable' }),
+    );
 
     // Act: Navigate (should fallback to default state)
     await page.goto('/checkout', {
@@ -372,7 +374,11 @@ type FlagVariation = boolean | string | number | object;
  * Set flag variation for specific user
  * Uses LaunchDarkly API to create user target
  */
-export async function setFlagForUser(flagKey: FlagKey, userId: string, variation: FlagVariation): Promise<void> {
+export async function setFlagForUser(
+  flagKey: FlagKey,
+  userId: string,
+  variation: FlagVariation,
+): Promise<void> {
   const response = await playwrightRequest.newContext().then((ctx) =>
     ctx.post(`${LD_API_BASE}/flags/${flagKey}/targeting`, {
       headers: {
@@ -410,7 +416,9 @@ export async function removeFlagTarget(flagKey: FlagKey, userId: string): Promis
 
   if (!response.ok() && response.status() !== 404) {
     // 404 is acceptable (user wasn't targeted)
-    throw new Error(`Failed to remove flag ${flagKey} target for user ${userId}: ${response.status()}`);
+    throw new Error(
+      `Failed to remove flag ${flagKey} target for user ${userId}: ${response.status()}`,
+    );
   }
 }
 
@@ -418,7 +426,10 @@ export async function removeFlagTarget(flagKey: FlagKey, userId: string): Promis
  * Percentage rollout helper
  * Enable flag for N% of users
  */
-export async function setFlagRolloutPercentage(flagKey: FlagKey, percentage: number): Promise<void> {
+export async function setFlagRolloutPercentage(
+  flagKey: FlagKey,
+  percentage: number,
+): Promise<void> {
   if (percentage < 0 || percentage > 100) {
     throw new Error('Percentage must be between 0 and 100');
   }

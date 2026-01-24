@@ -349,7 +349,9 @@ test.describe('Reliability NFR: Error Handling & Recovery', () => {
     await page.getByRole('button', { name: 'Refresh Data' }).click();
 
     // User sees offline indicator (not crash)
-    await expect(page.getByText('You are offline. Changes will sync when reconnected.')).toBeVisible();
+    await expect(
+      page.getByText('You are offline. Changes will sync when reconnected.'),
+    ).toBeVisible();
 
     // Reconnect
     await context.setOffline(false);
@@ -391,7 +393,9 @@ test.describe('Reliability NFR: Error Handling & Recovery', () => {
     await page.goto('/product/123');
 
     // Wait for circuit breaker to open (fallback UI appears)
-    await expect(page.getByText('Recommendations temporarily unavailable')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Recommendations temporarily unavailable')).toBeVisible({
+      timeout: 10000,
+    });
 
     // Verify circuit breaker stopped making requests after threshold (should be ≤5)
     expect(failureCount).toBeLessThanOrEqual(5);
@@ -538,7 +542,10 @@ test.describe('Maintainability NFR: Observability Validation', () => {
     await context.addInitScript(() => {
       (window as any).Sentry = {
         captureException: (error: Error) => {
-          console.log('SENTRY_CAPTURE:', JSON.stringify({ message: error.message, stack: error.stack }));
+          console.log(
+            'SENTRY_CAPTURE:',
+            JSON.stringify({ message: error.message, stack: error.stack }),
+          );
         },
       };
     });

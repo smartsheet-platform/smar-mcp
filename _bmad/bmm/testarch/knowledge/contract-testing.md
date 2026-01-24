@@ -103,7 +103,9 @@ describe('User API Contract', () => {
         })
         .executeTest(async (mockServer) => {
           // Act & Assert: Consumer handles 404 gracefully
-          await expect(getUserById(999, { baseURL: mockServer.url })).rejects.toThrow('User not found');
+          await expect(getUserById(999, { baseURL: mockServer.url })).rejects.toThrow(
+            'User not found',
+          );
         });
     });
   });
@@ -669,7 +671,11 @@ export class ApiError extends Error {
  */
 export async function getUserById(
   id: number,
-  config?: AxiosRequestConfig & { retries?: number; retryDelay?: number; respectRateLimit?: boolean },
+  config?: AxiosRequestConfig & {
+    retries?: number;
+    retryDelay?: number;
+    respectRateLimit?: boolean;
+  },
 ): Promise<User> {
   const { retries = 3, retryDelay = 1000, respectRateLimit = true, ...axiosConfig } = config || {};
 
@@ -846,7 +852,9 @@ async function main() {
       break;
 
     default:
-      console.error('Unknown command. Use: tag-release | record-deployment | can-i-deploy | cleanup');
+      console.error(
+        'Unknown command. Use: tag-release | record-deployment | can-i-deploy | cleanup',
+      );
       process.exit(1);
   }
 }

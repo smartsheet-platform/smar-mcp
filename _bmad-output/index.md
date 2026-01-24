@@ -7,6 +7,7 @@
 - **Architecture**: Layered Monolith
 
 ## Quick Reference
+
 - **Tech Stack**: Node.js, TypeScript, MCP SDK, Axios.
 - **Entry Point**: `src/index.ts`
 - **Primary Pattern**: Tool Adapters
@@ -20,9 +21,11 @@
 - [Development Guide](./development-guide.md)
 
 ## Existing Documentation
+
 - [README.md](../README.md) - Official usage guide.
 - [CHANGELOG.md](../CHANGELOG.md) - Version history.
 
 ## Getting Started
+
 See [Development Guide](./development-guide.md) for setup instructions.
 For feature planning, refer to the PRD (To be generated).

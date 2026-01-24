@@ -116,7 +116,11 @@ Initialize a production-ready test framework architecture (Playwright or Cypress
        navigationTimeout: 30 * 1000, // Navigation timeout: 30s
      },
 
-     reporter: [['html', { outputFolder: 'test-results/html' }], ['junit', { outputFile: 'test-results/junit.xml' }], ['list']],
+     reporter: [
+       ['html', { outputFolder: 'test-results/html' }],
+       ['junit', { outputFile: 'test-results/junit.xml' }],
+       ['list'],
+     ],
 
      projects: [
        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

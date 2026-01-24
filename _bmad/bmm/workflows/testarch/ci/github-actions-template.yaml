@@ -11,7 +11,7 @@ on:
     branches: [main, develop]
   schedule:
     # Weekly burn-in on Sundays at 2 AM UTC
-    - cron: "0 2 * * 0"
+    - cron: '0 2 * * 0'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -42,7 +42,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ steps.node-version.outputs.value }}
-          cache: "npm"
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -80,7 +80,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ steps.node-version.outputs.value }}
-          cache: "npm"
+          cache: 'npm'
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -136,7 +136,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ steps.node-version.outputs.value }}
-          cache: "npm"
+          cache: 'npm'
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4

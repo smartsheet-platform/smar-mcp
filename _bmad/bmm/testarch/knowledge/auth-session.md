@@ -34,7 +34,12 @@ The `auth-session` utility provides:
 
 ```typescript
 // Step 1: Configure in global-setup.ts
-import { authStorageInit, setAuthProvider, configureAuthSession, authGlobalInit } from '@seontechnologies/playwright-utils/auth-session';
+import {
+  authStorageInit,
+  setAuthProvider,
+  configureAuthSession,
+  authGlobalInit,
+} from '@seontechnologies/playwright-utils/auth-session';
 import myCustomProvider from './auth/custom-auth-provider';
 
 async function globalSetup() {
@@ -58,7 +63,10 @@ export default globalSetup;
 
 // Step 2: Create auth fixture
 import { test as base } from '@playwright/test';
-import { createAuthFixtures, setAuthProvider } from '@seontechnologies/playwright-utils/auth-session';
+import {
+  createAuthFixtures,
+  setAuthProvider,
+} from '@seontechnologies/playwright-utils/auth-session';
 import myCustomProvider from './custom-auth-provider';
 
 // Register provider early
@@ -263,14 +271,14 @@ const apiAuthProvider: AuthProvider = {
   extractToken: (storageState) => {
     // Token stored in localStorage format for disk persistence
     const tokenEntry = storageState.origins?.[0]?.localStorage?.find(
-      (item) => item.name === 'auth_token'
+      (item) => item.name === 'auth_token',
     );
     return tokenEntry?.value;
   },
 
   isTokenExpired: (storageState) => {
     const expiryEntry = storageState.origins?.[0]?.localStorage?.find(
-      (item) => item.name === 'token_expiry'
+      (item) => item.name === 'token_expiry',
     );
     if (!expiryEntry) return true;
     return Date.now() > parseInt(expiryEntry.value, 10);
@@ -317,7 +325,10 @@ export default apiAuthProvider;
 // Step 2: Create auth fixture
 // playwright/support/fixtures.ts
 import { test as base } from '@playwright/test';
-import { createAuthFixtures, setAuthProvider } from '@seontechnologies/playwright-utils/auth-session';
+import {
+  createAuthFixtures,
+  setAuthProvider,
+} from '@seontechnologies/playwright-utils/auth-session';
 import apiAuthProvider from './api-auth-provider';
 
 setAuthProvider(apiAuthProvider);

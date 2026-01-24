@@ -4,13 +4,13 @@
 # Override agent name
 agent:
   metadata:
-    name: ""
+    name: ''
 
 # Replace entire persona (not merged)
 persona:
-  role: ""
-  identity: ""
-  communication_style: ""
+  role: ''
+  identity: ''
+  communication_style: ''
   principles: []
 
 # Add custom critical actions (appended after standard config loading)

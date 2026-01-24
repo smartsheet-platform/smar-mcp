@@ -485,7 +485,9 @@ test.describe('Email Auth Negative Flows', () => {
 
       if (errorVisible) {
         console.log(`Rate limit hit after ${i + 1} requests`);
-        await expect(page.getByTestId('rate-limit-error')).toContainText(/too many.*requests|rate.*limit/i);
+        await expect(page.getByTestId('rate-limit-error')).toContainText(
+          /too many.*requests|rate.*limit/i,
+        );
         return;
       }
     }

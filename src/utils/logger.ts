@@ -8,60 +8,61 @@ config();
  * Writes to stderr to ensure stdout is reserved for MCP JSON-RPC protocol.
  */
 export class Logger {
-    private static secrets: string[] = [];
+  private static secrets: string[] = [];
 
-    static initialize() {
-        if (process.env.SMARTSHEET_API_KEY) {
-            this.secrets.push(process.env.SMARTSHEET_API_KEY);
-        }
+  static initialize() {
+    if (process.env.SMARTSHEET_API_KEY) {
+      this.secrets.push(process.env.SMARTSHEET_API_KEY);
+    }
+  }
+
+  /**
+   * Redacts known secrets from the message
+   */
+  private static sanitize(message: string): string {
+    let sanitized = message;
+    for (const secret of this.secrets) {
+      if (secret && secret.length > 5) {
+        // Avoid redacting short common strings
+        sanitized = sanitized.split(secret).join('[REDACTED]');
+      }
+    }
+    return sanitized;
+  }
+
+  private static format(level: string, message: string, meta?: any): string {
+    const timestamp = new Date().toISOString();
+    let text = `[${timestamp}] [${level}] ${message}`;
+
+    if (meta) {
+      try {
+        const metaStr = JSON.stringify(meta);
+        text += ` ${metaStr}`;
+      } catch (e) {
+        text += ` [Meta serialization failed]`;
+      }
     }
 
-    /**
-     * Redacts known secrets from the message
-     */
-    private static sanitize(message: string): string {
-        let sanitized = message;
-        for (const secret of this.secrets) {
-            if (secret && secret.length > 5) { // Avoid redacting short common strings
-                sanitized = sanitized.split(secret).join('[REDACTED]');
-            }
-        }
-        return sanitized;
-    }
+    return this.sanitize(text);
+  }
 
-    private static format(level: string, message: string, meta?: any): string {
-        const timestamp = new Date().toISOString();
-        let text = `[${timestamp}] [${level}] ${message}`;
+  static info(message: string, meta?: any) {
+    console.error(this.format('INFO', message, meta));
+  }
 
-        if (meta) {
-            try {
-                const metaStr = JSON.stringify(meta);
-                text += ` ${metaStr}`;
-            } catch (e) {
-                text += ` [Meta serialization failed]`;
-            }
-        }
+  static warn(message: string, meta?: any) {
+    console.error(this.format('WARN', message, meta));
+  }
 
-        return this.sanitize(text);
-    }
+  static error(message: string, meta?: any) {
+    console.error(this.format('ERROR', message, meta));
+  }
 
-    static info(message: string, meta?: any) {
-        console.error(this.format('INFO', message, meta));
-    }
-
-    static warn(message: string, meta?: any) {
-        console.error(this.format('WARN', message, meta));
-    }
-
-    static error(message: string, meta?: any) {
-        console.error(this.format('ERROR', message, meta));
-    }
-
-    static debug(message: string, meta?: any) {
-        // Only debug if explicit env var set, or just always log to stderr?
-        // Sticking to standard levels for now.
-        console.error(this.format('DEBUG', message, meta));
-    }
+  static debug(message: string, meta?: any) {
+    // Only debug if explicit env var set, or just always log to stderr?
+    // Sticking to standard levels for now.
+    console.error(this.format('DEBUG', message, meta));
+  }
 }
 
 // Initialize immediately

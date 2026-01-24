@@ -3,7 +3,7 @@
 # Version: 6.0.0-alpha.23
 # Date: 2026-01-11T22:55:43.041Z
 
-user_name: " Mark"
+user_name: ' Mark'
 communication_language: English
 document_output_language: English
-output_folder: "{project-root}/_bmad-output"
+output_folder: '{project-root}/_bmad-output'

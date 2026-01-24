@@ -20,12 +20,12 @@ smar-mcp/
 
 ## Critical Directories
 
-| Directory | Purpose | Key Files |
-|-----------|---------|-----------|
-| `src/` | Root source code | `index.ts` |
-| `src/tools/` | **Core Logic**: Defines the tools exposed to AI agents via MCP. Acts as the interface layer. | `smartsheet-sheet-tools.ts`, `smartsheet-search-tools.ts` |
-| `src/apis/` | **Data Layer**: Handles raw HTTP communication with Smartsheet API. Encapsulates authentication and error handling. | `smartsheet-api.ts` |
-| `src/smartsheet-types/` | **Types**: Shared type definitions to ensure type safety across layers. | N/A |
+| Directory               | Purpose                                                                                                             | Key Files                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `src/`                  | Root source code                                                                                                    | `index.ts`                                                |
+| `src/tools/`            | **Core Logic**: Defines the tools exposed to AI agents via MCP. Acts as the interface layer.                        | `smartsheet-sheet-tools.ts`, `smartsheet-search-tools.ts` |
+| `src/apis/`             | **Data Layer**: Handles raw HTTP communication with Smartsheet API. Encapsulates authentication and error handling. | `smartsheet-api.ts`                                       |
+| `src/smartsheet-types/` | **Types**: Shared type definitions to ensure type safety across layers.                                             | N/A                                                       |
 
 ## Entry Points
 
@@ -36,6 +36,7 @@ smar-mcp/
   - Connects to `StdioServerTransport`.
 
 ## Data Flow
+
 1. **Request**: AI Agent sends tool execution request (e.g., `get_sheet`).
 2. **Interface (Tools)**: `src/tools/smartsheet-sheet-tools.ts` receives request, validates args (Zod).
 3. **Internal Logic**: Tool calls appropriate method on `SmartsheetAPI`.

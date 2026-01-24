@@ -144,7 +144,11 @@ export type GateResult = {
   recommendations: string[];
 };
 
-export function evaluateGate(params: { risks: RiskScore[]; coverageGaps: CoverageGap[]; waiverApprover?: string }): GateResult {
+export function evaluateGate(params: {
+  risks: RiskScore[];
+  coverageGaps: CoverageGap[];
+  waiverApprover?: string;
+}): GateResult {
   const { risks, coverageGaps, waiverApprover } = params;
 
   // Categorize risks
@@ -164,7 +168,10 @@ export function evaluateGate(params: { risks: RiskScore[]; coverageGaps: Coverag
     decision = 'WAIVED';
   }
   // CONCERNS: High risks (score 6-8) with mitigation plans
-  else if (highRisks.length > 0 && highRisks.every((r) => r.mitigationPlan && r.owner !== 'unassigned')) {
+  else if (
+    highRisks.length > 0 &&
+    highRisks.every((r) => r.mitigationPlan && r.owner !== 'unassigned')
+  ) {
     decision = 'CONCERNS';
   }
   // PASS: No critical issues, all risks mitigated or low
@@ -175,7 +182,9 @@ export function evaluateGate(params: { risks: RiskScore[]; coverageGaps: Coverag
   // Generate recommendations
   const recommendations: string[] = [];
   if (criticalRisks.length > 0) {
-    recommendations.push(`🚨 ${criticalRisks.length} CRITICAL risk(s) must be mitigated before release`);
+    recommendations.push(
+      `🚨 ${criticalRisks.length} CRITICAL risk(s) must be mitigated before release`,
+    );
   }
   if (unresolvedGaps.length > 0) {
     recommendations.push(`📋 ${unresolvedGaps.length} acceptance criteria lack test coverage`);
@@ -293,7 +302,10 @@ export class RiskMitigationTracker {
 
     // Auto-assign mitigation requirements for score ≥6
     if (requiresMitigation(risk.score) && !risk.mitigationPlan) {
-      this.logHistory(risk.id, `⚠️  Mitigation required (score ${risk.score}). Assign owner and plan.`);
+      this.logHistory(
+        risk.id,
+        `⚠️  Mitigation required (score ${risk.score}). Assign owner and plan.`,
+      );
     }
   }
 
@@ -306,7 +318,10 @@ export class RiskMitigationTracker {
     existingActions.push(action);
     this.actions.set(action.riskId, existingActions);
 
-    this.logHistory(action.riskId, `Mitigation action added: ${action.action} (Owner: ${action.owner})`);
+    this.logHistory(
+      action.riskId,
+      `Mitigation action added: ${action.action} (Owner: ${action.owner})`,
+    );
   }
 
   // Complete mitigation action
@@ -385,7 +400,9 @@ export class RiskMitigationTracker {
   }
 
   getHistory(riskId: string): Array<{ event: string; timestamp: Date }> {
-    return this.history.filter((h) => h.riskId === riskId).map((h) => ({ event: h.event, timestamp: h.timestamp }));
+    return this.history
+      .filter((h) => h.riskId === riskId)
+      .map((h) => ({ event: h.event, timestamp: h.timestamp }));
   }
 }
 ```
@@ -478,7 +495,10 @@ export type CoverageMatrix = {
   waiverReason?: string;
 };
 
-export function buildCoverageMatrix(criteria: AcceptanceCriterion[], tests: TestCase[]): CoverageMatrix[] {
+export function buildCoverageMatrix(
+  criteria: AcceptanceCriterion[],
+  tests: TestCase[],
+): CoverageMatrix[] {
   return criteria.map((criterion) => {
     const matchingTests = tests.filter((t) => t.criteriaIds.includes(criterion.id));
 
@@ -562,13 +582,26 @@ export function generateTraceabilityReport(matrix: CoverageMatrix[]): string {
 // Define acceptance criteria
 const criteria: AcceptanceCriterion[] = [
   { id: 'AC-001', story: 'US-123', criterion: 'User can login with email', priority: 'P0' },
-  { id: 'AC-002', story: 'US-123', criterion: 'User sees error on invalid password', priority: 'P0' },
-  { id: 'AC-003', story: 'US-124', criterion: 'User receives password reset email', priority: 'P1' },
+  {
+    id: 'AC-002',
+    story: 'US-123',
+    criterion: 'User sees error on invalid password',
+    priority: 'P0',
+  },
+  {
+    id: 'AC-003',
+    story: 'US-124',
+    criterion: 'User receives password reset email',
+    priority: 'P1',
+  },
   { id: 'AC-004', story: 'US-125', criterion: 'User can update profile', priority: 'P2' }, // NO TEST
 ];
 
 // Extract tests
-const tests: TestCase[] = extractCriteriaFromTests(['tests/e2e/auth/login.spec.ts', 'tests/e2e/auth/password-reset.spec.ts']);
+const tests: TestCase[] = extractCriteriaFromTests([
+  'tests/e2e/auth/login.spec.ts',
+  'tests/e2e/auth/password-reset.spec.ts',
+]);
 
 // Build matrix
 const matrix = buildCoverageMatrix(criteria, tests);

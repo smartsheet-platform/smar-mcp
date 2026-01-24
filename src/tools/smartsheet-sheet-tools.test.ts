@@ -1,6 +1,6 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { SmartsheetAPI } from "../apis/smartsheet-api.js";
-import { getSheetTools } from "./smartsheet-sheet-tools.js";
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { SmartsheetAPI } from '../apis/smartsheet-api.js';
+import { getSheetTools } from './smartsheet-sheet-tools.js';
 
 describe('getSheetTools', () => {
   let server: McpServer;

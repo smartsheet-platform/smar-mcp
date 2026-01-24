@@ -260,7 +260,10 @@ test.describe('Selector Anti-Patterns to Avoid', () => {
     // await page.locator('.checkout-form > .payment-section > .btn-submit').click()
 
     // After (resilient):
-    await page.getByTestId('checkout-form').getByRole('button', { name: 'Complete Payment' }).click();
+    await page
+      .getByTestId('checkout-form')
+      .getByRole('button', { name: 'Complete Payment' })
+      .click();
 
     await expect(page.getByText('Payment successful')).toBeVisible();
   });
@@ -487,7 +490,10 @@ test.describe('Selector Best Practices Validation', () => {
     await page.goto('/checkout');
 
     // ✅ Good: Clear intent
-    await page.getByTestId('shipping-address-form').getByLabel('Street Address').fill('123 Main St');
+    await page
+      .getByTestId('shipping-address-form')
+      .getByLabel('Street Address')
+      .fill('123 Main St');
 
     // ❌ Bad: Cryptic
     // await page.locator('div > div:nth-child(2) > input[type="text"]').fill('123 Main St')

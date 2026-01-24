@@ -1,6 +1,22 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Check for secrets
+if command -v gitleaks >/dev/null 2>&1; then
+  # Use custom config to catch dummy secrets
+  gitleaks protect --staged --verbose --config gitleaks.toml
+  if [ $? -ne 0 ]; then
+
+    echo "gitleaks detected secrets! Commit aborted."
+    exit 1
+  fi
+else
+  echo "❌ gitleaks is NOT installed. Commit aborted."
+  echo "Please install gitleaks to protect the repository from secrets."
+  echo "  brew install gitleaks"
+  exit 1
+fi
+
 # Check if lint-staged is installed
 if command -v npx >/dev/null 2>&1; then
   if npx --no-install lint-staged --version >/dev/null 2>&1; then

@@ -12,6 +12,7 @@
     "start": "node -r dotenv/config build/index.js",
     "dev": "npm run build && npm run start",
     "test": "node --expose-gc --max-old-space-size=8192 node_modules/.bin/jest --logHeapUsage",
+    "test:integration": "RUN_INTEGRATION_TESTS=true node --expose-gc --max-old-space-size=8192 node_modules/.bin/jest tests/integration",
     "setup-claude": "node -r dotenv/config scripts/setup-claude-config.js",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build",

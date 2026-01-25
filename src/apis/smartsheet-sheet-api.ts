@@ -295,4 +295,13 @@ export class SmartsheetSheetAPI {
     Logger.info(`Search complete. Found total ${matches.length} matching rows.`);
     return matches;
   }
+
+  /**
+   * Deletes a sheet
+   * @param sheetId Sheet ID
+   * @returns Delete result
+   */
+  async deleteSheet(sheetId: string): Promise<any> {
+    return this.api.request('DELETE', `/sheets/${sheetId}`);
+  }
 }

@@ -1,7 +1,8 @@
 export default {
   testEnvironment: 'node',
   roots: [
-    'src'
+    'src',
+    'tests'
   ],
   testMatch: [
     '**/__tests__/**/*.test.ts',

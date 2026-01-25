@@ -677,6 +677,23 @@ Follow the steps at https://modelcontextprotocol.io/quickstart/server under "Tes
 
 See claude_desktop_config-example.json as an example config to use
 
+### Integration Testing
+
+This project includes a separate integration test suite that runs against the live Smartsheet API.
+
+**Prerequisites:**
+
+1.  **Dedicated Developer Account**: Strongly recommended to use a separate Smartsheet account to avoid modifying production data.
+2.  **Environment Variables**: Ensure `SMARTSHEET_API_KEY` is set in your `.env` file.
+
+**Running Integration Tests:**
+
+```bash
+npm run test:integration
+```
+
+_Note: These tests perform a full CRUD loop (Create Sheet -> Add Data -> Verify -> Delete Sheet) and will create temporary artifacts in your account which are cleaned up automatically._
+
 Roo:
 Run `npm run dev` and make sure your MCP is running locally.
 

@@ -1,0 +1,14 @@
+services:
+  - type: pserv
+    name: smar-mcp
+    env: docker
+    plan: free
+    repo: https://github.com/smartsheet-platform/smar-mcp
+    branch: main
+    envVars:
+      - key: SMARTSHEET_API_KEY
+        sync: false
+      - key: SMARTSHEET_ENDPOINT
+        value: https://api.smartsheet.com/2.0
+      - key: ALLOW_DELETE_TOOLS
+        value: false

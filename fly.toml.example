@@ -1,0 +1,33 @@
+# fly.toml app configuration file generated for smar-mcp on 2024-01-24T22:42:00+00:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "smar-mcp"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  SMARTSHEET_ENDPOINT = "https://api.smartsheet.com/2.0"
+  ALLOW_DELETE_TOOLS = "false"
+
+# Mount a volume for persistent data if needed (e.g. logs)
+# [mounts]
+#   source = "smar_mcp_data"
+#   destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1

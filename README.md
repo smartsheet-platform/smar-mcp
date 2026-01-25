@@ -175,45 +175,182 @@ Example Claude Desktop configuration for Docker:
 }
 ```
 
-## Usage
+## Configuration & Usage
 
-There are several ways to run the MCP server with the `.env` file loaded:
+This MCP server works with various AI clients and CLIs. Below are the configuration steps for the major platforms.
 
-### Using npm scripts (recommended)
+### 1. Standard Configuration
 
-Start the server with environment variables loaded from the `.env` file:
+Most MCP clients use a standard JSON structure to define the server. Use this configuration block, adjusting the path to your operating system.
+
+<details open>
+<summary><strong>macOS / Linux</strong></summary>
+
+```json
+{
+  "mcpServers": {
+    "smartsheet": {
+      "command": "node",
+      "args": ["/absolute/path/to/smar-mcp/build/index.js"],
+      "env": {
+        "SMARTSHEET_API_KEY": "YOUR_API_KEY_HERE",
+        "SMARTSHEET_ENDPOINT": "https://api.smartsheet.com/2.0"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Windows (PowerShell/Cmd)</strong></summary>
+
+```json
+{
+  "mcpServers": {
+    "smartsheet": {
+      "command": "node",
+      "args": ["C:\\path\\to\\smar-mcp\\build\\index.js"],
+      "env": {
+        "SMARTSHEET_API_KEY": "YOUR_API_KEY_HERE",
+        "SMARTSHEET_ENDPOINT": "https://api.smartsheet.com/2.0"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+---
+
+### 2. IDE Support
+
+#### Claude for Desktop
+
+1.  Open configuration file:
+    - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+    - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+2.  Paste the **Standard Configuration** block inside the file.
+
+#### Cline (VS Code Extension)
+
+1.  Open the **MCP Servers** tab in the Cline extension.
+2.  Click **Configure MCP Servers**.
+3.  Paste the **Standard Configuration** block.
+
+#### Windsurf IDE
+
+1.  Go to **Windsurf Settings** > **Advanced** > **Cascade**.
+2.  Under "Plugins (MCP servers)", click **Manage Plugins**.
+3.  Select **View raw config** to open `mcp_config.json`.
+    - **macOS/Linux**: `~/.codeium/windsurf/mcp_config.json`
+    - **Windows**: `%USERPROFILE%\.codeium\windsurf\mcp_config.json`
+4.  Paste the **Standard Configuration** block.
+
+#### Cursor
+
+1.  Open **Cursor Settings** > **Features** > **MCP Servers**.
+2.  Click **Add New MCP Server**.
+3.  Enter the details manually:
+    - **Name**: `smartsheet`
+    - **Type**: `stdio`
+    - **Command**: `node /absolute/path/to/smar-mcp/build/index.js` (or equivalent for your OS)
+    - **Environment Variables**: Add `SMARTSHEET_API_KEY` and `SMARTSHEET_ENDPOINT`.
+
+#### Antigravity IDE
+
+1.  Open the **Agent Panel** menu ("..." icon).
+2.  Select **MCP Store**.
+3.  Click **Manage MCP Servers**.
+4.  Select **View raw config**.
+5.  Paste the **Standard Configuration** block.
+
+---
+
+### 3. CLI Support
+
+#### Claude CLI
+
+Use the `claude mcp add` command to register the server:
+
+```bash
+claude mcp add smartsheet -- node /path/to/smar-mcp/build/index.js
+```
+
+_Note: Ensure environment variables are set in your shell or passed to the command._
+
+#### Cline CLI
+
+The Cline CLI typically shares configuration with the full environment or accepts an MCP config file flag (check `cline --help` for specific flags in your version). You can often point it to the same JSON config used by the extension.
+
+#### Gemini CLI
+
+1.  Open your `settings.json` file:
+    - **macOS/Linux**: `~/.config/google/gemini/settings.json`
+    - **Windows**: `%LOCALAPPDATA%\Google\Gemini\settings.json`
+2.  Paste the **Standard Configuration** block.
+
+#### Ollama CLI
+
+Ollama does not natively consume the MCP JSON standard directly in its core CLI but integrates via community bridges or wrappers (like `ollama-mcp-bridge` or specialized client UIs).
+
+- Configure the bridge/wrapper using the **Standard Configuration** block.
+- Run the bridge, then connect Ollama to the bridge's exposed endpoint.
+
+#### LM Studio CLI
+
+1.  Use the `lms` tool or open the application.
+2.  Navigate to **Program** tab > **Install** > **Edit mcp.json**.
+3.  Paste the **Standard Configuration** block.
+
+---
+
+### 4. Running Locally (Manual)
+
+If you wish to run the server manually without an MCP client (e.g. for testing via stdio):
+
+**Using npm scripts (recommended):**
 
 ```bash
 npm run start
 ```
 
-This uses the `-r dotenv/config` flag to ensure dotenv is loaded before the application code runs.
+This uses `dotenv` to load your environment variables automatically.
 
-Or build and start in one command:
-
-```bash
-npm run dev
-```
-
-### Using node directly
-
-You can also run the server directly with Node.js and the `-r` flag:
+**Using node directly:**
 
 ```bash
 node -r dotenv/config build/index.js
 ```
 
-This ensures that dotenv is loaded before the application code runs.
+---
 
-Alternatively, you can run without the `-r` flag:
+## Deployment
 
-```bash
-node build/index.js
-```
+### Docker Deployment
 
-In this case, the application code will load dotenv itself (we've included `import { config } from "dotenv"; config();` at the top of the entry file).
+To run the server in a containerized environment (recommended for servers):
 
-The server will start and display: "Smartsheet MCP Server running on stdio"
+1.  **Build and Run**:
+
+    ```bash
+    docker-compose up --build -d
+    ```
+
+2.  **Configuration**:
+    The server will be available on stdio inside the container. To connect an MCP client to a remote or containerized instance, you typically use a specific transport (like SSE or stdio over SSH).
+
+### Fly.io
+
+1.  Use the provided example config: `cp fly.toml.example fly.toml`
+2.  Deploy: `fly deploy`
+
+### Render.com
+
+1.  Use the `render.yaml.example` as a reference for your Blueprint definition.
+2.  Ensure `SMARTSHEET_API_KEY` is set as a secret environment variable in the Render dashboard.
 
 ## Available MCP Tools
 

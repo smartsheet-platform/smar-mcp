@@ -7,7 +7,6 @@ on:
     branches:
       - ci*
 
-
 jobs:
   release:
     name: Release
@@ -21,23 +20,22 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 22
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Build
         run: npm run build
-        
+
       - name: Test
-        # Skip tests for now as they need to be updated for TypeScript
-        run: echo "Tests temporarily skipped"
-        
+        run: npm test
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -18,7 +18,7 @@ export class SmartsheetFolderAPI {
    */
   async createFolder(folderId: string, folderName: string): Promise<any> {
     const data = {
-      name: folderName
+      name: folderName,
     };
 
     return this.api.request('POST', `/folders/${folderId}/folders`, data);

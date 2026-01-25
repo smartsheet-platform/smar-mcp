@@ -29,22 +29,34 @@ MCP is a new technology. This integration relies on a SMARTSHEET API token allow
 ## Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/smartsheet-platform/smar-mcp.git
    cd smar-mcp
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
-3. Create a `.env` file in the project root with your Smartsheet API token:
+3. Create a `.env` file in the project root with your Smartsheet configuration:
+
    ```
-   SMARTSHEET_API_KEY=your_smartsheet_api_token
+   SMARTSHEET_API_KEY=your_smartsheet_api_token_here
+   SMARTSHEET_ENDPOINT=https://api.smartsheet.com/2.0
    ```
 
-   You can obtain a Smartsheet API token from the [Smartsheet Developer Portal](https://developers.smartsheet.com/).
+   **Configuration details:**
+   - **API Token**: Obtain from the [Smartsheet Developer Portal](https://developers.smartsheet.com/)
+   - **API Endpoint**: Choose based on your deployment:
+     - US Commercial: `https://api.smartsheet.com/2.0` (default)
+     - EU: `https://api.smartsheet.eu/2.0`
+     - US Gov (FedRAMP): `https://api.smartsheetgov.com/2.0`
+     - Test/Sandbox: `https://api.test.smartsheet.com/2.0`
+
+   See `.env.example` for a complete template with detailed endpoint documentation.
 
 4. Build the project:
    ```bash
@@ -63,22 +75,31 @@ You can also run the Smartsheet MCP Server using Docker, which provides a consis
 ### Quick Start with Docker
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/smartsheet-platform/smar-mcp.git
    cd smar-mcp
    ```
 
 2. Create a `.env` file in the project root:
+
    ```bash
    cp .env.example .env
    ```
 
 3. Edit the `.env` file with your Smartsheet API credentials:
+
    ```
    SMARTSHEET_API_KEY=your_smartsheet_api_token_here
    SMARTSHEET_ENDPOINT=https://api.smartsheet.com/2.0
    ALLOW_DELETE_TOOLS=false
    ```
+
+   **Endpoint Selection:**
+   - For most users: `https://api.smartsheet.com/2.0` (US Commercial)
+   - For EU users: `https://api.smartsheet.eu/2.0`
+   - For Gov users: `https://api.smartsheetgov.com/2.0` (US Gov FedRAMP)
+   - For testing: `https://api.test.smartsheet.com/2.0`
 
 4. Build and run with Docker Compose:
    ```bash
@@ -88,6 +109,7 @@ You can also run the Smartsheet MCP Server using Docker, which provides a consis
 ### Docker Commands
 
 #### Production Mode
+
 ```bash
 # Build and run the production container
 docker-compose up --build
@@ -100,6 +122,7 @@ docker-compose down
 ```
 
 #### Development Mode
+
 ```bash
 # Run in development mode with hot reload
 docker-compose --profile dev up --build
@@ -109,6 +132,7 @@ docker-compose up smar-mcp-dev --build
 ```
 
 #### Manual Docker Build
+
 ```bash
 # Build the Docker image
 docker build -t smar-mcp .
@@ -139,60 +163,194 @@ When running in Docker, you can connect MCP clients by:
 2. **For production**: Deploy the container and configure your MCP client to connect to the running instance
 
 Example Claude Desktop configuration for Docker:
+
 ```json
 {
   "mcpServers": {
     "smartsheet": {
       "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "--env-file", "/path/to/your/.env",
-        "smar-mcp"
-      ]
+      "args": ["run", "-i", "--rm", "--env-file", "/path/to/your/.env", "smar-mcp"]
     }
   }
 }
 ```
 
-## Usage
+## Configuration & Usage
 
-There are several ways to run the MCP server with the `.env` file loaded:
+This MCP server works with various AI clients and CLIs. Below are the configuration steps for the major platforms.
 
-### Using npm scripts (recommended)
+### 1. Standard Configuration
 
-Start the server with environment variables loaded from the `.env` file:
+Most MCP clients use a standard JSON structure to define the server. Use this configuration block, adjusting the path to your operating system.
+
+<details open>
+<summary><strong>macOS / Linux</strong></summary>
+
+```json
+{
+  "mcpServers": {
+    "smartsheet": {
+      "command": "node",
+      "args": ["/absolute/path/to/smar-mcp/build/index.js"],
+      "env": {
+        "SMARTSHEET_API_KEY": "YOUR_API_KEY_HERE",
+        "SMARTSHEET_ENDPOINT": "https://api.smartsheet.com/2.0"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Windows (PowerShell/Cmd)</strong></summary>
+
+```json
+{
+  "mcpServers": {
+    "smartsheet": {
+      "command": "node",
+      "args": ["C:\\path\\to\\smar-mcp\\build\\index.js"],
+      "env": {
+        "SMARTSHEET_API_KEY": "YOUR_API_KEY_HERE",
+        "SMARTSHEET_ENDPOINT": "https://api.smartsheet.com/2.0"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+---
+
+### 2. IDE Support
+
+#### Claude for Desktop
+
+1.  Open configuration file:
+    - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+    - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+2.  Paste the **Standard Configuration** block inside the file.
+
+#### Cline (VS Code Extension)
+
+1.  Open the **MCP Servers** tab in the Cline extension.
+2.  Click **Configure MCP Servers**.
+3.  Paste the **Standard Configuration** block.
+
+#### Windsurf IDE
+
+1.  Go to **Windsurf Settings** > **Advanced** > **Cascade**.
+2.  Under "Plugins (MCP servers)", click **Manage Plugins**.
+3.  Select **View raw config** to open `mcp_config.json`.
+    - **macOS/Linux**: `~/.codeium/windsurf/mcp_config.json`
+    - **Windows**: `%USERPROFILE%\.codeium\windsurf\mcp_config.json`
+4.  Paste the **Standard Configuration** block.
+
+#### Cursor
+
+1.  Open **Cursor Settings** > **Features** > **MCP Servers**.
+2.  Click **Add New MCP Server**.
+3.  Enter the details manually:
+    - **Name**: `smartsheet`
+    - **Type**: `stdio`
+    - **Command**: `node /absolute/path/to/smar-mcp/build/index.js` (or equivalent for your OS)
+    - **Environment Variables**: Add `SMARTSHEET_API_KEY` and `SMARTSHEET_ENDPOINT`.
+
+#### Antigravity IDE
+
+1.  Open the **Agent Panel** menu ("..." icon).
+2.  Select **MCP Store**.
+3.  Click **Manage MCP Servers**.
+4.  Select **View raw config**.
+5.  Paste the **Standard Configuration** block.
+
+---
+
+### 3. CLI Support
+
+#### Claude CLI
+
+Use the `claude mcp add` command to register the server:
+
+```bash
+claude mcp add smartsheet -- node /path/to/smar-mcp/build/index.js
+```
+
+_Note: Ensure environment variables are set in your shell or passed to the command._
+
+#### Cline CLI
+
+The Cline CLI typically shares configuration with the full environment or accepts an MCP config file flag (check `cline --help` for specific flags in your version). You can often point it to the same JSON config used by the extension.
+
+#### Gemini CLI
+
+1.  Open your `settings.json` file:
+    - **macOS/Linux**: `~/.config/google/gemini/settings.json`
+    - **Windows**: `%LOCALAPPDATA%\Google\Gemini\settings.json`
+2.  Paste the **Standard Configuration** block.
+
+#### Ollama CLI
+
+Ollama does not natively consume the MCP JSON standard directly in its core CLI but integrates via community bridges or wrappers (like `ollama-mcp-bridge` or specialized client UIs).
+
+- Configure the bridge/wrapper using the **Standard Configuration** block.
+- Run the bridge, then connect Ollama to the bridge's exposed endpoint.
+
+#### LM Studio CLI
+
+1.  Use the `lms` tool or open the application.
+2.  Navigate to **Program** tab > **Install** > **Edit mcp.json**.
+3.  Paste the **Standard Configuration** block.
+
+---
+
+### 4. Running Locally (Manual)
+
+If you wish to run the server manually without an MCP client (e.g. for testing via stdio):
+
+**Using npm scripts (recommended):**
 
 ```bash
 npm run start
 ```
 
-This uses the `-r dotenv/config` flag to ensure dotenv is loaded before the application code runs.
+This uses `dotenv` to load your environment variables automatically.
 
-Or build and start in one command:
-
-```bash
-npm run dev
-```
-
-### Using node directly
-
-You can also run the server directly with Node.js and the `-r` flag:
+**Using node directly:**
 
 ```bash
 node -r dotenv/config build/index.js
 ```
 
-This ensures that dotenv is loaded before the application code runs.
+---
 
-Alternatively, you can run without the `-r` flag:
+## Deployment
 
-```bash
-node build/index.js
-```
+### Docker Deployment
 
-In this case, the application code will load dotenv itself (we've included `import { config } from "dotenv"; config();` at the top of the entry file).
+To run the server in a containerized environment (recommended for servers):
 
-The server will start and display: "Smartsheet MCP Server running on stdio"
+1.  **Build and Run**:
+
+    ```bash
+    docker-compose up --build -d
+    ```
+
+2.  **Configuration**:
+    The server will be available on stdio inside the container. To connect an MCP client to a remote or containerized instance, you typically use a specific transport (like SSE or stdio over SSH).
+
+### Fly.io
+
+1.  Use the provided example config: `cp fly.toml.example fly.toml`
+2.  Deploy: `fly deploy`
+
+### Render.com
+
+1.  Use the `render.yaml.example` as a reference for your Blueprint definition.
+2.  Ensure `SMARTSHEET_API_KEY` is set as a secret environment variable in the Render dashboard.
 
 ## Available MCP Tools
 
@@ -201,6 +359,7 @@ The server will start and display: "Smartsheet MCP Server running on stdio"
 Retrieves the current state of a sheet, including rows, columns, and cells.
 
 **Parameters:**
+
 - `sheetId` (string, required): The ID of the sheet to retrieve
 - `include` (string, optional): Comma-separated list of elements to include (e.g., 'format,formulas')
 
@@ -209,6 +368,7 @@ Retrieves the current state of a sheet, including rows, columns, and cells.
 Gets the current version number of a sheet.
 
 **Parameters:**
+
 - `sheetId` (string, required): The ID of the sheet
 
 ### get_cell_history
@@ -216,6 +376,7 @@ Gets the current version number of a sheet.
 Retrieves the history of changes for a specific cell.
 
 **Parameters:**
+
 - `sheetId` (string, required): The ID of the sheet
 - `rowId` (string, required): The ID of the row
 - `columnId` (string, required): The ID of the column
@@ -228,6 +389,7 @@ Retrieves the history of changes for a specific cell.
 Updates rows in a sheet, including cell values, formatting, and formulae.
 
 **Parameters:**
+
 - `sheetId` (string, required): The ID of the sheet
 - `rows` (array, required): Array of row objects to update
 
@@ -236,6 +398,7 @@ Updates rows in a sheet, including cell values, formatting, and formulae.
 Adds new rows to a sheet.
 
 **Parameters:**
+
 - `sheetId` (string, required): The ID of the sheet
 - `rows` (array, required): Array of row objects to add
 
@@ -244,6 +407,7 @@ Adds new rows to a sheet.
 Deletes rows from a sheet. This tool is only available when the ALLOW_DELETE_TOOLS environment variable is set to 'true'.
 
 **Parameters:**
+
 - `sheetId` (string, required): The ID of the sheet
 - `rowIds` (array, required): Array of row IDs to delete
 - `ignoreRowsNotFound` (boolean, optional): If true, don't throw an error if rows are not found
@@ -253,6 +417,7 @@ Deletes rows from a sheet. This tool is only available when the ALLOW_DELETE_TOO
 Gets the folder ID where a sheet is located.
 
 **Parameters:**
+
 - `sheetId` (string, required): The ID of the sheet
 
 ### copy_sheet
@@ -260,6 +425,7 @@ Gets the folder ID where a sheet is located.
 Creates a copy of the specified sheet in the same folder.
 
 **Parameters:**
+
 - `sheetId` (string, required): The ID of the sheet to copy
 - `destinationName` (string, required): Name for the sheet copy
 - `destinationFolderId` (string, optional): ID of the destination folder (same as source if not specified)
@@ -269,6 +435,7 @@ Creates a copy of the specified sheet in the same folder.
 Creates a new sheet.
 
 **Parameters:**
+
 - `name` (string, required): Name for the new sheet
 - `columns` (array, required): Array of column objects
 - `folderId` (string, optional): ID of the folder where the sheet should be created
@@ -278,6 +445,7 @@ Creates a new sheet.
 Creates a backup sheet with data from a specific timestamp.
 
 **Parameters:**
+
 - `sheetId` (string, required): The ID of the source sheet
 - `timestamp` (string, required): The ISO 8601 timestamp to use for historical data (e.g., '2025-03-27T13:00:00Z')
 - `archiveName` (string, optional): Name for the archive sheet (defaults to 'Original Sheet Name - Archive YYYY-MM-DD')
@@ -291,124 +459,125 @@ Creates a backup sheet with data from a specific timestamp.
 This table outlines the Smartsheet API endpoints, whether they are currently covered by SMAR-MCP tools, and their suitability for MCP.
 
 **Legend:**
+
 - **Yes**: Endpoint is well-suited for MCP integration
 - **No**: Endpoint is not suitable for MCP (e.g., binary data, streaming, or requires specialized handling)
 - **Consider**: Endpoint could work with MCP but may have limitations (e.g., potentially large responses that need pagination or filtering)
 
-| API Path                                      | Covered by SMAR-MCP? | HTTP Method(s) | SMAR-MCP Tool(s)                                           | Suitable for MCP? | Reason for Unsuitability/Consideration                                  |
-|-----------------------------------------------|----------------------|----------------|------------------------------------------------------------|--------------------|-------------------------------------------------------------------------|
-| `/contacts`                                   | No                   | GET                | N/A                                                        | Consider          | List operation. Response size can vary. Consider pagination/filters.    |
-| `/contacts/{contactId}`                       | No                   | GET                | N/A                                                        | Yes               | Retrieves a specific contact.                                           |
-| `/events`                                     | No                   | GET                | N/A                                                        | No          | Event stream. Potentially large/continuous. Needs specific handling.    |
-| `/favorites`                                  | No                   | GET, POST          | N/A                                                        | Yes               | Manages user favorites.                                                 |
-| `/favorites/{favoriteType}`                   | No                   | GET, POST          | N/A                                                        | Yes               | Manages user favorites by type.                                         |
-| `/favorites/{favoriteType}/{favoriteId}`      | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Manages a specific user favorite.                                       |
-| `/filteredEvents`                             | No                   | GET                | N/A                                                        | Consider          | Filtered event stream. Potentially large. Needs specific handling.      |
-| `/folders/{folderId}`                         | Yes                  | GET, PUT, DELETE   | `get_folder` (GET)                                         | Yes               | Retrieves a specific folder.                                            |
-| `/folders/{folderId}/copy`                    | No                   | POST               | N/A                                                        | Yes               | Copies a folder.                                                        |
-| `/folders/{folderId}/folders`                 | Yes                  | POST               | `create_folder` (POST)                                     | Yes               | Manages sub-folders (create). List via `get_folder`.                  |
-| `/folders/{folderId}/move`                    | No                   | POST               | N/A                                                        | Yes               | Moves a folder.                                                         |
-| `/folders/{folderId}/sheets`                  | Yes                  | POST               | `create_sheet` (POST with folderId). List via `get_folder`. | Yes               | Manages sheets within a folder.                                         |
-| `/folders/{folderId}/sheets/import`           | No                   | POST               | N/A                                                        | Yes               | Imports a sheet into a folder.                                          |
-| `/folders/personal`                           | No                   | GET                | N/A                                                        | Yes               | Accesses personal folders (Smartsheet specific, likely `GET /home/folders`). |
-| `/groups`                                     | No                   | GET, POST          | N/A                                                        | Consider          | List operation. Response size can vary.                                 |
-| `/groups/{groupId}`                           | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Retrieves a specific group.                                             |
-| `/groups/{groupId}/members`                   | No                   | GET, POST          | N/A                                                        | Consider          | List operation. Response size can vary.                                 |
-| `/groups/{groupId}/members/{userId}`          | No                   | DELETE             | N/A                                                        | Yes               | Manages a specific group member.                                        |
-| `/home/folders`                               | No                   | GET                | N/A                                                        | Yes               | Lists folders in the user's home.                                       |
-| `/imageurls`                                  | No                   | POST               | N/A                                                        | Consider          | Generates URLs for images. Response size depends on request.            |
-| `/reports`                                    | No                   | GET                | N/A                                                        | Consider          | List operation. Response size can vary.                                 |
-| `/reports/{reportId}`                         | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Retrieves a specific report.                                            |
-| `/reports/{reportId}/emails`                  | No                   | POST               | N/A                                                        | Yes               | Sends a report via email.                                               |
-| `/reports/{reportId}/publish`                 | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Manages report publishing.                                              |
-| `/reports/{reportId}/shares`                  | No                   | GET, POST          | N/A                                                        | Consider          | List operation. Manages report shares.                                  |
-| `/reports/{reportId}/shares/{shareId}`        | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Manages a specific report share.                                        |
-| `/search`                                     | No                   | GET                | N/A                                                        | Consider          | Global search. Response size can be very large.                         |
-| `/search/sheets/{sheetId}`                    | No                   | GET                | N/A                                                        | Consider          | Search within a specific sheet. Response size can vary.                 |
-| `/serverinfo`                                 | No                   | GET                | N/A                                                        | Yes               | Retrieves server information. Small response.                           |
-| `/sheets`                                     | Yes                  | GET, POST          | `create_sheet` (POST without folderId). List not directly exposed. | Consider      | List operation (not exposed as tool). Response size can be very large.  |
-| `/sheets/import`                              | No                   | POST               | N/A                                                        | Yes               | Imports a sheet.                                                        |
-| `/sheets/{sheetId}`                           | Yes                  | GET, PUT, DELETE   | `get_sheet` (GET), `get_sheet_location` (uses GET)         | Yes               | Retrieves a specific sheet. Response can be large.                      |
-| `/sheets/{sheetId}/attachments`               | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage attachments. Involves binary data.                          |
-| `/sheets/{sheetId}/attachments/{attachmentId}` | No                   | GET, DELETE        | N/A                                                        | Consider          | Get/Delete specific attachment. Involves binary data.                   |
-| `/sheets/{sheetId}/attachments/{attachmentId}/versions` | No         | GET                | N/A                                                        | Consider          | List attachment versions.                                               |
-| `/sheets/{sheetId}/automationrules`           | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage automation rules.                                           |
-| `/sheets/{sheetId}/automationrules/{automationRuleId}` | No          | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific automation rule.                             |
-| `/sheets/{sheetId}/columns`                   | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage columns. Response size depends on sheet complexity.         |
-| `/sheets/{sheetId}/columns/{columnId}`        | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific column.                                      |
-| `/sheets/{sheetId}/comments/{commentId}`      | No                   | GET, DELETE        | N/A                                                        | Yes               | Get/Delete specific comment.                                            |
-| `/sheets/{sheetId}/comments/{commentId}/attachments` | No            | GET, POST          | N/A                                                        | Consider          | Manage attachments for a comment. Involves binary data.                 |
-| `/sheets/{sheetId}/copy`                      | Yes                  | POST               | `copy_sheet` (POST)                                        | Yes               | Copies a sheet.                                                         |
-| `/sheets/{sheetId}/crosssheetreferences`      | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage cross-sheet references.                                     |
-| `/sheets/{sheetId}/crosssheetreferences/{crossSheetReferenceId}` | No | GET, DELETE        | N/A                                                        | Yes               | Get/Delete specific cross-sheet reference.                              |
-| `/sheets/{sheetId}/discussions`               | Yes                  | GET, POST          | `get_sheet_discussions` (GET)                              | Consider          | List discussions. Response size can vary.                               |
-| `/sheets/{sheetId}/discussions/{discussionId}` | No                  | GET, DELETE        | N/A                                                        | Yes               | Get/Delete specific discussion.                                         |
-| `/sheets/{sheetId}/discussions/{discussionId}/attachments` | No      | GET, POST          | N/A                                                        | Consider          | Manage attachments for a discussion. Involves binary data.              |
-| `/sheets/{sheetId}/discussions/{discussionId}/comments` | No         | GET, POST          | N/A                                                        | Consider          | List/Add comments to a discussion.                                      |
-| `/sheets/{sheetId}/emails`                    | No                   | POST               | N/A                                                        | Yes               | Sends a sheet via email.                                                |
-| `/sheets/{sheetId}/move`                      | No                   | POST               | N/A                                                        | Yes               | Moves a sheet.                                                          |
-| `/sheets/{sheetId}/proofs`                    | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage proofs.                                                     |
-| `/sheets/{sheetId}/proofs/{proofId}`          | No                   | GET, PUT           | N/A                                                        | Yes               | Get/Update specific proof.                                              |
-| `/sheets/{sheetId}/proofs/{proofId}/attachments` | No                | GET, POST          | N/A                                                        | Consider          | Manage attachments for a proof. Involves binary data.                   |
-| `/sheets/{sheetId}/proofs/{proofId}/discussions` | No                | GET, POST          | N/A                                                        | Consider          | Manage discussions for a proof.                                         |
-| `/sheets/{sheetId}/proofs/{proofId}/requestactions` | No             | POST               | N/A                                                        | Yes               | Manage request actions for a proof.                                     |
-| `/sheets/{sheetId}/proofs/{proofId}/requests` | No                   | GET, POST          | N/A                                                        | Consider          | Manage requests for a proof.                                            |
-| `/sheets/{sheetId}/proofs/{proofId}/versions` | No                   | GET                | N/A                                                        | Consider          | List versions of a proof.                                               |
-| `/sheets/{sheetId}/publish`                   | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Manages sheet publishing.                                               |
-| `/sheets/{sheetId}/rows`                      | Yes                  | GET, POST, PUT, DELETE | `update_rows` (PUT), `add_rows` (POST), `delete_rows` (DELETE) | Yes           | Manages rows. Individual row operations are fine. Bulk can be large.    |
-| `/sheets/{sheetId}/rows/copy`                 | No                   | POST               | N/A                                                        | Yes               | Copies rows within or between sheets.                                   |
-| `/sheets/{sheetId}/rows/emails`               | No                   | POST               | N/A                                                        | Yes               | Sends rows via email.                                                   |
-| `/sheets/{sheetId}/rows/move`                 | No                   | POST               | N/A                                                        | Yes               | Moves rows within or between sheets.                                    |
-| `/sheets/{sheetId}/rows/{rowId}`              | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific row.                                         |
-| `/sheets/{sheetId}/rows/{rowId}/attachments`  | No                   | GET, POST          | N/A                                                        | Consider          | Manage attachments for a row. Involves binary data.                     |
-| `/sheets/{sheetId}/rows/{rowId}/columns/{columnId}/cellimages` | No  | GET, POST, DELETE  | N/A                                                        | Consider          | Manage cell images. Involves binary data.                               |
-| `/sheets/{sheetId}/rows/{rowId}/columns/{columnId}/history` | Yes    | GET                | `get_cell_history` (GET)                                   | Yes               | Retrieves cell history. Response size can vary.                         |
-| `/sheets/{sheetId}/rows/{rowId}/discussions`  | Yes                  | GET, POST          | `create_row_discussion` (POST). List via parent.           | Yes               | Manages discussions for a row.                                          |
-| `/sheets/{sheetId}/rows/{rowId}/proofs`       | No                   | GET, POST          | N/A                                                        | Consider          | Manage proofs for a row.                                                |
-| `/sheets/{sheetId}/sentupdaterequests`        | No                   | GET                | N/A                                                        | Consider          | List sent update requests.                                              |
-| `/sheets/{sheetId}/sentupdaterequests/{sentUpdateRequestId}` | No    | GET, DELETE        | N/A                                                        | Yes               | Get/Delete specific sent update request.                                |
-| `/sheets/{sheetId}/shares`                    | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage sheet shares.                                               |
-| `/sheets/{sheetId}/shares/{shareId}`          | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific sheet share.                                 |
-| `/sheets/{sheetId}/sort`                      | No                   | POST               | N/A                                                        | Yes               | Sorts a sheet.                                                          |
-| `/sheets/{sheetId}/summary`                   | No                   | GET                | N/A                                                        | Yes               | Get sheet summary.                                                      |
-| `/sheets/{sheetId}/summary/fields`            | No                   | GET, POST, PUT     | N/A                                                        | Yes               | List/Add/Update sheet summary fields.                                   |
-| `/sheets/{sheetId}/summary/fields/{fieldId}/images` | No             | GET, POST, DELETE  | N/A                                                        | Consider          | Manage images for a sheet summary field. Involves binary data.          |
-| `/sheets/{sheetId}/updaterequests`            | Yes                  | GET, POST          | `create_update_request` (POST). List not directly exposed. | Consider          | List/Manage update requests.                                            |
-| `/sheets/{sheetId}/updaterequests/{updateRequestId}` | No            | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific update request.                              |
-| `/sheets/{sheetId}/version`                   | Yes                  | GET                | `get_sheet_version` (GET)                                  | Yes               | Retrieves sheet version. Small response.                                |
-| `/sights`                                     | No                   | GET, POST          | N/A                                                        | Consider          | List dashboards. Response size can vary.                                |
-| `/sights/{sightId}`                           | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get specific dashboard. Response can be large.                          |
-| `/sights/{sightId}/copy`                      | No                   | POST               | N/A                                                        | Yes               | Copies a dashboard.                                                     |
-| `/sights/{sightId}/move`                      | No                   | POST               | N/A                                                        | Yes               | Moves a dashboard.                                                      |
-| `/sights/{sightId}/publish`                   | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Manages dashboard publishing.                                           |
-| `/sights/{sightId}/shares`                    | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage dashboard shares.                                           |
-| `/sights/{sightId}/shares/{shareId}`          | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific dashboard share.                             |
-| `/templates`                                  | No                   | GET                | N/A                                                        | Consider          | List templates. Response size can vary.                                 |
-| `/templates/public`                           | No                   | GET                | N/A                                                        | Consider          | List public templates. Response size can vary.                          |
-| `/token`                                      | No                   | POST               | N/A                                                        | No               | OAuth token endpoint. Handled by auth flow, not direct MCP tool.        |
-| `/users`                                      | No                   | GET, POST          | N/A                                                        | Consider          | List users. Response size can be very large. Requires admin.            |
-| `/users/me`                                   | No                   | GET                | N/A                                                        | Yes               | Retrieves current user details. Small response.                         |
-| `/users/sheets`                               | No                   | GET                | N/A                                                        | Consider          | List sheets owned by or shared with users. Potentially large.           |
-| `/users/{userId}`                             | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get specific user.                                                      |
-| `/users/{userId}/alternateemails`             | No                   | GET, POST          | N/A                                                        | Yes               | Manage alternate emails for a user.                                     |
-| `/users/{userId}/alternateemails/{alternateEmailId}` | No            | GET, DELETE        | N/A                                                        | Yes               | Manage a specific alternate email.                                      |
-| `/users/{userId}/alternateemails/{alternateEmailId}/makeprimary` | No | POST               | N/A                                                        | Yes               | Makes an alternate email primary.                                       |
-| `/users/{userId}/deactivate`                  | No                   | DELETE             | N/A                                                        | Yes               | Deactivates a user. (Admin)                                             |
-| `/users/{userId}/profileimage`                | No                   | GET, PUT, DELETE   | N/A                                                        | Consider          | Manage user profile image. Involves binary data.                        |
-| `/users/{userId}/reactivate`                  | No                   | POST               | N/A                                                        | Yes               | Reactivates a user. (Admin)                                             |
-| `/webhooks`                                   | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage webhooks.                                                   |
-| `/webhooks/{webhookId}`                       | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific webhook.                                     |
-| `/webhooks/{webhookId}/resetSharedSecret`     | No                   | POST               | N/A                                                        | Yes               | Resets webhook shared secret.                                           |
-| `/workspaces`                                 | Yes                  | GET, POST          | `get_workspaces` (GET), `create_workspace` (POST)          | Consider          | List workspaces. Response size can vary. Create is fine.                |
-| `/workspaces/{workspaceId}`                   | Yes                  | GET, PUT, DELETE   | `get_workspace` (GET)                                      | Yes               | Get specific workspace. Response can be large.                          |
-| `/workspaces/{workspaceId}/copy`              | No                   | POST               | N/A                                                        | Yes               | Copies a workspace.                                                     |
-| `/workspaces/{workspaceId}/folders`           | Yes                  | POST               | `create_workspace_folder` (POST). List via `get_workspace`. | Yes              | Manages folders within a workspace.                                     |
-| `/workspaces/{workspaceId}/shares`            | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage workspace shares.                                           |
-| `/workspaces/{workspaceId}/shares/{shareId}`  | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific workspace share.                             |
-| `/workspaces/{workspaceId}/sheets`            | No                   | GET                | N/A                                                        | Consider          | List sheets in workspace. List via `get_workspace`.                     |
-| `/workspaces/{workspaceId}/sheets/import`     | No                   | POST               | N/A                                                        | Yes               | Imports a sheet into a workspace.                                       |
+| API Path                                                         | Covered by SMAR-MCP? | HTTP Method(s)         | SMAR-MCP Tool(s)                                                   | Suitable for MCP? | Reason for Unsuitability/Consideration                                       |
+| ---------------------------------------------------------------- | -------------------- | ---------------------- | ------------------------------------------------------------------ | ----------------- | ---------------------------------------------------------------------------- |
+| `/contacts`                                                      | No                   | GET                    | N/A                                                                | Consider          | List operation. Response size can vary. Consider pagination/filters.         |
+| `/contacts/{contactId}`                                          | No                   | GET                    | N/A                                                                | Yes               | Retrieves a specific contact.                                                |
+| `/events`                                                        | No                   | GET                    | N/A                                                                | No                | Event stream. Potentially large/continuous. Needs specific handling.         |
+| `/favorites`                                                     | No                   | GET, POST              | N/A                                                                | Yes               | Manages user favorites.                                                      |
+| `/favorites/{favoriteType}`                                      | No                   | GET, POST              | N/A                                                                | Yes               | Manages user favorites by type.                                              |
+| `/favorites/{favoriteType}/{favoriteId}`                         | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Manages a specific user favorite.                                            |
+| `/filteredEvents`                                                | No                   | GET                    | N/A                                                                | Consider          | Filtered event stream. Potentially large. Needs specific handling.           |
+| `/folders/{folderId}`                                            | Yes                  | GET, PUT, DELETE       | `get_folder` (GET)                                                 | Yes               | Retrieves a specific folder.                                                 |
+| `/folders/{folderId}/copy`                                       | No                   | POST                   | N/A                                                                | Yes               | Copies a folder.                                                             |
+| `/folders/{folderId}/folders`                                    | Yes                  | POST                   | `create_folder` (POST)                                             | Yes               | Manages sub-folders (create). List via `get_folder`.                         |
+| `/folders/{folderId}/move`                                       | No                   | POST                   | N/A                                                                | Yes               | Moves a folder.                                                              |
+| `/folders/{folderId}/sheets`                                     | Yes                  | POST                   | `create_sheet` (POST with folderId). List via `get_folder`.        | Yes               | Manages sheets within a folder.                                              |
+| `/folders/{folderId}/sheets/import`                              | No                   | POST                   | N/A                                                                | Yes               | Imports a sheet into a folder.                                               |
+| `/folders/personal`                                              | No                   | GET                    | N/A                                                                | Yes               | Accesses personal folders (Smartsheet specific, likely `GET /home/folders`). |
+| `/groups`                                                        | No                   | GET, POST              | N/A                                                                | Consider          | List operation. Response size can vary.                                      |
+| `/groups/{groupId}`                                              | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Retrieves a specific group.                                                  |
+| `/groups/{groupId}/members`                                      | No                   | GET, POST              | N/A                                                                | Consider          | List operation. Response size can vary.                                      |
+| `/groups/{groupId}/members/{userId}`                             | No                   | DELETE                 | N/A                                                                | Yes               | Manages a specific group member.                                             |
+| `/home/folders`                                                  | No                   | GET                    | N/A                                                                | Yes               | Lists folders in the user's home.                                            |
+| `/imageurls`                                                     | No                   | POST                   | N/A                                                                | Consider          | Generates URLs for images. Response size depends on request.                 |
+| `/reports`                                                       | No                   | GET                    | N/A                                                                | Consider          | List operation. Response size can vary.                                      |
+| `/reports/{reportId}`                                            | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Retrieves a specific report.                                                 |
+| `/reports/{reportId}/emails`                                     | No                   | POST                   | N/A                                                                | Yes               | Sends a report via email.                                                    |
+| `/reports/{reportId}/publish`                                    | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Manages report publishing.                                                   |
+| `/reports/{reportId}/shares`                                     | No                   | GET, POST              | N/A                                                                | Consider          | List operation. Manages report shares.                                       |
+| `/reports/{reportId}/shares/{shareId}`                           | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Manages a specific report share.                                             |
+| `/search`                                                        | No                   | GET                    | N/A                                                                | Consider          | Global search. Response size can be very large.                              |
+| `/search/sheets/{sheetId}`                                       | No                   | GET                    | N/A                                                                | Consider          | Search within a specific sheet. Response size can vary.                      |
+| `/serverinfo`                                                    | No                   | GET                    | N/A                                                                | Yes               | Retrieves server information. Small response.                                |
+| `/sheets`                                                        | Yes                  | GET, POST              | `create_sheet` (POST without folderId). List not directly exposed. | Consider          | List operation (not exposed as tool). Response size can be very large.       |
+| `/sheets/import`                                                 | No                   | POST                   | N/A                                                                | Yes               | Imports a sheet.                                                             |
+| `/sheets/{sheetId}`                                              | Yes                  | GET, PUT, DELETE       | `get_sheet` (GET), `get_sheet_location` (uses GET)                 | Yes               | Retrieves a specific sheet. Response can be large.                           |
+| `/sheets/{sheetId}/attachments`                                  | No                   | GET, POST              | N/A                                                                | Consider          | List/Manage attachments. Involves binary data.                               |
+| `/sheets/{sheetId}/attachments/{attachmentId}`                   | No                   | GET, DELETE            | N/A                                                                | Consider          | Get/Delete specific attachment. Involves binary data.                        |
+| `/sheets/{sheetId}/attachments/{attachmentId}/versions`          | No                   | GET                    | N/A                                                                | Consider          | List attachment versions.                                                    |
+| `/sheets/{sheetId}/automationrules`                              | No                   | GET, POST              | N/A                                                                | Consider          | List/Manage automation rules.                                                |
+| `/sheets/{sheetId}/automationrules/{automationRuleId}`           | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get/Update/Delete specific automation rule.                                  |
+| `/sheets/{sheetId}/columns`                                      | No                   | GET, POST              | N/A                                                                | Consider          | List/Manage columns. Response size depends on sheet complexity.              |
+| `/sheets/{sheetId}/columns/{columnId}`                           | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get/Update/Delete specific column.                                           |
+| `/sheets/{sheetId}/comments/{commentId}`                         | No                   | GET, DELETE            | N/A                                                                | Yes               | Get/Delete specific comment.                                                 |
+| `/sheets/{sheetId}/comments/{commentId}/attachments`             | No                   | GET, POST              | N/A                                                                | Consider          | Manage attachments for a comment. Involves binary data.                      |
+| `/sheets/{sheetId}/copy`                                         | Yes                  | POST                   | `copy_sheet` (POST)                                                | Yes               | Copies a sheet.                                                              |
+| `/sheets/{sheetId}/crosssheetreferences`                         | No                   | GET, POST              | N/A                                                                | Consider          | List/Manage cross-sheet references.                                          |
+| `/sheets/{sheetId}/crosssheetreferences/{crossSheetReferenceId}` | No                   | GET, DELETE            | N/A                                                                | Yes               | Get/Delete specific cross-sheet reference.                                   |
+| `/sheets/{sheetId}/discussions`                                  | Yes                  | GET, POST              | `get_sheet_discussions` (GET)                                      | Consider          | List discussions. Response size can vary.                                    |
+| `/sheets/{sheetId}/discussions/{discussionId}`                   | No                   | GET, DELETE            | N/A                                                                | Yes               | Get/Delete specific discussion.                                              |
+| `/sheets/{sheetId}/discussions/{discussionId}/attachments`       | No                   | GET, POST              | N/A                                                                | Consider          | Manage attachments for a discussion. Involves binary data.                   |
+| `/sheets/{sheetId}/discussions/{discussionId}/comments`          | No                   | GET, POST              | N/A                                                                | Consider          | List/Add comments to a discussion.                                           |
+| `/sheets/{sheetId}/emails`                                       | No                   | POST                   | N/A                                                                | Yes               | Sends a sheet via email.                                                     |
+| `/sheets/{sheetId}/move`                                         | No                   | POST                   | N/A                                                                | Yes               | Moves a sheet.                                                               |
+| `/sheets/{sheetId}/proofs`                                       | No                   | GET, POST              | N/A                                                                | Consider          | List/Manage proofs.                                                          |
+| `/sheets/{sheetId}/proofs/{proofId}`                             | No                   | GET, PUT               | N/A                                                                | Yes               | Get/Update specific proof.                                                   |
+| `/sheets/{sheetId}/proofs/{proofId}/attachments`                 | No                   | GET, POST              | N/A                                                                | Consider          | Manage attachments for a proof. Involves binary data.                        |
+| `/sheets/{sheetId}/proofs/{proofId}/discussions`                 | No                   | GET, POST              | N/A                                                                | Consider          | Manage discussions for a proof.                                              |
+| `/sheets/{sheetId}/proofs/{proofId}/requestactions`              | No                   | POST                   | N/A                                                                | Yes               | Manage request actions for a proof.                                          |
+| `/sheets/{sheetId}/proofs/{proofId}/requests`                    | No                   | GET, POST              | N/A                                                                | Consider          | Manage requests for a proof.                                                 |
+| `/sheets/{sheetId}/proofs/{proofId}/versions`                    | No                   | GET                    | N/A                                                                | Consider          | List versions of a proof.                                                    |
+| `/sheets/{sheetId}/publish`                                      | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Manages sheet publishing.                                                    |
+| `/sheets/{sheetId}/rows`                                         | Yes                  | GET, POST, PUT, DELETE | `update_rows` (PUT), `add_rows` (POST), `delete_rows` (DELETE)     | Yes               | Manages rows. Individual row operations are fine. Bulk can be large.         |
+| `/sheets/{sheetId}/rows/copy`                                    | No                   | POST                   | N/A                                                                | Yes               | Copies rows within or between sheets.                                        |
+| `/sheets/{sheetId}/rows/emails`                                  | No                   | POST                   | N/A                                                                | Yes               | Sends rows via email.                                                        |
+| `/sheets/{sheetId}/rows/move`                                    | No                   | POST                   | N/A                                                                | Yes               | Moves rows within or between sheets.                                         |
+| `/sheets/{sheetId}/rows/{rowId}`                                 | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get/Update/Delete specific row.                                              |
+| `/sheets/{sheetId}/rows/{rowId}/attachments`                     | No                   | GET, POST              | N/A                                                                | Consider          | Manage attachments for a row. Involves binary data.                          |
+| `/sheets/{sheetId}/rows/{rowId}/columns/{columnId}/cellimages`   | No                   | GET, POST, DELETE      | N/A                                                                | Consider          | Manage cell images. Involves binary data.                                    |
+| `/sheets/{sheetId}/rows/{rowId}/columns/{columnId}/history`      | Yes                  | GET                    | `get_cell_history` (GET)                                           | Yes               | Retrieves cell history. Response size can vary.                              |
+| `/sheets/{sheetId}/rows/{rowId}/discussions`                     | Yes                  | GET, POST              | `create_row_discussion` (POST). List via parent.                   | Yes               | Manages discussions for a row.                                               |
+| `/sheets/{sheetId}/rows/{rowId}/proofs`                          | No                   | GET, POST              | N/A                                                                | Consider          | Manage proofs for a row.                                                     |
+| `/sheets/{sheetId}/sentupdaterequests`                           | No                   | GET                    | N/A                                                                | Consider          | List sent update requests.                                                   |
+| `/sheets/{sheetId}/sentupdaterequests/{sentUpdateRequestId}`     | No                   | GET, DELETE            | N/A                                                                | Yes               | Get/Delete specific sent update request.                                     |
+| `/sheets/{sheetId}/shares`                                       | No                   | GET, POST              | N/A                                                                | Consider          | List/Manage sheet shares.                                                    |
+| `/sheets/{sheetId}/shares/{shareId}`                             | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get/Update/Delete specific sheet share.                                      |
+| `/sheets/{sheetId}/sort`                                         | No                   | POST                   | N/A                                                                | Yes               | Sorts a sheet.                                                               |
+| `/sheets/{sheetId}/summary`                                      | No                   | GET                    | N/A                                                                | Yes               | Get sheet summary.                                                           |
+| `/sheets/{sheetId}/summary/fields`                               | No                   | GET, POST, PUT         | N/A                                                                | Yes               | List/Add/Update sheet summary fields.                                        |
+| `/sheets/{sheetId}/summary/fields/{fieldId}/images`              | No                   | GET, POST, DELETE      | N/A                                                                | Consider          | Manage images for a sheet summary field. Involves binary data.               |
+| `/sheets/{sheetId}/updaterequests`                               | Yes                  | GET, POST              | `create_update_request` (POST). List not directly exposed.         | Consider          | List/Manage update requests.                                                 |
+| `/sheets/{sheetId}/updaterequests/{updateRequestId}`             | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get/Update/Delete specific update request.                                   |
+| `/sheets/{sheetId}/version`                                      | Yes                  | GET                    | `get_sheet_version` (GET)                                          | Yes               | Retrieves sheet version. Small response.                                     |
+| `/sights`                                                        | No                   | GET, POST              | N/A                                                                | Consider          | List dashboards. Response size can vary.                                     |
+| `/sights/{sightId}`                                              | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get specific dashboard. Response can be large.                               |
+| `/sights/{sightId}/copy`                                         | No                   | POST                   | N/A                                                                | Yes               | Copies a dashboard.                                                          |
+| `/sights/{sightId}/move`                                         | No                   | POST                   | N/A                                                                | Yes               | Moves a dashboard.                                                           |
+| `/sights/{sightId}/publish`                                      | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Manages dashboard publishing.                                                |
+| `/sights/{sightId}/shares`                                       | No                   | GET, POST              | N/A                                                                | Consider          | List/Manage dashboard shares.                                                |
+| `/sights/{sightId}/shares/{shareId}`                             | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get/Update/Delete specific dashboard share.                                  |
+| `/templates`                                                     | No                   | GET                    | N/A                                                                | Consider          | List templates. Response size can vary.                                      |
+| `/templates/public`                                              | No                   | GET                    | N/A                                                                | Consider          | List public templates. Response size can vary.                               |
+| `/token`                                                         | No                   | POST                   | N/A                                                                | No                | OAuth token endpoint. Handled by auth flow, not direct MCP tool.             |
+| `/users`                                                         | No                   | GET, POST              | N/A                                                                | Consider          | List users. Response size can be very large. Requires admin.                 |
+| `/users/me`                                                      | No                   | GET                    | N/A                                                                | Yes               | Retrieves current user details. Small response.                              |
+| `/users/sheets`                                                  | No                   | GET                    | N/A                                                                | Consider          | List sheets owned by or shared with users. Potentially large.                |
+| `/users/{userId}`                                                | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get specific user.                                                           |
+| `/users/{userId}/alternateemails`                                | No                   | GET, POST              | N/A                                                                | Yes               | Manage alternate emails for a user.                                          |
+| `/users/{userId}/alternateemails/{alternateEmailId}`             | No                   | GET, DELETE            | N/A                                                                | Yes               | Manage a specific alternate email.                                           |
+| `/users/{userId}/alternateemails/{alternateEmailId}/makeprimary` | No                   | POST                   | N/A                                                                | Yes               | Makes an alternate email primary.                                            |
+| `/users/{userId}/deactivate`                                     | No                   | DELETE                 | N/A                                                                | Yes               | Deactivates a user. (Admin)                                                  |
+| `/users/{userId}/profileimage`                                   | No                   | GET, PUT, DELETE       | N/A                                                                | Consider          | Manage user profile image. Involves binary data.                             |
+| `/users/{userId}/reactivate`                                     | No                   | POST                   | N/A                                                                | Yes               | Reactivates a user. (Admin)                                                  |
+| `/webhooks`                                                      | No                   | GET, POST              | N/A                                                                | Consider          | List/Manage webhooks.                                                        |
+| `/webhooks/{webhookId}`                                          | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get/Update/Delete specific webhook.                                          |
+| `/webhooks/{webhookId}/resetSharedSecret`                        | No                   | POST                   | N/A                                                                | Yes               | Resets webhook shared secret.                                                |
+| `/workspaces`                                                    | Yes                  | GET, POST              | `get_workspaces` (GET), `create_workspace` (POST)                  | Consider          | List workspaces. Response size can vary. Create is fine.                     |
+| `/workspaces/{workspaceId}`                                      | Yes                  | GET, PUT, DELETE       | `get_workspace` (GET)                                              | Yes               | Get specific workspace. Response can be large.                               |
+| `/workspaces/{workspaceId}/copy`                                 | No                   | POST                   | N/A                                                                | Yes               | Copies a workspace.                                                          |
+| `/workspaces/{workspaceId}/folders`                              | Yes                  | POST                   | `create_workspace_folder` (POST). List via `get_workspace`.        | Yes               | Manages folders within a workspace.                                          |
+| `/workspaces/{workspaceId}/shares`                               | No                   | GET, POST              | N/A                                                                | Consider          | List/Manage workspace shares.                                                |
+| `/workspaces/{workspaceId}/shares/{shareId}`                     | No                   | GET, PUT, DELETE       | N/A                                                                | Yes               | Get/Update/Delete specific workspace share.                                  |
+| `/workspaces/{workspaceId}/sheets`                               | No                   | GET                    | N/A                                                                | Consider          | List sheets in workspace. List via `get_workspace`.                          |
+| `/workspaces/{workspaceId}/sheets/import`                        | No                   | POST                   | N/A                                                                | Yes               | Imports a sheet into a workspace.                                            |
 
-*Note: The `create_version_backup` tool is a workflow using multiple underlying API calls and is not listed as a direct endpoint coverer but its constituent calls are.*
+_Note: The `create_version_backup` tool is a workflow using multiple underlying API calls and is not listed as a direct endpoint coverer but its constituent calls are._
 
 ## Example Usage
 
@@ -417,17 +586,17 @@ Here's an example of how to use the `create_version_backup` tool to create a bac
 ```javascript
 // Using the MCP tool from an AI assistant
 const result = await use_mcp_tool({
-  server_name: "smartsheet",
-  tool_name: "create_version_backup",
+  server_name: 'smartsheet',
+  tool_name: 'create_version_backup',
   arguments: {
-    sheetId: "7532263697764228",
-    timestamp: "2025-03-27T17:00:00Z",
-    archiveName: "Project Timeline - Version Backup 17:00 27/03/2025",
+    sheetId: '7532263697764228',
+    timestamp: '2025-03-27T17:00:00Z',
+    archiveName: 'Project Timeline - Version Backup 17:00 27/03/2025',
     includeFormulas: true,
     includeFormatting: true,
     batchSize: 100,
-    maxConcurrentRequests: 5
-  }
+    maxConcurrentRequests: 5,
+  },
 });
 
 // Result:
@@ -448,8 +617,32 @@ const result = await use_mcp_tool({
 
 ## Environment Variables
 
-- `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
-- `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
+The following environment variables are used to configure the Smartsheet MCP Server:
+
+### Required Variables
+
+- **`SMARTSHEET_API_KEY`**: Your Smartsheet API access token (required)
+  - Obtain from: [Smartsheet Developer Portal](https://developers.smartsheet.com/)
+  - Example: `SMARTSHEET_API_KEY=your_token_here`
+
+- **`SMARTSHEET_ENDPOINT`**: The Smartsheet API endpoint URL (required)
+  - Choose based on your Smartsheet deployment region:
+    - **US Commercial**: `https://api.smartsheet.com/2.0` (default for most users)
+    - **EU**: `https://api.smartsheet.eu/2.0`
+    - **US Gov (FedRAMP)**: `https://api.smartsheetgov.com/2.0`
+    - **Test/Sandbox**: `https://api.test.smartsheet.com/2.0`
+  - Example: `SMARTSHEET_ENDPOINT=https://api.smartsheet.com/2.0`
+
+### Optional Variables
+
+- **`ALLOW_DELETE_TOOLS`**: Enable/disable deletion operations (default: `false`)
+  - Set to `'true'` to enable deletion operations like `delete_rows`
+  - When disabled, delete tools will not be available for use
+  - Example: `ALLOW_DELETE_TOOLS=true`
+
+### Configuration File
+
+All environment variables should be set in a `.env` file in the project root. See `.env.example` for a complete template with all available endpoints documented.
 
 ## Development
 
@@ -476,13 +669,30 @@ npm run build
 - `examples/`: Example usage files
 - `.env`: Environment variables
 - `.env.example`: Template for environment variables
-- `claude_desktop_config-example.json`: Example claude desktop config to connect with the tool - Set your Smartsheet key in the env setting. 
+- `claude_desktop_config-example.json`: Example claude desktop config to connect with the tool - Set your Smartsheet key in the env setting.
 
-### Testing 
+### Testing
 
 Follow the steps at https://modelcontextprotocol.io/quickstart/server under "Testing your server with Claude for Desktop"
 
 See claude_desktop_config-example.json as an example config to use
+
+### Integration Testing
+
+This project includes a separate integration test suite that runs against the live Smartsheet API.
+
+**Prerequisites:**
+
+1.  **Dedicated Developer Account**: Strongly recommended to use a separate Smartsheet account to avoid modifying production data.
+2.  **Environment Variables**: Ensure `SMARTSHEET_API_KEY` is set in your `.env` file.
+
+**Running Integration Tests:**
+
+```bash
+npm run test:integration
+```
+
+_Note: These tests perform a full CRUD loop (Create Sheet -> Add Data -> Verify -> Delete Sheet) and will create temporary artifacts in your account which are cleaned up automatically._
 
 Roo:
 Run `npm run dev` and make sure your MCP is running locally.
@@ -490,7 +700,6 @@ Run `npm run dev` and make sure your MCP is running locally.
 In the Roo Code plug-in, click on the MCP Servers button then Edit MCP Settings. Copy over the text in the `claude_desktop_config-example.json` file over (it should be the same) and make the necessary changes to match your environment.
 
 You should see the MCP Service listed above the Edit MCP Settings button. If not, check that your config is correct and your API key is properly set. If it is, try restarting VS Code.
-
 
 ## Contributing
 
@@ -545,6 +754,7 @@ BREAKING CHANGE: `extends` key in config file is now used for extending other co
 6. Open a Pull Request
 
 When your PR is merged to the main branch, semantic-release will automatically:
+
 1. Determine the next version number based on commit messages
 2. Generate release notes
 3. Create a GitHub release

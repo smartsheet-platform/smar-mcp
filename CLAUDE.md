@@ -3,6 +3,7 @@
 This file contains configuration and instructions for Claude to help with this repository.
 
 ## Repository Overview
+
 This repository contains a Smartsheet Model Context Protocol (MCP) server that provides tools for interacting with the Smartsheet API.
 
 ## GitHub CLI Setup and Authentication
@@ -20,6 +21,7 @@ gh auth login
 ## GitHub Commands
 
 ### Creating Issues
+
 ```bash
 # Basic issue creation
 gh issue create --title "Issue title" --body "Issue description"
@@ -29,6 +31,7 @@ gh issue create --title "Issue title" --body "Issue description" --label "bug,en
 ```
 
 ### Creating Pull Requests
+
 ```bash
 # Basic PR creation
 gh pr create --title "PR title" --body "PR description"
@@ -48,6 +51,7 @@ EOF
 ```
 
 ### Updating Pull Requests
+
 ```bash
 # Update title and body
 gh pr edit [PR number] --title "New title" --body "New description"
@@ -60,6 +64,7 @@ gh pr edit [PR number] --add-reviewer "username" --remove-reviewer "another-user
 ```
 
 ### Fetching PR Comments
+
 ```bash
 # View PR with comments
 gh pr view [PR number] --comments
@@ -69,6 +74,7 @@ gh pr view [PR number] --comments --json comments
 ```
 
 ### Adding Comments to PRs
+
 ```bash
 # Add a comment to a PR
 gh pr comment [PR number] --body "This looks good!"
@@ -77,12 +83,14 @@ gh pr comment [PR number] --body "This looks good!"
 ## Git Workflow
 
 ### Creating a new branch
+
 ```bash
 # Create and switch to a new branch
 git checkout -b feature/branch-name
 ```
 
 ### Committing changes with conventional commit messages
+
 ```bash
 # Stage changes
 git add .
@@ -102,6 +110,7 @@ EOF
 ```
 
 ### Pushing and creating a PR
+
 ```bash
 # Push with branch tracking
 git push -u origin feature/branch-name
@@ -111,6 +120,7 @@ gh pr create --title "PR Title" --body "PR description"
 ```
 
 ## Repository Structure
+
 ```
 .github/
   ├── ISSUE_TEMPLATE/

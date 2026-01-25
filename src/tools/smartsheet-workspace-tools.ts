@@ -1,110 +1,106 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { SmartsheetAPI } from "../apis/smartsheet-api.js";
-import { z } from "zod";
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
+import { SmartsheetAPI } from '../apis/smartsheet-api.js';
 
 export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
-
-    // Tool: Get Workspaces
-    server.tool(
-        "get_workspaces",
-        "Retrieves my Workspaces",
-        {},
-        async ({ }) => {
-          try {
-            console.info("Getting workspaces");
-            const workspace = await api.workspaces.getWorkspaces();
-    
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: JSON.stringify(workspace, null, 2)
-                }
-              ]
-            };
-          } catch (error: any) {
-            console.error("Failed to get workspaces", { error });
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: `Failed to get workspaces: ${error.message}`
-                }
-              ],
-              isError: true
-            };
-          }
-        }
-    );
-    
-    // Tool: Get Workspace
-    server.tool(
-        "get_workspace",
-        "Retrieves the current state of a Workspace, including its contents which can be sheets, reports, or other folders",
+  server.tool('list_workspaces', 'Lists all workspaces', async () => {
+    const result = await api.workspaces.listWorkspaces();
+    return {
+      content: [
         {
-          workspaceId: z.string().describe("The ID of the workspace to retrieve")
+          type: 'text' as const,
+          text: JSON.stringify(result, null, 2),
         },
-        async ({ workspaceId}) => {
-          try {
-            console.info(`Getting workspace with ID: ${workspaceId}`);
-            const workspace = await api.workspaces.getWorkspace(workspaceId);
-    
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: JSON.stringify(workspace, null, 2)
-                }
-              ]
-            };
-          } catch (error: any) {
-            console.error(`Failed to get workspace with ID: ${workspaceId}`, { error });
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: `Failed to get workspace: ${error.message}`
-                }
-              ],
-              isError: true
-            };
-          }
-        }
-    );
-    
-    // Tool: Create workspace
-    server.tool(
-        "create_workspace",
-        "Creates a new workspace",
-        {
-          workspaceName: z.string().describe("The name of the new workspace")
-        },
-        async ({ workspaceName }) => {
-          try {
-            console.info(`Creating workspace: ${workspaceName}`);
-            const workspace = await api.workspaces.createWorkspace(workspaceName);
-    
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: JSON.stringify(workspace, null, 2)
-                }
-              ]
-            };
-          } catch (error: any) {
-            console.error("Failed to create workspace", { error });
-            return {
-              content: [
-                {
-                  type: "text",
-                  text: `Failed to create_workspace: ${error.message}`
-                }
-              ],
-              isError: true
-            };
-          }
-        }
-    );
+      ],
+    };
+  });
 
+  const getWorkspaceSchema = {
+    workspaceId: z.number().describe('The ID of the workspace'),
+  };
+
+  server.tool(
+    'get_workspace',
+    'Gets a single workspace',
+    getWorkspaceSchema as any,
+    async (args: any) => {
+      const { workspaceId } = args;
+      const result = await api.workspaces.getWorkspace(workspaceId.toString());
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    },
+  );
+
+  const createWorkspaceSchema = {
+    name: z.string().describe('The name of the new workspace'),
+  };
+
+  server.tool(
+    'create_workspace',
+    'Creates a new workspace',
+    createWorkspaceSchema as any,
+    async (args: any) => {
+      const { name } = args;
+      const result = await api.workspaces.createWorkspace(name);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    },
+  );
+
+  const updateWorkspaceSchema = {
+    workspaceId: z.number().describe('The ID of the workspace to update'),
+    name: z.string().describe('The new name of the workspace'),
+  };
+
+  server.tool(
+    'update_workspace',
+    'Updates a workspace',
+    updateWorkspaceSchema as any,
+    async (args: any) => {
+      const { workspaceId, name } = args;
+      const result = await api.workspaces.updateWorkspace(workspaceId, name);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    },
+  );
+
+  const deleteWorkspaceSchema = {
+    workspaceId: z.number().describe('The ID of the workspace to delete'),
+  };
+
+  server.tool(
+    'delete_workspace',
+    'Deletes a workspace',
+    deleteWorkspaceSchema as any,
+    async (args: any) => {
+      const { workspaceId } = args;
+      const result = await api.workspaces.deleteWorkspace(workspaceId);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    },
+  );
 }

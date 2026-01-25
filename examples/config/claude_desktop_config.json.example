@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "smartsheet": {
+      "command": "node",
+      "args": ["/absolute/path/to/smar-mcp/build/index.js"],
+      "env": {
+        "SMARTSHEET_API_KEY": "YOUR_API_KEY_HERE",
+        "SMARTSHEET_ENDPOINT": "https://api.smartsheet.com/2.0"
+      }
+    }
+  }
+}

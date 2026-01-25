@@ -1,0 +1,110 @@
+# Workflow Status Template
+
+# This tracks progress through BMM methodology Analysis, Planning, and Solutioning phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/product-brief.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+generated: '2026-01-11'
+project: 'smar-mcp'
+project_type: 'legacy'
+selected_track: 'method'
+field_type: 'brownfield'
+workflow_path: '_bmad/bmm/workflows/workflow-status/paths/method-brownfield.yaml'
+workflow_status:
+  - phase: 0
+    name: 'Documentation'
+    status: 'completed'
+    workflows:
+      - id: 'document-project'
+        status: 'completed'
+        required: true
+        workflow: '{project-root}/_bmad/bmm/workflows/document-project/workflow.yaml'
+        agent: 'analyst'
+        command: '/bmad:bmm:workflows:document-project'
+        output: 'Comprehensive project documentation'
+        purpose: 'Understand existing codebase before planning'
+
+  - phase: 1
+    name: 'Analysis'
+    status: 'skipped'
+    workflows:
+      - id: 'brainstorm-project'
+        status: 'skipped'
+        optional: true
+        agent: 'analyst'
+        command: '/bmad:bmm:workflows:brainstorming'
+      - id: 'research'
+        status: 'skipped'
+        optional: true
+        agent: 'analyst'
+        command: '/bmad:bmm:workflows:research'
+      - id: 'product-brief'
+        status: 'skipped'
+        optional: true
+        agent: 'analyst'
+        command: '/bmad:bmm:workflows:create-product-brief'
+
+  - phase: 2
+    name: 'Planning'
+    status: 'completed'
+    workflows:
+      - id: 'prd'
+        status: 'completed'
+        output_file: '_bmad-output/planning-artifacts/prd.md'
+        required: true
+        agent: 'pm'
+        command: '/bmad:bmm:workflows:create-prd'
+        output: 'Product Requirements Document with FRs and NFRs'
+      - id: 'create-ux-design'
+        status: 'pending'
+        conditional: 'if_has_ui'
+        agent: 'ux-designer'
+        command: '/bmad:bmm:workflows:create-ux-design'
+
+  - phase: 3
+    name: 'Solutioning'
+    status: 'active'
+    workflows:
+      - id: 'create-architecture'
+        status: '_bmad-output/planning-artifacts/architecture.md'
+        required: true
+        agent: 'architect'
+        command: '/bmad:bmm:workflows:create-architecture'
+        output: 'System architecture document'
+      - id: 'create-epics-and-stories'
+        status: 'pending'
+        required: true
+        agent: 'pm'
+        command: '/bmad:bmm:workflows:create-epics-and-stories'
+      - id: 'test-design'
+        status: 'pending'
+        optional: true
+        agent: 'tea'
+        command: '/bmad:bmm:workflows:test-design'
+        output: 'System-level testability review'
+      - id: 'implementation-readiness'
+        status: 'pending'
+        required: true
+        agent: 'architect'
+        command: '/bmad:bmm:workflows:implementation-readiness'
+
+  - phase: 4
+    name: 'Implementation'
+    status: 'pending'
+    workflows:
+      - id: 'sprint-planning'
+        status: 'pending'
+        required: true
+        agent: 'sm'
+        command: '/bmad:bmm:workflows:sprint-planning'

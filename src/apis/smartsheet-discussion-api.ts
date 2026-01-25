@@ -1,4 +1,4 @@
-import { SmartsheetAPI } from "./smartsheet-api.js";
+import { SmartsheetAPI } from './smartsheet-api.js';
 
 export class SmartsheetDiscussionAPI {
   private api: SmartsheetAPI;
@@ -8,7 +8,7 @@ export class SmartsheetDiscussionAPI {
   }
 
   /**
-   * Get discussions by sheet ID 
+   * Get discussions by sheet ID
    * @param sheetId Sheet ID
    * @param include Optional parameter to include additional information (e.g., 'attachments')
    * @param pageSize Number of discussions to return per page
@@ -21,7 +21,7 @@ export class SmartsheetDiscussionAPI {
     include?: string,
     pageSize?: number,
     page?: number,
-    includeAll?: boolean
+    includeAll?: boolean,
   ): Promise<any> {
     return this.api.request('GET', `/sheets/${sheetId}/discussions`, undefined, {
       include,
@@ -47,7 +47,7 @@ export class SmartsheetDiscussionAPI {
     include?: string,
     pageSize?: number,
     page?: number,
-    includeAll?: boolean
+    includeAll?: boolean,
   ): Promise<any> {
     return this.api.request('GET', `/sheets/${sheetId}/rows/${rowId}/discussions`, undefined, {
       include,
@@ -66,10 +66,10 @@ export class SmartsheetDiscussionAPI {
   async createSheetDiscussion(sheetId: string, commentText: string): Promise<any> {
     const data = {
       comment: {
-        text: commentText
-      }
+        text: commentText,
+      },
     };
-    
+
     return this.api.request('POST', `/sheets/${sheetId}/discussions`, data);
   }
 
@@ -83,11 +83,20 @@ export class SmartsheetDiscussionAPI {
   async createRowDiscussion(sheetId: string, rowId: string, commentText: string): Promise<any> {
     const data = {
       comment: {
-        text: commentText
-      }
+        text: commentText,
+      },
     };
-    
+
     return this.api.request('POST', `/sheets/${sheetId}/rows/${rowId}/discussions`, data);
   }
 
+  /**
+   * Delete a discussion
+   * @param sheetId Sheet ID
+   * @param discussionId Discussion ID
+   * @returns Delete result
+   */
+  async deleteDiscussion(sheetId: string, discussionId: number): Promise<any> {
+    return this.api.request('DELETE', `/sheets/${sheetId}/discussions/${discussionId}`);
+  }
 }

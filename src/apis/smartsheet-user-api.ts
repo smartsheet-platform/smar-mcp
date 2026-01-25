@@ -1,4 +1,4 @@
-import { SmartsheetAPI } from "./smartsheet-api.js";
+import { SmartsheetAPI } from './smartsheet-api.js';
 
 export class SmartsheetUserAPI {
   private api: SmartsheetAPI;
@@ -8,7 +8,7 @@ export class SmartsheetUserAPI {
   }
 
   /**
-   * Get user by ID 
+   * Get user by ID
    * @param userId ID of the user to get
    * @returns User data
    */
@@ -25,11 +25,10 @@ export class SmartsheetUserAPI {
   }
 
   /**
-   * List Users 
+   * List Users
    * @returns List of users
    */
   async listUsers(): Promise<any> {
     return this.api.request('GET', '/users');
   }
-
 }

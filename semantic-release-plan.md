@@ -3,6 +3,7 @@
 ## Overview
 
 We'll implement semantic-release in the Smartsheet MCP Server project with the following features:
+
 - Automatic versioning based on conventional commits
 - GitHub releases integration
 - Automatic changelog generation
@@ -35,19 +36,26 @@ Create a `.releaserc.json` file in the project root with the following configura
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    ["@semantic-release/changelog", {
-      "changelogFile": "CHANGELOG.md"
-    }],
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
     "@semantic-release/npm",
-    ["@semantic-release/github", {
-      "assets": [
-        {"path": "build/**", "label": "Build artifacts"}
-      ]
-    }],
-    ["@semantic-release/git", {
-      "assets": ["package.json", "CHANGELOG.md"],
-      "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-    }]
+    [
+      "@semantic-release/github",
+      {
+        "assets": [{ "path": "build/**", "label": "Build artifacts" }]
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["package.json", "CHANGELOG.md"],
+        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ]
   ]
 }
 ```
@@ -58,7 +66,7 @@ Create a `commitlint.config.js` file:
 
 ```javascript
 module.exports = {
-  extends: ['@commitlint/config-conventional']
+  extends: ['@commitlint/config-conventional'],
 };
 ```
 
@@ -102,22 +110,22 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Build
         run: npm run build
-        
+
       - name: Test
         run: npm test
-        
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -127,6 +135,7 @@ jobs:
 ### 6. Update Documentation
 
 Update the README.md to include information about:
+
 - The semantic versioning strategy
 - How to write commit messages following conventional commits
 - How releases are generated
@@ -154,17 +163,17 @@ flowchart TD
 
 ## Commit Types and Version Bumps
 
-| Commit Type | Description | Version Bump |
-|-------------|-------------|--------------|
-| `fix:`      | Bug fixes | Patch (0.0.1) |
-| `feat:`     | New features | Minor (0.1.0) |
-| `BREAKING CHANGE:` | Breaking API changes | Major (1.0.0) |
-| `docs:`     | Documentation only | No version change |
-| `style:`    | Code style changes | No version change |
-| `refactor:` | Code refactoring | No version change |
-| `perf:`     | Performance improvements | Patch (0.0.1) |
-| `test:`     | Adding tests | No version change |
-| `chore:`    | Build process or auxiliary tool changes | No version change |
+| Commit Type        | Description                             | Version Bump      |
+| ------------------ | --------------------------------------- | ----------------- |
+| `fix:`             | Bug fixes                               | Patch (0.0.1)     |
+| `feat:`            | New features                            | Minor (0.1.0)     |
+| `BREAKING CHANGE:` | Breaking API changes                    | Major (1.0.0)     |
+| `docs:`            | Documentation only                      | No version change |
+| `style:`           | Code style changes                      | No version change |
+| `refactor:`        | Code refactoring                        | No version change |
+| `perf:`            | Performance improvements                | Patch (0.0.1)     |
+| `test:`            | Adding tests                            | No version change |
+| `chore:`           | Build process or auxiliary tool changes | No version change |
 
 ## GitHub Permissions
 

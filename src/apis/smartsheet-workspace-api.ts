@@ -14,7 +14,7 @@ export class SmartsheetWorkspaceAPI {
    * Gets workspaces
    * @returns workspaces data
    */
-  async getWorkspaces(): Promise<any[]> {
+  async listWorkspaces(): Promise<any[]> {
     return this.api.request('GET', `/workspaces`);
   }
 
@@ -34,7 +34,7 @@ export class SmartsheetWorkspaceAPI {
    */
   async createWorkspace(workspaceName: string): Promise<any> {
     const data = {
-      name: workspaceName
+      name: workspaceName,
     };
 
     return this.api.request('POST', `/workspaces`, data);
@@ -57,9 +57,31 @@ export class SmartsheetWorkspaceAPI {
    */
   async createWorkspaceFolder(workspaceId: string, folderName: string): Promise<any> {
     const data = {
-      name: folderName
+      name: folderName,
     };
-    
+
     return this.api.request('POST', `/workspaces/${workspaceId}/folders`, data);
+  }
+
+  /**
+   * Updates a workspace
+   * @param workspaceId Workspace ID
+   * @param name New name for the workspace
+   * @returns Updated workspace data
+   */
+  async updateWorkspace(workspaceId: number, name: string): Promise<any> {
+    const data = {
+      name,
+    };
+    return this.api.request('PUT', `/workspaces/${workspaceId}`, data);
+  }
+
+  /**
+   * Deletes a workspace
+   * @param workspaceId Workspace ID
+   * @returns Delete result
+   */
+  async deleteWorkspace(workspaceId: number): Promise<any> {
+    return this.api.request('DELETE', `/workspaces/${workspaceId}`);
   }
 }

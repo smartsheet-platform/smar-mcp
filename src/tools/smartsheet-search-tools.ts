@@ -3,13 +3,16 @@ import { SmartsheetAPI } from '../apis/smartsheet-api.js';
 import { z } from 'zod';
 
 export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
+  const searchSheetsSchema = {
+    query: z.string().describe('Text to search for in sheet names, cell data, or summary fields'),
+  };
+
   server.tool(
     'search_sheets',
     'Search for sheets by name, cell data, or summary fields',
-    {
-      query: z.string().describe('Text to search for in sheet names, cell data, or summary fields'),
-    },
-    async ({ query }) => {
+    searchSheetsSchema as any,
+    async (args: any) => {
+      const { query } = args;
       try {
         console.info(`Searching for sheets with query: ${query}`);
         const results = await api.search.searchSheets(query);
@@ -17,7 +20,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -29,7 +32,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to search for sheets: ${error.message}`,
             },
           ],
@@ -39,14 +42,17 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     },
   );
 
+  const searchInSheetSchema = {
+    sheetId: z.string().describe('The ID of the sheet to retrieve'),
+    query: z.string().describe('Text to search for in sheet names, cell data, or summary fields'),
+  };
+
   server.tool(
     'search_in_sheet',
     "Search all cell data and summary fields in a specific sheet. For a more targeted search in a specific column, use 'find_rows_by_column_value'.",
-    {
-      sheetId: z.string().describe('The ID of the sheet to retrieve'),
-      query: z.string().describe('Text to search for in sheet names, cell data, or summary fields'),
-    },
-    async ({ sheetId, query }) => {
+    searchInSheetSchema as any,
+    async (args: any) => {
+      const { sheetId, query } = args;
       try {
         console.info(`Searching for sheet with ID: ${sheetId} with query: ${query}`);
         const results = await api.search.searchSheet(sheetId, query);
@@ -54,7 +60,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -67,7 +73,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to search in sheet: ${error.message}`,
             },
           ],
@@ -77,14 +83,17 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     },
   );
 
+  const searchInSheetByUrlSchema = {
+    url: z.string().describe('The URL of the sheet to retrieve'),
+    query: z.string().describe('Text to search for in sheet names, cell data, or summary fields'),
+  };
+
   server.tool(
     'search_in_sheet_by_url',
     'Search cell data and summary fields for a specific sheet by URL',
-    {
-      url: z.string().describe('The URL of the sheet to retrieve'),
-      query: z.string().describe('Text to search for in sheet names, cell data, or summary fields'),
-    },
-    async ({ url, query }) => {
+    searchInSheetByUrlSchema as any,
+    async (args: any) => {
+      const { url, query } = args;
       try {
         console.info(`Searching for sheet with URL: ${url} with query: ${query}`);
         const match = url.match(/sheets\/([^/?]+)/);
@@ -93,7 +102,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
           return {
             content: [
               {
-                type: 'text',
+                type: 'text' as const,
                 text: `Failed to get sheet: Invalid URL format`,
               },
             ],
@@ -106,7 +115,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -118,7 +127,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to search in sheet: ${error.message}`,
             },
           ],
@@ -128,13 +137,16 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     },
   );
 
+  const whatAmIAssignedToBySheetIdSchema = {
+    sheetId: z.string().describe('The ID of the sheet to retrieve'),
+  };
+
   server.tool(
     'what_am_i_assigned_to_by_sheet_id',
     'Search a sheet by ID to find assigned tasks',
-    {
-      sheetId: z.string().describe('The ID of the sheet to retrieve'),
-    },
-    async ({ sheetId }) => {
+    whatAmIAssignedToBySheetIdSchema as any,
+    async (args: any) => {
+      const { sheetId } = args;
       try {
         const user = await api.users.getCurrentUser();
         const results = await api.search.searchSheet(sheetId, user.email);
@@ -142,7 +154,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -152,7 +164,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to search for assigned tasks in sheet: ${error.message}`,
             },
           ],
@@ -162,13 +174,16 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     },
   );
 
+  const whatAmIAssignedToBySheetUrlSchema = {
+    url: z.string().describe('The URL of the sheet to retrieve'),
+  };
+
   server.tool(
     'what_am_i_assigned_to_by_sheet_url',
     'Search a sheet by URL to find assigned tasks',
-    {
-      url: z.string().describe('The URL of the sheet to retrieve'),
-    },
-    async ({ url }) => {
+    whatAmIAssignedToBySheetUrlSchema as any,
+    async (args: any) => {
+      const { url } = args;
       try {
         const user = await api.users.getCurrentUser();
         const match = url.match(/sheets\/([^/?]+)/);
@@ -177,7 +192,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
           return {
             content: [
               {
-                type: 'text',
+                type: 'text' as const,
                 text: `Failed to get sheet: Invalid URL format`,
               },
             ],
@@ -190,7 +205,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -200,7 +215,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to search for assigned tasks in sheet: ${error.message}`,
             },
           ],
@@ -210,13 +225,16 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     },
   );
 
+  const searchFoldersSchema = {
+    query: z.string().describe('Text to search for in folder names'),
+  };
+
   server.tool(
     'search_folders',
     'Search for folders by name',
-    {
-      query: z.string().describe('Text to search for in folder names'),
-    },
-    async ({ query }) => {
+    searchFoldersSchema as any,
+    async (args: any) => {
+      const { query } = args;
       try {
         console.info(`Searching for folders with query: ${query}`);
         const results = await api.search.searchFolders(query);
@@ -224,7 +242,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -234,7 +252,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to search for folders: ${error.message}`,
             },
           ],
@@ -244,13 +262,16 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     },
   );
 
+  const searchWorkspacesSchema = {
+    query: z.string().describe('Text to search for in workspace names'),
+  };
+
   server.tool(
     'search_workspaces',
     'Search for workspaces by name',
-    {
-      query: z.string().describe('Text to search for in workspace names'),
-    },
-    async ({ query }) => {
+    searchWorkspacesSchema as any,
+    async (args: any) => {
+      const { query } = args;
       try {
         console.info(`Searching for workspaces with query: ${query}`);
         const results = await api.search.searchWorkspaces(query);
@@ -258,7 +279,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -268,7 +289,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to search for workspaces: ${error.message}`,
             },
           ],
@@ -278,13 +299,16 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     },
   );
 
+  const searchReportsSchema = {
+    query: z.string().describe('Text to search for in report names'),
+  };
+
   server.tool(
     'search_reports',
     'Search for reports by name',
-    {
-      query: z.string().describe('Text to search for in report names'),
-    },
-    async ({ query }) => {
+    searchReportsSchema as any,
+    async (args: any) => {
+      const { query } = args;
       try {
         console.info(`Searching for reports with query: ${query}`);
         const results = await api.search.searchReports(query);
@@ -292,7 +316,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -302,7 +326,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to search for reports: ${error.message}`,
             },
           ],
@@ -312,13 +336,16 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
     },
   );
 
+  const searchDashboardsSchema = {
+    query: z.string().describe('Text to search for in dashboard names'),
+  };
+
   server.tool(
     'search_dashboards',
     'Search for dashboards by name',
-    {
-      query: z.string().describe('Text to search for in dashboard names'),
-    },
-    async ({ query }) => {
+    searchDashboardsSchema as any,
+    async (args: any) => {
+      const { query } = args;
       try {
         console.info(`Searching for dashboards with query: ${query}`);
         const results = await api.search.searchDashboards(query);
@@ -326,7 +353,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(results, null, 2),
             },
           ],
@@ -336,7 +363,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to search for dashboards: ${error.message}`,
             },
           ],

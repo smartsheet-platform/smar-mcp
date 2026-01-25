@@ -89,4 +89,14 @@ export class SmartsheetDiscussionAPI {
 
     return this.api.request('POST', `/sheets/${sheetId}/rows/${rowId}/discussions`, data);
   }
+
+  /**
+   * Delete a discussion
+   * @param sheetId Sheet ID
+   * @param discussionId Discussion ID
+   * @returns Delete result
+   */
+  async deleteDiscussion(sheetId: string, discussionId: number): Promise<any> {
+    return this.api.request('DELETE', `/sheets/${sheetId}/discussions/${discussionId}`);
+  }
 }

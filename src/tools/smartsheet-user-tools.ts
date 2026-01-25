@@ -12,7 +12,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
       return {
         content: [
           {
-            type: 'text',
+            type: 'text' as const,
             text: JSON.stringify(user, null, 2),
           },
         ],
@@ -22,7 +22,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
       return {
         content: [
           {
-            type: 'text',
+            type: 'text' as const,
             text: `Failed to get current user: ${error.message}`,
           },
         ],
@@ -32,13 +32,17 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
   });
 
   // Tool: Get User
+  // Tool: Get User
+  const getUserSchema = {
+    userId: z.string().describe('ID of the user to get'),
+  };
+
   server.tool(
     'get_user',
     "Gets a user's information by ID",
-    {
-      userId: z.string().describe('ID of the user to get'),
-    },
-    async ({ userId }) => {
+    getUserSchema as any,
+    async (args: any) => {
+      const { userId } = args;
       try {
         console.info(`Getting user with ID: ${userId}`);
         const user = await api.users.getUserById(userId);
@@ -46,7 +50,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(user, null, 2),
             },
           ],
@@ -56,7 +60,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to get user: ${error.message}`,
             },
           ],
@@ -74,7 +78,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
       return {
         content: [
           {
-            type: 'text',
+            type: 'text' as const,
             text: JSON.stringify(users, null, 2),
           },
         ],
@@ -84,7 +88,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
       return {
         content: [
           {
-            type: 'text',
+            type: 'text' as const,
             text: `Failed to list users: ${error.message}`,
           },
         ],

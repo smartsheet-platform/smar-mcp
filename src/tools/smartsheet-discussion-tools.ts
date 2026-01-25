@@ -4,20 +4,23 @@ import { z } from 'zod';
 
 export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
   // Tool: Get discussions by sheet ID
+  const getDiscussionsBySheetIdSchema = {
+    sheetId: z.string().describe('The ID of the sheet'),
+    include: z
+      .string()
+      .optional()
+      .describe("Optional parameter to include additional information (e.g., 'attachments')"),
+    pageSize: z.number().optional().describe('Number of discussions to return per page'),
+    page: z.number().optional().describe('Page number to return'),
+    includeAll: z.boolean().optional().describe('Whether to include all results'),
+  };
+
   server.tool(
     'get_discussions_by_sheet_id',
     'Gets discussions by sheet ID',
-    {
-      sheetId: z.string().describe('The ID of the sheet'),
-      include: z
-        .string()
-        .optional()
-        .describe("Optional parameter to include additional information (e.g., 'attachments')"),
-      pageSize: z.number().optional().describe('Number of discussions to return per page'),
-      page: z.number().optional().describe('Page number to return'),
-      includeAll: z.boolean().optional().describe('Whether to include all results'),
-    },
-    async ({ sheetId, include, pageSize, page, includeAll }) => {
+    getDiscussionsBySheetIdSchema as any,
+    async (args: any) => {
+      const { sheetId, include, pageSize, page, includeAll } = args;
       try {
         console.info(`Getting discussions for sheet with ID: ${sheetId}`);
         const discussions = await api.discussions.getDiscussionsBySheetId(
@@ -31,7 +34,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(discussions, null, 2),
             },
           ],
@@ -41,7 +44,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to get discussions: ${error.message}`,
             },
           ],
@@ -52,21 +55,24 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
   );
 
   // Get discussions by row ID
+  const getDiscussionsByRowIdSchema = {
+    sheetId: z.string().describe('ID of the sheet to get discussions for'),
+    rowId: z.string().describe('ID of the row to get discussions for'),
+    include: z
+      .string()
+      .optional()
+      .describe("Optional parameter to include additional information (e.g., 'attachments')"),
+    pageSize: z.number().optional().describe('Number of discussions to return per page'),
+    page: z.number().optional().describe('Page number to return'),
+    includeAll: z.boolean().optional().describe('Whether to include all results'),
+  };
+
   server.tool(
     'get_discussions_by_row_id',
     'Gets discussions by row ID',
-    {
-      sheetId: z.string().describe('ID of the sheet to get discussions for'),
-      rowId: z.string().describe('ID of the row to get discussions for'),
-      include: z
-        .string()
-        .optional()
-        .describe("Optional parameter to include additional information (e.g., 'attachments')"),
-      pageSize: z.number().optional().describe('Number of discussions to return per page'),
-      page: z.number().optional().describe('Page number to return'),
-      includeAll: z.boolean().optional().describe('Whether to include all results'),
-    },
-    async ({ sheetId, rowId, include, pageSize, page, includeAll }) => {
+    getDiscussionsByRowIdSchema as any,
+    async (args: any) => {
+      const { sheetId, rowId, include, pageSize, page, includeAll } = args;
       try {
         console.info(`Getting discussions for row with ID: ${rowId} in sheet with ID: ${sheetId}`);
         const discussions = await api.discussions.getDiscussionsByRowId(
@@ -81,7 +87,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(discussions, null, 2),
             },
           ],
@@ -93,7 +99,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to get discussions: ${error.message}`,
             },
           ],
@@ -104,14 +110,17 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
   );
 
   // Create sheet discussion
+  const createSheetDiscussionSchema = {
+    sheetId: z.string().describe('ID of the sheet to create a discussion for'),
+    commentText: z.string().describe('Text of the comment to add'),
+  };
+
   server.tool(
     'create_sheet_discussion',
     'Creates a new discussion on a sheet',
-    {
-      sheetId: z.string().describe('ID of the sheet to create a discussion for'),
-      commentText: z.string().describe('Text of the comment to add'),
-    },
-    async ({ sheetId, commentText }) => {
+    createSheetDiscussionSchema as any,
+    async (args: any) => {
+      const { sheetId, commentText } = args;
       try {
         console.info(`Creating discussion on sheet with ID: ${sheetId}`);
         const discussion = await api.discussions.createSheetDiscussion(sheetId, commentText);
@@ -119,7 +128,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(discussion, null, 2),
             },
           ],
@@ -129,7 +138,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to create discussion: ${error.message}`,
             },
           ],
@@ -140,15 +149,18 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
   );
 
   // Create row discussion
+  const createRowDiscussionSchema = {
+    sheetId: z.string().describe('ID of the sheet to create a discussion for'),
+    rowId: z.string().describe('ID of the row to create a discussion for'),
+    commentText: z.string().describe('Text of the comment to add'),
+  };
+
   server.tool(
     'create_row_discussion',
     'Creates a new discussion on a row',
-    {
-      sheetId: z.string().describe('ID of the sheet to create a discussion for'),
-      rowId: z.string().describe('ID of the row to create a discussion for'),
-      commentText: z.string().describe('Text of the comment to add'),
-    },
-    async ({ sheetId, rowId, commentText }) => {
+    createRowDiscussionSchema as any,
+    async (args: any) => {
+      const { sheetId, rowId, commentText } = args;
       try {
         console.info(`Creating discussion on row with ID: ${rowId} in sheet with ID: ${sheetId}`);
         const discussion = await api.discussions.createRowDiscussion(sheetId, rowId, commentText);
@@ -156,7 +168,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(discussion, null, 2),
             },
           ],
@@ -168,7 +180,7 @@ export function getDiscussionTools(server: McpServer, api: SmartsheetAPI) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Failed to create discussion: ${error.message}`,
             },
           ],

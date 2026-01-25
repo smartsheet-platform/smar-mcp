@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "esnext",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "bundler",
     "outDir": "./build",
     "rootDir": "./src",
     "strict": true,

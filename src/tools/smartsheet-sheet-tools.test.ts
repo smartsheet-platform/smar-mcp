@@ -1,3 +1,7 @@
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { SmartsheetAPI } from '../apis/smartsheet-api.js';
+import { getSheetTools } from './smartsheet-sheet-tools.js';
+
 // Mock dependencies
 jest.mock('@modelcontextprotocol/sdk/server/mcp.js');
 jest.mock('../apis/smartsheet-api.js', () => ({

@@ -8,7 +8,7 @@
     "smar-mcp": "./build/index.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x build/index.js",
+    "build": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && tsc && chmod +x build/index.js",
     "start": "node -r dotenv/config build/index.js",
     "dev": "npm run build && npm run start",
     "test": "node --expose-gc --max-old-space-size=8192 node_modules/.bin/jest --logHeapUsage",
@@ -79,7 +79,7 @@
     "prettier": "^3.8.1",
     "semantic-release": "^21.1.2",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.4.5"
   },
   "files": [
     "build"

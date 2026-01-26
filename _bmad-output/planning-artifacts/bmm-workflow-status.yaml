@@ -67,14 +67,14 @@ workflow_status:
         command: '/bmad:bmm:workflows:create-prd'
         output: 'Product Requirements Document with FRs and NFRs'
       - id: 'create-ux-design'
-        status: 'pending'
+        status: 'completed'
         conditional: 'if_has_ui'
         agent: 'ux-designer'
         command: '/bmad:bmm:workflows:create-ux-design'
 
   - phase: 3
     name: 'Solutioning'
-    status: 'active'
+    status: 'completed'
     workflows:
       - id: 'create-architecture'
         status: '_bmad-output/planning-artifacts/architecture.md'
@@ -83,28 +83,28 @@ workflow_status:
         command: '/bmad:bmm:workflows:create-architecture'
         output: 'System architecture document'
       - id: 'create-epics-and-stories'
-        status: 'pending'
+        status: '_bmad-output/planning-artifacts/epics 2.md'
         required: true
         agent: 'pm'
         command: '/bmad:bmm:workflows:create-epics-and-stories'
       - id: 'test-design'
-        status: 'pending'
+        status: '_bmad-output/test-design-system 2.md'
         optional: true
         agent: 'tea'
         command: '/bmad:bmm:workflows:test-design'
         output: 'System-level testability review'
       - id: 'implementation-readiness'
-        status: 'pending'
+        status: '_bmad-output/planning-artifacts/implementation-readiness-report-2026-01-25 2.md'
         required: true
         agent: 'architect'
         command: '/bmad:bmm:workflows:implementation-readiness'
 
   - phase: 4
     name: 'Implementation'
-    status: 'pending'
+    status: 'active'
     workflows:
       - id: 'sprint-planning'
-        status: 'pending'
+        status: 'completed'
         required: true
         agent: 'sm'
         command: '/bmad:bmm:workflows:sprint-planning'

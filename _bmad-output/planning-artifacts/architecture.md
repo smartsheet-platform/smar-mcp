@@ -4,9 +4,9 @@ inputDocuments: ['_bmad-output/planning-artifacts/prd.md']
 workflowType: 'architecture'
 project_name: 'smar-mcp'
 status: 'complete'
-completedAt: '2026-01-11'
+completedAt: '2026-01-25'
 user_name: 'Mark'
-date: '2026-01-11'
+date: '2026-01-25'
 ---
 
 # Architecture Decision Document
@@ -108,17 +108,28 @@ The existing project structure effectively implements the "Official SDK" pattern
 
 ### Data Architecture
 
-**Decision: Linear Scan for `find_rows` (MVP)**
+**Decision: Hybrid Strategy (Linear Scan + Metadata Cache)**
 
-- **Rationale**: The 'stateless' nature of the MCP server and simplicity of MVP dictates avoiding complex local state/cache. We will fetch rows and scan them in memory.
-- **Fallout**: Performance risk for sheets > 500 rows.
-- **Mitigation**: If <5s target is missed, upgrade to "Local Indexing" in Phase 2.
+- **Rationale**: To meet NFR-06 (Metadata Caching Permitted) and improve performance vs. pure statelessness.
+- **Implementation**:
+  - **Row Data**: Still Stateless / Linear Scan (No persistence).
+  - **Metadata**: In-Memory LRU Cache (`lru-cache`) for Sheet Summaries (Columns, top rows) to avoid repetitive `get_sheet` calls for context.
+  - **TTL**: Short (e.g., 5 mins) to prevent stale schema data.
+
+### Reliability & Concurrency
+
+**Decision: In-Memory Queueing (`p-queue`)**
+
+- **Rationale**: To meet NFR-01 (Queue & Wait) and NFR-02 (50 Concurrent Agents).
+- **Implementation**:
+  - Global `PQueue` instance with `concurrency: 50`.
+  - All Smartsheet API calls wrapped in `queue.add()`.
+  - **Timeout**: Requests expire/reject if queued > 60s.
 
 ### Authentication & Security
 
 **Decision: Centralized Logging Wrapper**
 
-- **Rationale**: prevent `SMARTSHEET_API_KEY` leakage.
 - **Implementation**: A proxy logger that regex-replaces the API key pattern before writing to `stderr`/`stdout`.
 
 ### API & Communication Patterns
@@ -139,9 +150,10 @@ The existing project structure effectively implements the "Official SDK" pattern
 **Implementation Sequence:**
 
 1.  **Security Layer**: Implement Logger & Secret Sanitization.
-2.  **Error Layer**: Implement Error Mapper.
-3.  **Data Layer**: Implement `find_rows` using Linear Scan.
-4.  **Hierarchy**: Implement `add_rows` with `parentId`.
+2.  **Reliability Layer**: Implement `p-queue` wrapper and `lru-cache` setup.
+3.  **Error Layer**: Implement Error Mapper.
+4.  **Data Layer**: Implement `find_rows` (Linear Scan).
+5.  **Hierarchy**: Implement `add_rows`.
 
 **Cross-Component Dependencies:**
 
@@ -208,6 +220,8 @@ All tool modules must export a function matching this signature:
 │   ├── utils/                  # [NEW] Shared Utilities
 │   │   ├── error-mapper.ts     # [NEW] StdSmartsheetError -> McpError
 │   │   ├── logger.ts           # [NEW] Secret Sanitization Logger
+│   │   ├── queue.ts            # [NEW] PQueue Singleton & Wrapper
+│   │   ├── cache.ts            # [NEW] LRU Cache Singleton
 │   └── smartsheet-types/       # Shared TypeScript Interfaces
 ```
 

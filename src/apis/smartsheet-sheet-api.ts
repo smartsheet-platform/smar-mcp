@@ -1,5 +1,15 @@
 import { SmartsheetAPI } from './smartsheet-api.js';
 import { Logger } from '../utils/logger.js';
+import {
+  Sheet,
+  Row,
+  BulkItemResult,
+  Result,
+  CellHistory,
+  SheetLocation,
+  UpdateRequest,
+  SheetSummary,
+} from '../smartsheet-types/index.js';
 
 /**
  * Sheet-specific API methods for Smartsheet
@@ -23,13 +33,77 @@ export class SmartsheetSheetAPI {
     exclude?: string,
     pageSize?: number,
     page?: number,
-  ): Promise<any> {
+  ): Promise<Sheet> {
     return this.api.request('GET', `/sheets/${sheetId}`, undefined, {
       include,
       exclude,
       pageSize,
       page,
     });
+  }
+
+  /**
+   * Gets all rows of a sheet, handling pagination automatically
+   * @param sheetId Sheet ID
+   * @param include Optional comma-separated list of elements to include
+   * @param exclude Optional comma-separated list of elements to exclude
+   * @returns Sheet with all rows
+   */
+  async getAllRows(sheetId: string, include?: string, exclude?: string): Promise<Sheet> {
+    const pageSize = 500; // Maximize page size for efficiency
+    let page = 1;
+    let hasMore = true;
+    let allRows: Row[] = [];
+    let sheetMetadata: Sheet | null = null;
+
+    Logger.info(`Fetching all rows for sheet ${sheetId}...`);
+
+    while (hasMore) {
+      const sheet = await this.getSheet(sheetId, include, exclude, pageSize, page);
+
+      // Capture metadata from the first page
+      if (!sheetMetadata) {
+        sheetMetadata = { ...sheet, rows: [] };
+      }
+
+      const rows = sheet.rows || [];
+      allRows = allRows.concat(rows);
+      Logger.info(`Fetched page ${page}, total rows: ${allRows.length}`);
+
+      if (sheet.totalPageCount && page < sheet.totalPageCount) {
+        page++;
+      } else {
+        hasMore = false;
+      }
+    }
+
+    if (!sheetMetadata) {
+      throw new Error(`Failed to fetch sheet ${sheetId}`);
+    }
+
+    sheetMetadata.rows = allRows;
+    return sheetMetadata;
+  }
+
+  /**
+   * Gets a lightweight summary of a sheet
+   * @param sheetId Sheet ID
+   * @returns Sheet summary with top 5 rows
+   */
+  async getSheetSummary(sheetId: string): Promise<SheetSummary> {
+    const sheet = (await this.api.request('GET', `/sheets/${sheetId}`, undefined, {
+      include: 'columnType,rowPermalink',
+      pageSize: 5, // Truncate to top 5 rows for efficiency
+      page: 1,
+    })) as Sheet;
+
+    return {
+      id: sheet.id,
+      name: sheet.name,
+      totalRowCount: sheet.totalRowCount,
+      columns: sheet.columns,
+      rows: sheet.rows,
+    };
   }
 
   /**
@@ -44,7 +118,7 @@ export class SmartsheetSheetAPI {
     exclude?: string,
     pageSize?: number,
     page?: number,
-  ): Promise<any> {
+  ): Promise<Sheet> {
     return this.api.request('GET', `/sheets/${directIdToken}`, undefined, {
       include,
       exclude,
@@ -58,7 +132,7 @@ export class SmartsheetSheetAPI {
    * @param sheetId Sheet ID
    * @returns Sheet version
    */
-  async getSheetVersion(sheetId: string): Promise<any> {
+  async getSheetVersion(sheetId: string): Promise<Result> {
     return this.api.request('GET', `/sheets/${sheetId}/version`);
   }
 
@@ -79,7 +153,7 @@ export class SmartsheetSheetAPI {
     include?: string,
     pageSize?: number,
     page?: number,
-  ): Promise<any> {
+  ): Promise<CellHistory[]> {
     return this.api.request(
       'GET',
       `/sheets/${sheetId}/rows/${rowId}/columns/${columnId}/history`,
@@ -99,7 +173,7 @@ export class SmartsheetSheetAPI {
    * @param include Optional comma-separated list of elements to include
    * @returns Row data
    */
-  async getRow(sheetId: string, rowId: string, include?: string, exclude?: string): Promise<any> {
+  async getRow(sheetId: string, rowId: string, include?: string, exclude?: string): Promise<Row> {
     return this.api.request('GET', `/sheets/${sheetId}/rows/${rowId}`, undefined, {
       include,
       exclude,
@@ -112,7 +186,7 @@ export class SmartsheetSheetAPI {
    * @param rows Array of row objects to update
    * @returns Update result
    */
-  async updateRows(sheetId: string, rows: any[]): Promise<any> {
+  async updateRows(sheetId: string, rows: any[]): Promise<BulkItemResult> {
     return this.api.request('PUT', `/sheets/${sheetId}/rows`, rows);
   }
 
@@ -131,7 +205,7 @@ export class SmartsheetSheetAPI {
       toTop?: boolean;
       toBottom?: boolean;
     },
-  ): Promise<any> {
+  ): Promise<BulkItemResult> {
     return this.api.request('POST', `/sheets/${sheetId}/rows`, rows, options);
   }
 
@@ -146,7 +220,7 @@ export class SmartsheetSheetAPI {
     sheetId: string,
     rowIds: string[],
     ignoreRowsNotFound: boolean = true,
-  ): Promise<any> {
+  ): Promise<BulkItemResult> {
     return this.api.request('DELETE', `/sheets/${sheetId}/rows`, undefined, {
       ids: rowIds.join(','),
       ignoreRowsNotFound: ignoreRowsNotFound.toString(),
@@ -158,7 +232,7 @@ export class SmartsheetSheetAPI {
    * @param sheetId Sheet ID
    * @returns Location information including folder ID
    */
-  async getSheetLocation(sheetId: string): Promise<any> {
+  async getSheetLocation(sheetId: string): Promise<SheetLocation> {
     const sheet = await this.getSheet(sheetId);
     return {
       folderId: sheet.parentId,
@@ -180,7 +254,7 @@ export class SmartsheetSheetAPI {
     destinationName: string,
     destinationFolderId?: string,
     workspaceId?: string,
-  ): Promise<any> {
+  ): Promise<Result> {
     const data: any = {
       newName: destinationName,
     };
@@ -201,7 +275,7 @@ export class SmartsheetSheetAPI {
 
     const result = await this.api.request('POST', `/sheets/${sheetId}/copy`, data);
     Logger.info(`Copy sheet result: ${JSON.stringify((result as any).result?.id)}`);
-    return result;
+    return result as Result;
   }
 
   /**
@@ -211,7 +285,7 @@ export class SmartsheetSheetAPI {
    * @param folderId Optional folder ID where the sheet should be created
    * @returns New sheet data
    */
-  async createSheet(name: string, columns: any[], folderId?: string): Promise<any> {
+  async createSheet(name: string, columns: any[], folderId?: string): Promise<Sheet> {
     const data = {
       name,
       columns,
@@ -245,7 +319,7 @@ export class SmartsheetSheetAPI {
       subject?: string;
       ccMe?: boolean;
     },
-  ): Promise<any> {
+  ): Promise<UpdateRequest> {
     return this.api.request('POST', `/sheets/${sheetId}/updaterequests`, options);
   }
 
@@ -257,7 +331,7 @@ export class SmartsheetSheetAPI {
    * @param value Value to search for (case-insensitive string match)
    * @returns Array of matching rows
    */
-  async findRows(sheetId: string, columnId: number, value: string): Promise<any[]> {
+  async findRows(sheetId: string, columnId: number, value: string): Promise<Row[]> {
     const pageSize = 500; // Maximize page size for efficiency
     let page = 1;
     let hasMore = true;
@@ -267,7 +341,6 @@ export class SmartsheetSheetAPI {
     Logger.info(`Searching sheet ${sheetId} for rows where column ${columnId} equals "${value}"`);
 
     while (hasMore) {
-      Logger.info(`Scanning page ${page}...`);
       const sheet = await this.getSheet(sheetId, undefined, undefined, pageSize, page);
       const rows = sheet.rows || [];
 
@@ -301,7 +374,7 @@ export class SmartsheetSheetAPI {
    * @param sheetId Sheet ID
    * @returns Delete result
    */
-  async deleteSheet(sheetId: string): Promise<any> {
+  async deleteSheet(sheetId: string): Promise<Result> {
     return this.api.request('DELETE', `/sheets/${sheetId}`);
   }
 }

@@ -3,7 +3,12 @@ import { SmartsheetAPI } from '../apis/smartsheet-api.js';
 import { z } from 'zod';
 import { Logger } from '../utils/logger.js';
 
-export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDeleteTools: boolean) {
+export function getSheetTools(
+  server: McpServer,
+  api: SmartsheetAPI,
+  allowDeleteTools: boolean,
+  safeMode: boolean,
+) {
   // Tool: Get Sheet
   const getSheetSchema = {
     sheetId: z.string().describe('The ID of the sheet to retrieve'),
@@ -11,8 +16,12 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       .string()
       .optional()
       .describe("Comma-separated list of elements to include (e.g., 'format,formulas')"),
-    pageSize: z.number().optional().describe('Number of rows to return per page'),
-    page: z.number().optional().describe('Page number to return'),
+    pageSize: z.number().optional().describe('Deprecated. Use `limit` instead.'),
+    page: z.number().optional().describe('Deprecated. Use `limit` instead.'),
+    limit: z
+      .number()
+      .optional()
+      .describe('Number of rows to return. Default is 50. Set to -1 for all rows.'),
   };
 
   server.tool(
@@ -20,10 +29,32 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
     'Retrieves the current state of a sheet, including rows, columns, and cells',
     getSheetSchema as any,
     async (args: any) => {
-      const { sheetId, include, pageSize, page } = args;
+      const { sheetId, include, pageSize, page, limit } = args;
       try {
-        Logger.info(`Getting sheet with ID: ${sheetId}`);
-        const sheet = await api.sheets.getSheet(sheetId, include, undefined, pageSize, page);
+        Logger.info(`Getting sheet with ID: ${sheetId}. Limit: ${limit}`);
+
+        let sheet;
+        if (limit === -1) {
+          // Unlimited read - fetch all rows
+          sheet = await api.sheets.getAllRows(sheetId, include);
+        } else {
+          // Smart Truncation
+          const effectiveLimit = limit !== undefined ? limit : 50; // Default to 50
+          const effectivePageSize = pageSize || effectiveLimit; // Map limit to pageSize if possible
+          const effectivePage = page || 1;
+
+          // If limit is specific (e.g. 10), we can just set pageSize=10
+          // If limit is larger than max pageSize (500?), we might need multiple pages, but for now
+          // we will rely on mapped pageSize for simplicity unless -1 is used.
+
+          sheet = await api.sheets.getSheet(
+            sheetId,
+            include,
+            undefined,
+            effectivePageSize,
+            effectivePage,
+          );
+        }
 
         return {
           content: [
@@ -40,6 +71,43 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
             {
               type: 'text' as const,
               text: `Failed to get sheet: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+
+  const getSheetSummarySchema = {
+    sheetId: z.string().describe('The ID of the sheet to summarize'),
+  };
+
+  server.tool(
+    'get_sheet_summary',
+    'Retrieves a lightweight summary of a sheet (columns + top 5 rows). Use this before `get_sheet` to verify context.',
+    getSheetSummarySchema as any,
+    async (args: any) => {
+      const { sheetId } = args;
+      try {
+        Logger.info(`Getting summary for sheet: ${sheetId}`);
+        const summary = await api.sheets.getSheetSummary(sheetId);
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(summary, null, 2),
+            },
+          ],
+        };
+      } catch (error: any) {
+        Logger.error(`Failed to get summary for sheet: ${sheetId}`, { error });
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Failed to get sheet summary: ${error.message}`,
             },
           ],
           isError: true,
@@ -270,6 +338,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         }),
       )
       .describe('Array of row objects to update'),
+    dry_run: z.boolean().optional().describe('Simulate the update only (no actual change)'),
   };
 
   server.tool(
@@ -277,9 +346,29 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
     'Updates rows in a sheet, including cell values, formatting, and formulae',
     updateRowsSchema as any,
     async (args: any) => {
-      const { sheetId, rows } = args;
+      const { sheetId, rows, dry_run } = args;
       try {
-        Logger.info(`Updating ${rows.length} rows in sheet ${sheetId}`);
+        Logger.info(`Updating ${rows.length} rows in sheet ${sheetId}. Dry Run: ${dry_run}`);
+
+        if (dry_run) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: JSON.stringify(
+                  {
+                    resultCode: 0,
+                    message: `[Dry Run] Would update ${rows.length} rows in sheet ${sheetId}`,
+                    result: rows,
+                  },
+                  null,
+                  2,
+                ),
+              },
+            ],
+          };
+        }
+
         const result = await api.sheets.updateRows(sheetId, rows);
 
         return {
@@ -340,12 +429,33 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         }),
       )
       .describe('Array of row objects to add'),
+    dry_run: z.boolean().optional().describe('Simulate the add only (no actual change)'),
   };
 
   server.tool('add_rows', 'Adds new rows to a sheet', addRowsSchema as any, async (args: any) => {
-    const { sheetId, rows, toTop, toBottom, parentId, siblingId } = args;
+    const { sheetId, rows, toTop, toBottom, parentId, siblingId, dry_run } = args;
     try {
-      Logger.info(`Adding ${rows.length} rows to sheet ${sheetId}`);
+      Logger.info(`Adding ${rows.length} rows to sheet ${sheetId}. Dry Run: ${dry_run}`);
+
+      if (dry_run) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(
+                {
+                  resultCode: 0,
+                  message: `[Dry Run] Would add ${rows.length} rows to sheet ${sheetId}`,
+                  result: rows,
+                },
+                null,
+                2,
+              ),
+            },
+          ],
+        };
+      }
+
       const result = await api.sheets.addRows(sheetId, rows, {
         toTop,
         toBottom,
@@ -384,6 +494,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         .boolean()
         .optional()
         .describe("If true, don't throw an error if rows are not found"),
+      dry_run: z.boolean().optional().describe('Simulate the delete only (no actual change)'),
     };
 
     server.tool(
@@ -391,9 +502,47 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       'Deletes rows from a sheet',
       deleteRowsSchema as any,
       async (args: any) => {
-        const { sheetId, rowIds, ignoreRowsNotFound } = args;
+        const { sheetId, rowIds, ignoreRowsNotFound, dry_run } = args;
         try {
-          Logger.info(`Deleting ${rowIds.length} rows from sheet ${sheetId}`);
+          Logger.info(
+            `Deleting ${rowIds.length} rows from sheet ${sheetId}. SafeMode: ${safeMode}, DryRun: ${dry_run}`,
+          );
+
+          // Safety Check: Bulk Delete Protection
+          if (safeMode && rowIds.length > 1) {
+            const errorMsg =
+              'Bulk delete is disabled in Safe Mode. You can only delete 1 row at a time.';
+            Logger.warn(errorMsg);
+            return {
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `Failed to delete rows: ${errorMsg}`,
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          if (dry_run) {
+            return {
+              content: [
+                {
+                  type: 'text' as const,
+                  text: JSON.stringify(
+                    {
+                      resultCode: 0,
+                      message: `[Dry Run] Would delete ${rowIds.length} rows from sheet ${sheetId}`,
+                      result: rowIds,
+                    },
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            };
+          }
+
           const result = await api.sheets.deleteRows(sheetId, rowIds, ignoreRowsNotFound);
 
           return {

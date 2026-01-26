@@ -110,7 +110,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
           };
         }
         const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken);
-        const results = await api.search.searchSheet(sheet.id, query);
+        const results = await api.search.searchSheet(sheet.id.toString(), query);
 
         return {
           content: [
@@ -200,7 +200,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
           };
         }
         const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken);
-        const results = await api.search.searchSheet(sheet.id, user.email);
+        const results = await api.search.searchSheet(sheet.id.toString(), user.email);
 
         return {
           content: [

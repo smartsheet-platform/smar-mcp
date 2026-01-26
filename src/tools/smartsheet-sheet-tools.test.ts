@@ -63,7 +63,7 @@ describe('getSheetTools', () => {
 
   describe('Registration', () => {
     it('should register all tools when deletion is enabled', () => {
-      getSheetTools(server, api, true);
+      getSheetTools(server, api, true, false);
       const expectedTools = [
         'get_sheet',
         'get_sheet_by_url',
@@ -89,7 +89,7 @@ describe('getSheetTools', () => {
     });
 
     it('should NOT register delete_rows when deletion is disabled', () => {
-      getSheetTools(server, api, false);
+      getSheetTools(server, api, false, false);
       expect(toolCallbacks.has('delete_rows')).toBe(false);
       expect(toolCallbacks.has('get_sheet')).toBe(true);
     });
@@ -98,7 +98,7 @@ describe('getSheetTools', () => {
   describe('Tool Logic', () => {
     beforeEach(() => {
       // Register tools for logic testing
-      getSheetTools(server, api, true);
+      getSheetTools(server, api, true, false);
     });
 
     describe('get_sheet', () => {
@@ -108,13 +108,7 @@ describe('getSheetTools', () => {
 
         const result = await callback({ sheetId: '123', include: 'format' });
 
-        expect(api.sheets.getSheet).toHaveBeenCalledWith(
-          '123',
-          'format',
-          undefined,
-          undefined,
-          undefined,
-        );
+        expect(api.sheets.getSheet).toHaveBeenCalledWith('123', 'format', undefined, 50, 1);
         expect(JSON.parse(result.content[0].text)).toEqual({ id: '123', name: 'Test Sheet' });
       });
 
@@ -208,6 +202,226 @@ describe('getSheetTools', () => {
         expect(api.sheets.findRows).toHaveBeenCalledWith('123', 456, 'search_term');
         expect(JSON.parse(result.content[0].text)).toEqual([{ id: 'row1' }]);
       });
+    });
+
+    describe('add_rows - Story 2.2: Hierarchy Support', () => {
+      it('should add rows with parentId for hierarchy', async () => {
+        const callback = toolCallbacks.get('add_rows')!;
+        const mockResult = {
+          resultCode: 0,
+          message: 'SUCCESS',
+          result: [{ id: 'newrow1' }],
+        };
+        (api.sheets.addRows as jest.Mock).mockResolvedValue(mockResult);
+
+        const rows = [
+          {
+            cells: [
+              { columnId: 123, value: 'Child Task' },
+              { columnId: 456, value: 'In Progress' },
+            ],
+          },
+        ];
+
+        const result = await callback({
+          sheetId: '999',
+          rows,
+          parentId: '888',
+        });
+
+        // Verify API called with parentId in options
+        expect(api.sheets.addRows).toHaveBeenCalledWith('999', rows, {
+          toTop: undefined,
+          toBottom: undefined,
+          parentId: '888',
+          siblingId: undefined,
+        });
+
+        expect(JSON.parse(result.content[0].text)).toEqual(mockResult);
+      });
+
+      it('should add rows with siblingId for positioning', async () => {
+        const callback = toolCallbacks.get('add_rows')!;
+        (api.sheets.addRows as jest.Mock).mockResolvedValue({ resultCode: 0 });
+
+        const rows = [{ cells: [{ columnId: 123, value: 'Sibling Task' }] }];
+
+        await callback({
+          sheetId: '999',
+          rows,
+          siblingId: '777',
+        });
+
+        expect(api.sheets.addRows).toHaveBeenCalledWith('999', rows, {
+          toTop: undefined,
+          toBottom: undefined,
+          parentId: undefined,
+          siblingId: '777',
+        });
+      });
+
+      it('should add rows to top when toTop is true', async () => {
+        const callback = toolCallbacks.get('add_rows')!;
+        (api.sheets.addRows as jest.Mock).mockResolvedValue({ resultCode: 0 });
+
+        const rows = [{ cells: [{ columnId: 123, value: 'Top Task' }] }];
+
+        await callback({
+          sheetId: '999',
+          rows,
+          toTop: true,
+        });
+
+        expect(api.sheets.addRows).toHaveBeenCalledWith('999', rows, {
+          toTop: true,
+          toBottom: undefined,
+          parentId: undefined,
+          siblingId: undefined,
+        });
+      });
+
+      it('should add rows to bottom when toBottom is true', async () => {
+        const callback = toolCallbacks.get('add_rows')!;
+        (api.sheets.addRows as jest.Mock).mockResolvedValue({ resultCode: 0 });
+
+        const rows = [{ cells: [{ columnId: 123, value: 'Bottom Task' }] }];
+
+        await callback({
+          sheetId: '999',
+          rows,
+          toBottom: true,
+        });
+
+        expect(api.sheets.addRows).toHaveBeenCalledWith('999', rows, {
+          toTop: undefined,
+          toBottom: true,
+          parentId: undefined,
+          siblingId: undefined,
+        });
+      });
+
+      it('should support dry_run for add_rows', async () => {
+        const callback = toolCallbacks.get('add_rows')!;
+
+        const rows = [{ cells: [{ columnId: 123, value: 'Dry Run Task' }] }];
+
+        const result = await callback({
+          sheetId: '999',
+          rows,
+          parentId: '888',
+          dry_run: true,
+        });
+
+        // Should NOT call API during dry run
+        expect(api.sheets.addRows).not.toHaveBeenCalled();
+
+        const response = JSON.parse(result.content[0].text);
+        expect(response.message).toContain('[Dry Run]');
+        expect(response.result).toEqual(rows);
+      });
+
+      it('should populate cells correctly with hierarchy', async () => {
+        const callback = toolCallbacks.get('add_rows')!;
+        (api.sheets.addRows as jest.Mock).mockResolvedValue({
+          resultCode: 0,
+          result: [
+            {
+              id: 'newrow1',
+              parentId: '888',
+              cells: [
+                { columnId: 123, value: 'Child Task', displayValue: 'Child Task' },
+                { columnId: 456, value: 'Open', displayValue: 'Open' },
+              ],
+            },
+          ],
+        });
+
+        const rows = [
+          {
+            cells: [
+              { columnId: 123, value: 'Child Task' },
+              { columnId: 456, value: 'Open' },
+            ],
+          },
+        ];
+
+        const result = await callback({
+          sheetId: '999',
+          rows,
+          parentId: '888',
+        });
+
+        expect(api.sheets.addRows).toHaveBeenCalledWith('999', rows, {
+          toTop: undefined,
+          toBottom: undefined,
+          parentId: '888',
+          siblingId: undefined,
+        });
+
+        const response = JSON.parse(result.content[0].text);
+        expect(response.result[0].parentId).toBe('888');
+        expect(response.result[0].cells).toHaveLength(2);
+      });
+
+      it('should handle addRows API errors gracefully', async () => {
+        const callback = toolCallbacks.get('add_rows')!;
+        (api.sheets.addRows as jest.Mock).mockRejectedValue(new Error('Invalid parent ID'));
+
+        const rows = [{ cells: [{ columnId: 123, value: 'Task' }] }];
+
+        const result = await callback({
+          sheetId: '999',
+          rows,
+          parentId: 'invalid',
+        });
+
+        expect(result.isError).toBe(true);
+        expect(result.content[0].text).toContain('Failed to add rows: Invalid parent ID');
+      });
+    });
+  });
+
+  describe('Safe Mode - Story 2.1', () => {
+    it('should block bulk delete in safe mode', async () => {
+      getSheetTools(server, api, true, true); // safeMode = true
+      const callback = toolCallbacks.get('delete_rows')!;
+
+      const result = await callback({
+        sheetId: '123',
+        rowIds: ['1', '2', '3'],
+      });
+
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('Bulk delete is disabled in Safe Mode');
+      expect(api.sheets.deleteRows).not.toHaveBeenCalled();
+    });
+
+    it('should allow single row delete in safe mode', async () => {
+      getSheetTools(server, api, true, true); // safeMode = true
+      const callback = toolCallbacks.get('delete_rows')!;
+      (api.sheets.deleteRows as jest.Mock).mockResolvedValue({ resultCode: 0 });
+
+      const result = await callback({
+        sheetId: '123',
+        rowIds: ['1'],
+      });
+
+      expect(result.isError).toBeFalsy();
+      expect(api.sheets.deleteRows).toHaveBeenCalledWith('123', ['1'], undefined);
+    });
+
+    it('should allow bulk delete when safe mode is disabled', async () => {
+      getSheetTools(server, api, true, false); // safeMode = false
+      const callback = toolCallbacks.get('delete_rows')!;
+      (api.sheets.deleteRows as jest.Mock).mockResolvedValue({ resultCode: 0 });
+
+      const result = await callback({
+        sheetId: '123',
+        rowIds: ['1', '2', '3'],
+      });
+
+      expect(result.isError).toBeFalsy();
+      expect(api.sheets.deleteRows).toHaveBeenCalledWith('123', ['1', '2', '3'], undefined);
     });
   });
 });

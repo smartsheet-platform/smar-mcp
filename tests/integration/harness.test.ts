@@ -86,8 +86,8 @@ const runTests = process.env.RUN_INTEGRATION_TESTS === 'true';
 
       const addedRows = await client.sheets.addRows(testSheetId, [rowData]);
       expect(addedRows).toBeDefined();
-      expect(addedRows.length).toBe(1);
-      const newRowId = addedRows[0].id;
+      expect(addedRows.result.length).toBe(1);
+      const newRowId = addedRows.result[0].id;
       console.log(`Row added with ID: ${newRowId}`);
 
       // 3. Verify Row Data (Get Sheet)
@@ -96,7 +96,11 @@ const runTests = process.env.RUN_INTEGRATION_TESTS === 'true';
       const fetchedRow = sheetData.rows.find((r: any) => r.id.toString() === newRowId.toString());
 
       expect(fetchedRow).toBeDefined();
+      if (!fetchedRow) throw new Error('Row not found');
+
       const taskCell = fetchedRow.cells.find((c: any) => c.columnId === colMap.get('Task Name'));
+      expect(taskCell).toBeDefined();
+      if (!taskCell) throw new Error('Cell not found');
       expect(taskCell.value).toBe('Integration Test Task');
       console.log('Row verified successfully.');
     },

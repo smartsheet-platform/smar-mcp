@@ -8,6 +8,11 @@ export class SmartsheetErrorMapper {
    * Maps an unknown error (likely from axios/Smartsheet) to a user-friendly message
    */
   static getErrorMessage(error: any): string {
+    if (!error) return 'Unknown Error (Null/Undefined)';
+
+    // Handle string errors
+    if (typeof error === 'string') return error;
+
     // 1. Handle Axios Response Errors
     if (error.response) {
       const status = error.response.status;

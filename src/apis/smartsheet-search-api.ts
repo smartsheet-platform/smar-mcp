@@ -1,4 +1,5 @@
 import { SmartsheetAPI } from './smartsheet-api.js';
+import { SearchResult } from '../smartsheet-types/index.js';
 
 export class SmartsheetSearchAPI {
   private api: SmartsheetAPI;
@@ -13,7 +14,7 @@ export class SmartsheetSearchAPI {
    * @param query Text to search for
    * @returns Search results
    */
-  async searchSheet(sheetId: string, query: string): Promise<any> {
+  async searchSheet(sheetId: string, query: string): Promise<SearchResult> {
     return this.api.request('GET', `/search/sheets/${sheetId}?query=${query}`);
   }
 
@@ -22,7 +23,7 @@ export class SmartsheetSearchAPI {
    * @param query Text to search for
    * @returns Search results
    */
-  async searchSheets(query: string): Promise<any> {
+  async searchSheets(query: string): Promise<SearchResult> {
     return this.api.request(
       'GET',
       `/search?query=${query}&scopes=sheetNames,cellData,summaryFields`,
@@ -34,7 +35,7 @@ export class SmartsheetSearchAPI {
    * @param query Text to search for
    * @returns Search results
    */
-  async searchFolders(query: string): Promise<any> {
+  async searchFolders(query: string): Promise<SearchResult> {
     return this.api.request('GET', `/search?query=${query}&scopes=folderNames`);
   }
 
@@ -43,7 +44,7 @@ export class SmartsheetSearchAPI {
    * @param query Text to search for
    * @returns Search results
    */
-  async searchWorkspaces(query: string): Promise<any> {
+  async searchWorkspaces(query: string): Promise<SearchResult> {
     return this.api.request('GET', `/search?query=${query}&scopes=workspaceNames`);
   }
 
@@ -52,7 +53,7 @@ export class SmartsheetSearchAPI {
    * @param query Text to search for
    * @returns Search results
    */
-  async searchReports(query: string): Promise<any> {
+  async searchReports(query: string): Promise<SearchResult> {
     return this.api.request('GET', `/search?query=${query}&scopes=reportNames`);
   }
 
@@ -61,7 +62,7 @@ export class SmartsheetSearchAPI {
    * @param query Text to search for
    * @returns Search results
    */
-  async searchDashboards(query: string): Promise<any> {
+  async searchDashboards(query: string): Promise<SearchResult> {
     return this.api.request('GET', `/search?query=${query}&scopes=sightNames`);
   }
 }

@@ -10,15 +10,18 @@ import {
   UpdateRequest,
   SheetSummary,
 } from '../smartsheet-types/index.js';
+import { MetadataCache } from '../utils/cache.js';
 
 /**
  * Sheet-specific API methods for Smartsheet
  */
 export class SmartsheetSheetAPI {
   private api: SmartsheetAPI;
+  private summaryCache: MetadataCache<SheetSummary>;
 
   constructor(api: SmartsheetAPI) {
     this.api = api;
+    this.summaryCache = new MetadataCache<SheetSummary>();
   }
 
   /**
@@ -91,19 +94,27 @@ export class SmartsheetSheetAPI {
    * @returns Sheet summary with top 5 rows
    */
   async getSheetSummary(sheetId: string): Promise<SheetSummary> {
+    const cached = this.summaryCache.get(`summary-${sheetId}`);
+    if (cached) {
+      Logger.debug(`Cache hit for sheet summary ${sheetId}`);
+      return cached;
+    }
+
     const sheet = (await this.api.request('GET', `/sheets/${sheetId}`, undefined, {
       include: 'columnType,rowPermalink',
       pageSize: 5, // Truncate to top 5 rows for efficiency
       page: 1,
     })) as Sheet;
 
-    return {
+    const result = {
       id: sheet.id,
       name: sheet.name,
       totalRowCount: sheet.totalRowCount,
       columns: sheet.columns,
       rows: sheet.rows,
     };
+    this.summaryCache.set(`summary-${sheetId}`, result);
+    return result;
   }
 
   /**

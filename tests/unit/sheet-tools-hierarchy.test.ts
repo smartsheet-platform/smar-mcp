@@ -4,7 +4,7 @@ import { getSheetTools } from '../../src/tools/smartsheet-sheet-tools.js';
 describe('add_rows hierarchy support', () => {
   test('passes parentId to API', async () => {
     const mockServer = { tool: jest.fn() };
-    const mockApi = {
+    const mockApi: any = {
       sheets: {
         addRows: jest.fn().mockResolvedValue({ resultCode: 0 }),
       },
@@ -29,7 +29,7 @@ describe('add_rows hierarchy support', () => {
 
   test('passes siblingId to API', async () => {
     const mockServer = { tool: jest.fn() };
-    const mockApi = {
+    const mockApi: any = {
       sheets: {
         addRows: jest.fn().mockResolvedValue({ resultCode: 0 }),
       },

@@ -11,6 +11,7 @@ import { resolve } from 'path';
 const packageJson = JSON.parse(readFileSync(resolve(process.cwd(), 'package.json'), 'utf-8'));
 import { Logger } from '../utils/logger.js';
 import { SmartsheetErrorMapper } from '../utils/error-mapper.js';
+import { RequestQueue } from '../utils/queue.js';
 
 /**
  * Direct Smartsheet API client that doesn't rely on the SDK
@@ -24,6 +25,7 @@ export class SmartsheetAPI {
   public users: SmartsheetUserAPI;
   public search: SmartsheetSearchAPI;
   public discussions: SmartsheetDiscussionAPI;
+  private queue: RequestQueue;
   /**
    * Creates a new SmartsheetAPI instance
    * @param accessToken Smartsheet API access token (from SMARTSHEET_API_KEY env var)
@@ -44,6 +46,7 @@ export class SmartsheetAPI {
     this.users = new SmartsheetUserAPI(this);
     this.search = new SmartsheetSearchAPI(this);
     this.discussions = new SmartsheetDiscussionAPI(this);
+    this.queue = new RequestQueue(50); // Concurrency limit from NFR-02
 
     if (this.accessToken == '') {
       throw new Error('SMARTSHEET_API_KEY environment variable is not set');
@@ -68,55 +71,67 @@ export class SmartsheetAPI {
     data?: any,
     queryParams?: Record<string, any>,
   ): Promise<T> {
-    const maxRetries = 3;
-    let retries = 0;
+    return this.queue.run(async () => {
+      const maxRetries = 3;
+      let retries = 0;
 
-    while (retries <= maxRetries) {
-      try {
-        const url = new URL(`${this.baseUrl}${endpoint}`);
+      while (retries <= maxRetries) {
+        try {
+          const url = new URL(`${this.baseUrl}${endpoint}`);
 
-        // Add query parameters if provided
-        if (queryParams) {
-          Object.entries(queryParams).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-              url.searchParams.append(key, String(value));
-            }
+          // Add query parameters if provided
+          if (queryParams) {
+            Object.entries(queryParams).forEach(([key, value]) => {
+              if (value !== undefined && value !== null) {
+                url.searchParams.append(key, String(value));
+              }
+            });
+          }
+
+          Logger.info(`API Request: ${method} ${url.toString()}`);
+
+          const response = await axios({
+            method,
+            url: url.toString(),
+            data,
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+              'Content-Type': 'application/json',
+              'User-Agent': `smar-mcp/${packageJson.version}`,
+            },
           });
-        }
 
-        Logger.info(`API Request: ${method} ${url.toString()}`);
+          return response.data;
+        } catch (error: any) {
+          const status = error.response?.status;
+          // Retry on Rate Limit (429) or Server Errors (502, 503, 504)
+          if (
+            (status === 429 || status === 503 || status === 502 || status === 504) &&
+            retries < maxRetries
+          ) {
+            const retryAfterHeader = error.response?.headers
+              ? error.response.headers['retry-after']
+              : undefined;
+            let delay = 1000 * Math.pow(2, retries); // Exponential backoff
 
-        const response = await axios({
-          method,
-          url: url.toString(),
-          data,
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            'Content-Type': 'application/json',
-            'User-Agent': `smar-mcp/${packageJson.version}`,
-          },
-        });
+            if (retryAfterHeader) {
+              delay = parseInt(retryAfterHeader, 10) * 1000;
+            }
 
-        return response.data;
-      } catch (error: any) {
-        // Check if rate limited
-        if (error.response?.status === 429 && retries < maxRetries) {
-          const retryAfter = error.response.headers['retry-after'] || 1;
-          const delay = Math.max(
-            parseInt(retryAfter, 10) * 1000,
-            Math.pow(2, retries) * 1000 + Math.random() * 1000,
-          );
-          Logger.warn(`[Rate Limit] Retrying in ${delay}ms...`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          retries++;
-        } else {
-          Logger.error(`API Error: ${error.message}`, { error: error.message });
-          throw this.formatError(error);
+            // Add jitter
+            delay += Math.random() * 500;
+
+            Logger.warn(`[Retryable Error ${status}] Retrying in ${delay}ms...`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            retries++;
+          } else {
+            Logger.error(`API Error: ${error.message}`, { error: error.message });
+            throw this.formatError(error);
+          }
         }
       }
-    }
-
-    throw new Error('Maximum retries exceeded');
+      throw new Error('Maximum retries exceeded');
+    });
   }
 
   /**

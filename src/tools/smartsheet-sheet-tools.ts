@@ -712,6 +712,78 @@ export function getSheetTools(
     },
   );
 
+  const getSheetFilteredSchema = {
+    sheetId: z.string().describe('The ID of the sheet'),
+    filter: z
+      .record(z.string())
+      .describe(
+        "Key-value pairs for filtering (e.g. { 'Status': 'Open' }). Case-insensitive exact match.",
+      ),
+  };
+
+  server.tool(
+    'get_sheet_filtered',
+    'Retrieves rows from a sheet that match specific criteria (Smart Scan). More efficient than reading the whole sheet.',
+    getSheetFilteredSchema as any,
+    async (args: any) => {
+      const { sheetId, filter } = args;
+      try {
+        Logger.info(`Filtering sheet ${sheetId} with criteria: ${JSON.stringify(filter)}`);
+
+        // 1. Get All Rows to ensure we can filter comprehensively
+        const fullSheet = await api.sheets.getAllRows(sheetId);
+
+        const rows = fullSheet.rows || [];
+        const columns = fullSheet.columns || [];
+
+        // 2. Map Column Names to IDs
+        const criteria = Object.keys(filter);
+        const columnMap = new Map<string, number>();
+
+        for (const colName of criteria) {
+          const col = columns.find((c: any) => c.title.toLowerCase() === colName.toLowerCase());
+          if (!col) {
+            throw new Error(`Column '${colName}' not found in sheet.`);
+          }
+          columnMap.set(colName, col.id);
+        }
+
+        // 3. Filter Rows
+        const matches = rows.filter((row: any) => {
+          return Object.entries(filter).every(([colName, searchVal]) => {
+            const colId = columnMap.get(colName);
+            const cell = row.cells.find((c: any) => c.columnId === colId);
+            const cellVal =
+              cell?.value !== undefined && cell?.value !== null ? String(cell.value) : '';
+            return cellVal.toLowerCase() === (searchVal as string).toLowerCase();
+          });
+        });
+
+        Logger.info(`Found ${matches.length} matches.`);
+
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify(matches, null, 2),
+            },
+          ],
+        };
+      } catch (error: any) {
+        Logger.error(`Failed to filter sheet ${sheetId}`, { error });
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Failed to filter sheet: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+
   const findRowsByColumnValueSchema = {
     sheetId: z.string().describe('The ID of the sheet'),
     columnId: z.number().describe('The ID of the column to search'),

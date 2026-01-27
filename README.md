@@ -24,6 +24,8 @@ MCP is a new technology. This integration relies on a SMARTSHEET API token allow
 - Get detailed information about sheets in Smartsheet
 - Create, update, and delete sheets and rows
 - Create version backups of sheets at specific timestamps
+- **Smart Retrieval**: efficient filtered reads to save LLM tokens
+- **Reliability**: Queueing, Caching, and Automatic Retries for robust performance
 - Formatted responses optimized for AI consumption
 
 ## Installation
@@ -360,8 +362,19 @@ Retrieves the current state of a sheet, including rows, columns, and cells.
 
 **Parameters:**
 
-- `sheetId` (string, required): The ID of the sheet to retrieve
+- `sheetId` (string, required): The ID of the sheet
 - `include` (string, optional): Comma-separated list of elements to include (e.g., 'format,formulas')
+- `limit` (number, optional): Max number of rows to return (default: 50). Use -1 for all rows.
+- `page` (number, optional): Page number to retrieve (default: 1).
+
+### get_sheet_filtered
+
+Retrieves rows from a sheet that match specific criteria (Smart Scan). More efficient than reading the whole sheet.
+
+**Parameters:**
+
+- `sheetId` (string, required): The ID of the sheet
+- `filter` (object, required): Key-value pairs for filtering (e.g. `{"Status": "Open"}`). Case-insensitive exact match.
 
 ### get_sheet_version
 

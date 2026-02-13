@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
+import { parseSmartsheetUrl, validateRegionMatch } from "../utils/url-utils.js";
 
 export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
 
@@ -83,20 +84,31 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         async ({ url, query }) => {
         try {
             console.info(`Searching for sheet with URL: ${url} with query: ${query}`);
-            const match = url.match(/\/sheets\/([^?\/]+)/);
-            const directIdToken = match ? match[1] : null;
-            if (!directIdToken) {
+            const parsed = parseSmartsheetUrl(url);
+            if (!parsed) {
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Failed to get sheet: Invalid URL format`
+                            text: `Failed to get sheet: Invalid URL format. Expected a Smartsheet URL containing /sheets/{id}`
                         }
                     ],
                     isError: true
                 };
             }
-            const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken);
+            const regionError = validateRegionMatch(parsed.region, api.region);
+            if (regionError) {
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Failed to search in sheet: ${regionError}`
+                        }
+                    ],
+                    isError: true
+                };
+            }
+            const sheet = await api.sheets.getSheetByDirectIdToken(parsed.directIdToken);
             const results = await api.search.searchSheet(sheet.id, query);
             
             return {
@@ -164,21 +176,32 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         },
         async ({ url }) => {
         try {
-            const user = await api.users.getCurrentUser();
-            const match = url.match(/\/sheets\/([^?\/]+)/);
-            const directIdToken = match ? match[1] : null;
-            if (!directIdToken) {
+            const parsed = parseSmartsheetUrl(url);
+            if (!parsed) {
                 return {
                     content: [
                         {
                             type: "text",
-                            text: `Failed to get sheet: Invalid URL format`
+                            text: `Failed to get sheet: Invalid URL format. Expected a Smartsheet URL containing /sheets/{id}`
                         }
                     ],
                     isError: true
                 };
             }
-            const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken);
+            const regionError = validateRegionMatch(parsed.region, api.region);
+            if (regionError) {
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Failed to search for assigned tasks: ${regionError}`
+                        }
+                    ],
+                    isError: true
+                };
+            }
+            const user = await api.users.getCurrentUser();
+            const sheet = await api.sheets.getSheetByDirectIdToken(parsed.directIdToken);
             const results = await api.search.searchSheet(sheet.id, user.email);
             
             return {

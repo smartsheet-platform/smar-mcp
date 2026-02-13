@@ -5,6 +5,7 @@ import { SmartsheetSearchAPI } from './smartsheet-search-api.js';
 import { SmartsheetSheetAPI } from './smartsheet-sheet-api.js';
 import { SmartsheetWorkspaceAPI } from './smartsheet-workspace-api.js';
 import { SmartsheetUserAPI } from './smartsheet-user-api.js';
+import { detectApiRegion, type SmartsheetRegion } from '../utils/url-utils.js';
 import packageJson from '../../package.json' with { type: 'json' };
 
 /**
@@ -13,6 +14,7 @@ import packageJson from '../../package.json' with { type: 'json' };
 export class SmartsheetAPI {
   private baseUrl: string;
   private accessToken: string;
+  public readonly region: SmartsheetRegion;
   public sheets: SmartsheetSheetAPI;
   public workspaces: SmartsheetWorkspaceAPI;
   public folders: SmartsheetFolderAPI;
@@ -27,6 +29,7 @@ export class SmartsheetAPI {
   constructor(accessToken?: string, baseUrl?: string) {
     this.baseUrl = baseUrl || '';
     this.accessToken = accessToken || '';
+    this.region = detectApiRegion(this.baseUrl);
     this.sheets = new SmartsheetSheetAPI(this);
     this.workspaces = new SmartsheetWorkspaceAPI(this);
     this.folders = new SmartsheetFolderAPI(this);

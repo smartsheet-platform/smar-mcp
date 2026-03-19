@@ -423,6 +423,128 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         }
       );
       
+      // Tool: Get Sheet Summary
+      server.tool(
+        "get_sheet_summary",
+        "Gets the summary fields of a sheet",
+        {
+          sheetId: z.string().describe("The ID of the sheet"),
+          include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'writerInfo')"),
+        },
+        async ({ sheetId, include }) => {
+          try {
+            console.info(`Getting summary for sheet ${sheetId}`);
+            const summary = await api.sheets.getSheetSummary(sheetId, include);
+            return {
+              content: [{ type: "text", text: JSON.stringify(summary, null, 2) }]
+            };
+          } catch (error: any) {
+            console.error(`Failed to get summary for sheet ${sheetId}`, { error });
+            return {
+              content: [{ type: "text", text: `Failed to get sheet summary: ${error.message}` }],
+              isError: true
+            };
+          }
+        }
+      );
+
+      // Tool: Add Summary Fields
+      server.tool(
+        "add_summary_fields",
+        "Adds new summary fields to a sheet",
+        {
+          sheetId: z.string().describe("The ID of the sheet"),
+          fields: z.array(
+            z.object({
+              title: z.string().describe("Field title/name"),
+              type: z.string().describe("Field type (e.g., TEXT_NUMBER, DATE, CONTACT_LIST, CHECKBOX, PICKLIST, DURATION, PREDECESSOR, ABSTRACT_DATETIME)"),
+              objectValue: z.any().optional().describe("Field value"),
+              formula: z.string().optional().describe("Field formula"),
+              locked: z.boolean().optional().describe("Whether the field is locked"),
+            })
+          ).describe("Array of summary field objects to add"),
+          renameIfConflict: z.boolean().optional().describe("If true, rename the field if a field with the same name already exists"),
+        },
+        async ({ sheetId, fields, renameIfConflict }) => {
+          try {
+            console.info(`Adding ${fields.length} summary fields to sheet ${sheetId}`);
+            const result = await api.sheets.addSummaryFields(sheetId, fields, renameIfConflict);
+            return {
+              content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+            };
+          } catch (error: any) {
+            console.error(`Failed to add summary fields to sheet ${sheetId}`, { error });
+            return {
+              content: [{ type: "text", text: `Failed to add summary fields: ${error.message}` }],
+              isError: true
+            };
+          }
+        }
+      );
+
+      // Tool: Update Summary Fields
+      server.tool(
+        "update_summary_fields",
+        "Updates existing summary fields on a sheet",
+        {
+          sheetId: z.string().describe("The ID of the sheet"),
+          fields: z.array(
+            z.object({
+              id: z.number().or(z.string()).describe("Summary field ID"),
+              title: z.string().optional().describe("Field title/name"),
+              type: z.string().optional().describe("Field type (e.g., TEXT_NUMBER, DATE, CONTACT_LIST, CHECKBOX, PICKLIST)"),
+              objectValue: z.any().optional().describe("Field value"),
+              formula: z.string().optional().describe("Field formula"),
+              locked: z.boolean().optional().describe("Whether the field is locked"),
+            })
+          ).describe("Array of summary field objects to update (each must include id)"),
+          renameIfConflict: z.boolean().optional().describe("If true, rename the field if a field with the same name already exists"),
+        },
+        async ({ sheetId, fields, renameIfConflict }) => {
+          try {
+            console.info(`Updating ${fields.length} summary fields on sheet ${sheetId}`);
+            const result = await api.sheets.updateSummaryFields(sheetId, fields, renameIfConflict);
+            return {
+              content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+            };
+          } catch (error: any) {
+            console.error(`Failed to update summary fields on sheet ${sheetId}`, { error });
+            return {
+              content: [{ type: "text", text: `Failed to update summary fields: ${error.message}` }],
+              isError: true
+            };
+          }
+        }
+      );
+
+      // Tool: Delete Summary Fields (conditionally registered)
+      if (allowDeleteTools) {
+        server.tool(
+          "delete_summary_fields",
+          "Deletes summary fields from a sheet",
+          {
+            sheetId: z.string().describe("The ID of the sheet"),
+            fieldIds: z.array(z.string()).describe("Array of summary field IDs to delete"),
+            ignoreFieldsNotFound: z.boolean().optional().describe("If true, don't throw an error if fields are not found"),
+          },
+          async ({ sheetId, fieldIds, ignoreFieldsNotFound }) => {
+            try {
+              console.info(`Deleting ${fieldIds.length} summary fields from sheet ${sheetId}`);
+              const result = await api.sheets.deleteSummaryFields(sheetId, fieldIds, ignoreFieldsNotFound);
+              return {
+                content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+              };
+            } catch (error: any) {
+              console.error(`Failed to delete summary fields from sheet ${sheetId}`, { error });
+              return {
+                content: [{ type: "text", text: `Failed to delete summary fields: ${error.message}` }],
+                isError: true
+              };
+            }
+          }
+        );
+      }
+
       // Tool: Create Sheet
       server.tool(
         "create_sheet",

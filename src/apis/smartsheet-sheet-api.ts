@@ -184,6 +184,52 @@ export class SmartsheetSheetAPI {
   }
   
   /**
+   * Gets the summary fields of a sheet
+   * @param sheetId Sheet ID
+   * @param include Optional comma-separated list of elements to include (e.g., 'writerInfo')
+   * @returns Sheet summary data
+   */
+  async getSheetSummary(sheetId: string, include?: string): Promise<any> {
+    return this.api.request('GET', `/sheets/${sheetId}/summary`, undefined, { include });
+  }
+
+  /**
+   * Adds summary fields to a sheet
+   * @param sheetId Sheet ID
+   * @param fields Array of summary field objects to add
+   * @param renameIfConflict If true, rename field if a field with the same name already exists
+   * @returns Add result
+   */
+  async addSummaryFields(sheetId: string, fields: any[], renameIfConflict?: boolean): Promise<any> {
+    return this.api.request('POST', `/sheets/${sheetId}/summary/fields`, fields, { renameIfConflict });
+  }
+
+  /**
+   * Updates summary fields on a sheet
+   * @param sheetId Sheet ID
+   * @param fields Array of summary field objects to update (must include id)
+   * @param renameIfConflict If true, rename field if a field with the same name already exists
+   * @returns Update result
+   */
+  async updateSummaryFields(sheetId: string, fields: any[], renameIfConflict?: boolean): Promise<any> {
+    return this.api.request('PUT', `/sheets/${sheetId}/summary/fields`, fields, { renameIfConflict });
+  }
+
+  /**
+   * Deletes summary fields from a sheet
+   * @param sheetId Sheet ID
+   * @param fieldIds Array of summary field IDs to delete
+   * @param ignoreFieldsNotFound If true, don't throw an error if fields are not found
+   * @returns Delete result
+   */
+  async deleteSummaryFields(sheetId: string, fieldIds: string[], ignoreFieldsNotFound: boolean = true): Promise<any> {
+    return this.api.request('DELETE', `/sheets/${sheetId}/summary/fields`, undefined, {
+      fieldIds: fieldIds.join(','),
+      ignoreFieldsNotFound: ignoreFieldsNotFound.toString()
+    });
+  }
+
+  /**
    * Creates an update request for a sheet
    * @param sheetId Sheet ID
    * @param options Update request options

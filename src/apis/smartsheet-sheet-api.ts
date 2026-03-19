@@ -224,7 +224,7 @@ export class SmartsheetSheetAPI {
    */
   async deleteSummaryFields(sheetId: string, fieldIds: string[], ignoreFieldsNotFound: boolean = true): Promise<any> {
     return this.api.request('DELETE', `/sheets/${sheetId}/summary/fields`, undefined, {
-      fieldIds: fieldIds.join(','),
+      ids: fieldIds.join(','),
       ignoreFieldsNotFound: ignoreFieldsNotFound.toString()
     });
   }

@@ -346,6 +346,7 @@ const result = await use_mcp_tool({
 ## Environment Variables
 
 - `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
+- `SMARTSHEET_ENDPOINT`: The Smartsheet API base URL (required, e.g. `https://api.smartsheet.com/2.0`)
 - `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
 
 ## Development
@@ -363,17 +364,14 @@ npm run build
 
 ### Project Structure
 
-- `src/index.ts`: Main entry point and MCP tool definitions
-- `src/smartsheet-direct-api.ts`: Direct API client for Smartsheet
-- `src/smartsheet-utils.ts`: Utility functions for common operations
-- `src/smartsheet-workflows.ts`: Implementation of complex workflows
-- `src/smartsheet-types`: Classes representing Smartsheet API objects
-- `tests/`: Test files for various functionality
+- `src/index.ts`: Main entry point and server bootstrap
+- `src/apis/`: API client classes for each Smartsheet resource area
+- `src/tools/`: MCP tool definitions and handlers
+- `src/smartsheet-types/`: Classes representing Smartsheet API objects
 - `scripts/`: Utility scripts
-- `examples/`: Example usage files
-- `.env`: Environment variables
+- `.env`: Environment variables (not committed)
 - `.env.example`: Template for environment variables
-- `claude_desktop_config-example.json`: Example claude desktop config to connect with the tool - Set your Smartsheet key in the env setting. 
+- `claude_desktop_config-example.json`: Example Claude Desktop config — set your API key in the env section
 
 ### Testing 
 

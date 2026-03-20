@@ -170,6 +170,42 @@ Creates a new sheet.
 - `columns` (array, required): Array of column objects
 - `folderId` (string, optional): ID of the folder where the sheet should be created
 
+### get_sheet_summary
+
+Gets the summary of a sheet, including all summary fields and their values.
+
+**Parameters:**
+- `sheetId` (string, required): The ID of the sheet
+- `include` (string, optional): Comma-separated elements to include (e.g., `format`, `writerInfo`)
+- `exclude` (string, optional): Comma-separated elements to exclude (e.g., `displayValue`, `image`, `imageAltText`)
+
+### add_summary_fields
+
+Adds new summary fields to a sheet.
+
+**Parameters:**
+- `sheetId` (string, required): The ID of the sheet
+- `fields` (array, required): Array of summary field objects to add. Each object requires `title` and `type` (e.g., `TEXT_NUMBER`, `DATE`, `CHECKBOX`, `CONTACT_LIST`, `PICKLIST`); optional fields: `objectValue`, `formula`, `locked`
+- `renameIfConflict` (boolean, optional): If true, rename the field if one with the same name already exists
+
+### update_summary_fields
+
+Updates existing summary fields on a sheet.
+
+**Parameters:**
+- `sheetId` (string, required): The ID of the sheet
+- `fields` (array, required): Array of summary field objects to update. Each object requires `id`; optional fields: `title`, `type`, `objectValue`, `formula`, `locked`
+- `renameIfConflict` (boolean, optional): If true, rename the field if one with the same name already exists
+
+### delete_summary_fields
+
+Deletes summary fields from a sheet. Only available when `ALLOW_DELETE_TOOLS=true`.
+
+**Parameters:**
+- `sheetId` (string, required): The ID of the sheet
+- `fieldIds` (array, required): Array of summary field IDs to delete
+- `ignoreFieldsNotFound` (boolean, optional): If true, don't throw an error if a field ID doesn't exist
+
 ### create_version_backup
 
 Creates a backup sheet with data from a specific timestamp.
@@ -267,8 +303,8 @@ This table outlines the Smartsheet API endpoints, whether they are currently cov
 | `/sheets/{sheetId}/shares`                    | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage sheet shares.                                               |
 | `/sheets/{sheetId}/shares/{shareId}`          | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific sheet share.                                 |
 | `/sheets/{sheetId}/sort`                      | No                   | POST               | N/A                                                        | Yes               | Sorts a sheet.                                                          |
-| `/sheets/{sheetId}/summary`                   | No                   | GET                | N/A                                                        | Yes               | Get sheet summary.                                                      |
-| `/sheets/{sheetId}/summary/fields`            | No                   | GET, POST, PUT     | N/A                                                        | Yes               | List/Add/Update sheet summary fields.                                   |
+| `/sheets/{sheetId}/summary`                   | Yes                  | GET                | `get_sheet_summary` (GET)                                  | Yes               | Get sheet summary.                                                      |
+| `/sheets/{sheetId}/summary/fields`            | Yes                  | POST, PUT, DELETE  | `add_summary_fields` (POST), `update_summary_fields` (PUT), `delete_summary_fields` (DELETE) | Yes | Full CRUD for sheet summary fields.                  |
 | `/sheets/{sheetId}/summary/fields/{fieldId}/images` | No             | GET, POST, DELETE  | N/A                                                        | Consider          | Manage images for a sheet summary field. Involves binary data.          |
 | `/sheets/{sheetId}/updaterequests`            | Yes                  | GET, POST          | `create_update_request` (POST). List not directly exposed. | Consider          | List/Manage update requests.                                            |
 | `/sheets/{sheetId}/updaterequests/{updateRequestId}` | No            | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific update request.                              |

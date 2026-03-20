@@ -429,12 +429,13 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         "Gets the summary fields of a sheet",
         {
           sheetId: z.string().describe("The ID of the sheet"),
-          include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'writerInfo')"),
+          include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'format', 'writerInfo')"),
+          exclude: z.string().optional().describe("Comma-separated list of elements to exclude (e.g., 'displayValue', 'image', 'imageAltText')"),
         },
-        async ({ sheetId, include }) => {
+        async ({ sheetId, include, exclude }) => {
           try {
             console.info(`Getting summary for sheet ${sheetId}`);
-            const summary = await api.sheets.getSheetSummary(sheetId, include);
+            const summary = await api.sheets.getSheetSummary(sheetId, include, exclude);
             return {
               content: [{ type: "text", text: JSON.stringify(summary, null, 2) }]
             };

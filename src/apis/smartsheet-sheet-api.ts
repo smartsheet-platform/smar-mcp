@@ -189,8 +189,8 @@ export class SmartsheetSheetAPI {
    * @param include Optional comma-separated list of elements to include (e.g., 'writerInfo')
    * @returns Sheet summary data
    */
-  async getSheetSummary(sheetId: string, include?: string): Promise<any> {
-    return this.api.request('GET', `/sheets/${sheetId}/summary`, undefined, { include });
+  async getSheetSummary(sheetId: string, include?: string, exclude?: string): Promise<any> {
+    return this.api.request('GET', `/sheets/${sheetId}/summary`, undefined, { include, exclude });
   }
 
   /**
@@ -225,7 +225,7 @@ export class SmartsheetSheetAPI {
   async deleteSummaryFields(sheetId: string, fieldIds: string[], ignoreFieldsNotFound: boolean = true): Promise<any> {
     return this.api.request('DELETE', `/sheets/${sheetId}/summary/fields`, undefined, {
       ids: fieldIds.join(','),
-      ignoreFieldsNotFound: ignoreFieldsNotFound.toString()
+      ignoreSummaryFieldsNotFound: ignoreFieldsNotFound.toString()
     });
   }
 

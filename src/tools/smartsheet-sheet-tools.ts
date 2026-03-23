@@ -2,7 +2,13 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
 
-export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDeleteTools: boolean) {
+export interface SheetToolFlags {
+  deleteRows: boolean;
+  deleteSummaryFields: boolean;
+}
+
+export function getSheetTools(server: McpServer, api: SmartsheetAPI, flags: SheetToolFlags) {
+  const { deleteRows, deleteSummaryFields } = flags;
 
     server.tool(
       "get_sheet",
@@ -300,7 +306,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       );
       
       // Tool: Delete Rows (conditionally registered)
-      if (allowDeleteTools) {
+      if (deleteRows) {
         server.tool(
           "delete_rows",
           "Deletes rows from a sheet",
@@ -519,7 +525,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       );
 
       // Tool: Delete Summary Fields (conditionally registered)
-      if (allowDeleteTools) {
+      if (deleteSummaryFields) {
         server.tool(
           "delete_summary_fields",
           "Deletes summary fields from a sheet",

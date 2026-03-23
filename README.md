@@ -138,7 +138,7 @@ Adds new rows to a sheet.
 
 ### delete_rows
 
-Deletes rows from a sheet. This tool is only available when the ALLOW_DELETE_TOOLS environment variable is set to 'true'.
+Deletes rows from a sheet. Available when `ALLOW_DELETE_ROWS=true`, or when `ALLOW_DELETE_TOOLS=true` and `ALLOW_DELETE_ROWS` is unset.
 
 **Parameters:**
 - `sheetId` (string, required): The ID of the sheet
@@ -199,7 +199,7 @@ Updates existing summary fields on a sheet.
 
 ### delete_summary_fields
 
-Deletes summary fields from a sheet. Only available when `ALLOW_DELETE_TOOLS=true`.
+Deletes summary fields from a sheet. Available when `ALLOW_DELETE_SUMMARY_FIELDS=true`, or when `ALLOW_DELETE_TOOLS=true` and `ALLOW_DELETE_SUMMARY_FIELDS` is unset.
 
 **Parameters:**
 - `sheetId` (string, required): The ID of the sheet
@@ -383,7 +383,9 @@ const result = await use_mcp_tool({
 
 - `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
 - `SMARTSHEET_ENDPOINT`: The Smartsheet API base URL (required, e.g. `https://api.smartsheet.com/2.0`)
-- `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
+- `ALLOW_DELETE_TOOLS`: Set to `true` to enable all deletion operations (default: `false`). Acts as the general/lower-order flag.
+- `ALLOW_DELETE_ROWS`: Granular override for `delete_rows`. `true` enables even if `ALLOW_DELETE_TOOLS=false`; `false` disables even if `ALLOW_DELETE_TOOLS=true`; absent defers to `ALLOW_DELETE_TOOLS`.
+- `ALLOW_DELETE_SUMMARY_FIELDS`: Granular override for `delete_summary_fields`. Same 3-state logic as `ALLOW_DELETE_ROWS`.
 
 ## Development
 

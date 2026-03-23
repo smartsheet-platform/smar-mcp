@@ -383,6 +383,9 @@ const result = await use_mcp_tool({
 
 - `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
 - `SMARTSHEET_ENDPOINT`: The Smartsheet API base URL (required, e.g. `https://api.smartsheet.com/2.0`)
+- `PORT`: When set, activates HTTP server mode on the given port. Omit to run in stdio mode (default).
+- `ISSUER_URL`: Public HTTPS base URL of the server (required in HTTP mode, e.g. `https://mcp.example.com`). Used to construct OAuth discovery and endpoint URLs.
+- `JWT_SIGNING_KEY`: Hex-encoded 32-byte key used to sign OAuth access tokens in HTTP mode. If unset, an ephemeral key is generated at startup and tokens are invalidated on restart.
 - `ALLOW_DELETE_TOOLS`: Set to `true` to enable all deletion operations (default: `false`). Acts as the general/lower-order flag.
 - `ALLOW_DELETE_ROWS`: Granular override for `delete_rows`. `true` enables even if `ALLOW_DELETE_TOOLS=false`; `false` disables even if `ALLOW_DELETE_TOOLS=true`; absent defers to `ALLOW_DELETE_TOOLS`.
 - `ALLOW_DELETE_SUMMARY_FIELDS`: Granular override for `delete_summary_fields`. Same 3-state logic as `ALLOW_DELETE_ROWS`.

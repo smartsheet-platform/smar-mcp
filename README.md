@@ -379,6 +379,32 @@ const result = await use_mcp_tool({
 // }
 ```
 
+## Security
+
+### HTTP Mode: Restrict /mcp to Anthropic Egress IPs
+
+When running in HTTP mode (`PORT` is set), the `/mcp` endpoint should be IP-restricted at the reverse proxy layer to Anthropic's egress CIDR block (`160.79.104.0/21`). This prevents unauthorized clients from reaching the MCP endpoint even if they obtain a valid token.
+
+Example Caddy snippet:
+
+```caddyfile
+@anthropic_egress {
+    remote_ip 160.79.104.0/21
+}
+handle /mcp {
+    reverse_proxy @anthropic_egress localhost:{$PORT}
+    respond "Forbidden" 403
+}
+```
+
+### JWT Signing Key
+
+If `JWT_SIGNING_KEY` is not set, an ephemeral key is generated at startup and all issued tokens are invalidated when the process restarts. Set `JWT_SIGNING_KEY` to a stable hex-encoded 32-byte value (e.g. `openssl rand -hex 32`) to make tokens survive restarts.
+
+### CSRF Protection
+
+The OAuth consent form is protected by a per-request server-side CSRF token. The token is generated in `/authorize`, stored in memory, and validated when the form is submitted to `/oauth/approve`. Replay attacks are mitigated by the token's 10-minute expiry.
+
 ## Environment Variables
 
 - `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)

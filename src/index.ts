@@ -10,7 +10,7 @@ import { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { OAuthClientInformationFull, OAuthTokenRevocationRequest, OAuthTokens } from "@modelcontextprotocol/sdk/shared/auth.js";
 import { SmartsheetAPI } from "./apis/smartsheet-api.js";
 import { config } from "dotenv";
-import { randomUUID, randomBytes, createHmac } from "crypto";
+import { randomUUID, randomBytes, createHmac, timingSafeEqual } from "crypto";
 import express, { Request, Response } from "express";
 import { getDiscussionTools } from "./tools/smartsheet-discussion-tools.js";
 import { getFolderTools } from "./tools/smartsheet-folder-tools.js";
@@ -55,11 +55,16 @@ function buildMcpServer(api: SmartsheetAPI): McpServer {
 // Single-user OAuth provider
 //
 // Security model:
-//   - Tokens are JWTs signed with a key generated at startup (never stored)
-//   - Token state is in-memory only; server restart invalidates all tokens
-//   - The /authorize page is a consent-click only — no password
+//   - Tokens are JWTs signed with HMAC-SHA256.
+//   - If JWT_SIGNING_KEY is set (hex-encoded 32 bytes), that key is used and
+//     tokens survive server restarts. If unset, an ephemeral key is generated
+//     at startup and all tokens are invalidated when the process restarts.
+//   - Token state is in-memory only.
+//   - The /authorize page presents a consent form protected by a per-request
+//     CSRF token stored server-side; /oauth/approve validates the token before
+//     issuing an authorization code.
 //   - The OAuth redirect_uri goes to claude.ai (your account), so only you
-//     can receive the issued token
+//     can receive the issued token.
 //   - IP allowlist (separate firewall task) restricts /mcp to Anthropic egress
 // ---------------------------------------------------------------------------
 
@@ -67,6 +72,16 @@ function buildMcpServer(api: SmartsheetAPI): McpServer {
 const JWT_KEY = process.env.JWT_SIGNING_KEY
   ? Buffer.from(process.env.JWT_SIGNING_KEY, "hex")
   : randomBytes(32); // ephemeral fallback for stdio/dev
+
+/** Escape a string for safe interpolation into HTML attribute values and text content. */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
 
 function jwtSign(payload: Record<string, unknown>): string {
   const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
@@ -80,12 +95,24 @@ function jwtVerify(token: string): Record<string, unknown> {
   if (parts.length !== 3) throw new Error("Malformed token");
   const [header, body, sig] = parts;
   const expected = createHmac("sha256", JWT_KEY).update(`${header}.${body}`).digest("base64url");
-  if (sig !== expected) throw new Error("Invalid token signature");
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString()) as Record<string, unknown>;
-  if (typeof payload.exp === "number" && payload.exp < Math.floor(Date.now() / 1000)) {
+  // Constant-time comparison to prevent timing attacks
+  if (!timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) throw new Error("Invalid token signature");
+  let payload: unknown;
+  try {
+    payload = JSON.parse(Buffer.from(body, "base64url").toString());
+  } catch {
+    throw new Error("Malformed token payload");
+  }
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new Error("Token payload must be a non-null object");
+  }
+  const p = payload as Record<string, unknown>;
+  if (typeof p.sub !== "string") throw new Error("Token payload missing valid sub claim");
+  if (p.exp !== undefined && typeof p.exp !== "number") throw new Error("Token payload exp claim must be a number");
+  if (typeof p.exp === "number" && p.exp < Math.floor(Date.now() / 1000)) {
     throw new Error("Token expired");
   }
-  return payload;
+  return p;
 }
 
 interface PendingCode {
@@ -95,9 +122,32 @@ interface PendingCode {
   expiresAt: number;
 }
 
+/** Pending authorization: stored by CSRF token, used to validate /oauth/approve POSTs. */
+interface PendingAuthorization {
+  clientId: string;
+  redirectUri: string;
+  codeChallenge: string;
+  expiresAt: number;
+}
+
 class PersonalOAuthProvider implements OAuthServerProvider {
   private readonly clients    = new Map<string, OAuthClientInformationFull>();
   private readonly pendingCodes = new Map<string, PendingCode>();
+  /** CSRF token → authorization params; populated in authorize(), consumed in /oauth/approve. */
+  readonly pendingAuthorizations = new Map<string, PendingAuthorization>();
+
+  constructor() {
+    // Periodically purge expired auth codes (every 60 seconds)
+    setInterval(() => {
+      const now = Date.now();
+      for (const [code, entry] of this.pendingCodes) {
+        if (entry.expiresAt < now) this.pendingCodes.delete(code);
+      }
+      for (const [csrf, entry] of this.pendingAuthorizations) {
+        if (entry.expiresAt < now) this.pendingAuthorizations.delete(csrf);
+      }
+    }, 60_000).unref(); // unref() so the timer doesn't keep the process alive
+  }
 
   get clientsStore(): OAuthRegisteredClientsStore {
     return {
@@ -114,6 +164,15 @@ class PersonalOAuthProvider implements OAuthServerProvider {
     params: AuthorizationParams,
     res: Response
   ): Promise<void> {
+    // Generate a per-request CSRF token and store the authorization params server-side.
+    const csrfToken = randomBytes(16).toString("hex");
+    this.pendingAuthorizations.set(csrfToken, {
+      clientId: client.client_id,
+      redirectUri: params.redirectUri,
+      codeChallenge: params.codeChallenge,
+      expiresAt: Date.now() + 10 * 60 * 1000, // 10 minute window to click Authorize
+    });
+
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -135,12 +194,9 @@ class PersonalOAuthProvider implements OAuthServerProvider {
 <body>
   <div class="card">
     <h1>Smartsheet MCP</h1>
-    <p><strong>${client.client_name ?? client.client_id}</strong> is requesting access to your Smartsheet data.</p>
+    <p><strong>${escapeHtml(client.client_name ?? client.client_id)}</strong> is requesting access to your Smartsheet data.</p>
     <form method="POST" action="/oauth/approve">
-      <input type="hidden" name="client_id"      value="${client.client_id}">
-      <input type="hidden" name="redirect_uri"   value="${params.redirectUri}">
-      <input type="hidden" name="state"          value="${params.state ?? ""}">
-      <input type="hidden" name="code_challenge" value="${params.codeChallenge}">
+      <input type="hidden" name="csrf_token" value="${escapeHtml(csrfToken)}">
       <button type="submit">Authorize</button>
     </form>
   </div>
@@ -182,11 +238,12 @@ class PersonalOAuthProvider implements OAuthServerProvider {
 
   async verifyAccessToken(token: string): Promise<AuthInfo> {
     const payload = jwtVerify(token);
+    const exp = typeof payload.exp === "number" ? payload.exp : 0;
     return {
       token,
       clientId: payload.sub as string,
       scopes: [],
-      expiresAt: payload.exp as number,
+      expiresAt: exp,
     };
   }
 
@@ -220,24 +277,62 @@ async function runHttp(api: SmartsheetAPI) {
     resourceName: "Smartsheet MCP",
   }));
 
-  // Consent POST handler — no credential check; security via OAuth redirect + IP allowlist
+  // Consent POST handler — validated by CSRF token; security via CSRF + OAuth redirect + IP allowlist
   app.post("/oauth/approve", (req: Request, res: Response) => {
-    const { client_id, redirect_uri, state, code_challenge } = req.body;
+    try {
+      const { csrf_token } = req.body;
 
-    const code = provider.issueCode({
-      clientId: client_id,
-      redirectUri: redirect_uri,
-      codeChallenge: code_challenge,
-    });
+      // Validate required fields
+      if (!csrf_token || typeof csrf_token !== "string") {
+        return res.status(400).send("Bad request");
+      }
 
-    const redirectUrl = new URL(redirect_uri);
-    redirectUrl.searchParams.set("code", code);
-    if (state) redirectUrl.searchParams.set("state", state);
-    res.redirect(redirectUrl.toString());
+      // Look up the pending authorization by CSRF token
+      const pending = provider.pendingAuthorizations.get(csrf_token);
+      if (!pending || pending.expiresAt < Date.now()) {
+        return res.status(400).send("Bad request: invalid or expired authorization session");
+      }
+      provider.pendingAuthorizations.delete(csrf_token);
+
+      const { clientId, redirectUri, codeChallenge } = pending;
+
+      // Validate that the redirect_uri matches the registered client
+      const registeredClient = provider.clientsStore.getClient(clientId);
+      if (!registeredClient) {
+        return res.status(400).send("Bad request: unknown client");
+      }
+      const registeredUris: string[] = (registeredClient as any).redirect_uris ?? [];
+      if (!registeredUris.includes(redirectUri)) {
+        return res.status(400).send("Bad request: redirect_uri does not match registered client");
+      }
+
+      const code = provider.issueCode({ clientId, redirectUri, codeChallenge });
+
+      const state = req.body.state as string | undefined;
+      const redirectUrl = new URL(redirectUri);
+      redirectUrl.searchParams.set("code", code);
+      if (state) redirectUrl.searchParams.set("state", state);
+      return res.redirect(redirectUrl.toString());
+    } catch (err) {
+      console.error("Error in /oauth/approve handler", { err });
+      return res.status(400).send("Bad request");
+    }
   });
 
   // MCP endpoint — one transport per session
   const transports = new Map<string, StreamableHTTPServerTransport>();
+  const transportCreatedAt = new Map<string, number>();
+
+  // Periodically evict MCP sessions older than 24 hours
+  setInterval(() => {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    for (const [id, createdAt] of transportCreatedAt) {
+      if (createdAt < cutoff) {
+        transports.delete(id);
+        transportCreatedAt.delete(id);
+      }
+    }
+  }, 5 * 60 * 1000).unref();
 
   app.all("/mcp", async (req: Request, res: Response) => {
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
@@ -249,10 +344,16 @@ async function runHttp(api: SmartsheetAPI) {
 
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
-      onsessioninitialized: (id) => { transports.set(id, transport); },
+      onsessioninitialized: (id) => {
+        transports.set(id, transport);
+        transportCreatedAt.set(id, Date.now());
+      },
     });
     transport.onclose = () => {
-      if (transport.sessionId) transports.delete(transport.sessionId);
+      if (transport.sessionId) {
+        transports.delete(transport.sessionId);
+        transportCreatedAt.delete(transport.sessionId);
+      }
     };
 
     const server = buildMcpServer(api);

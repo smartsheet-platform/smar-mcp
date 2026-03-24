@@ -550,6 +550,8 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, flags: Shee
             }
           }
         );
+      } else {
+        console.warn("Delete summary fields is disabled. Set ALLOW_DELETE_SUMMARY_FIELDS=true or ALLOW_DELETE_TOOLS=true to enable it.");
       }
 
       // Tool: Create Sheet

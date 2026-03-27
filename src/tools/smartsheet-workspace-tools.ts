@@ -9,7 +9,7 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
         "get_workspaces",
         "Retrieves my Workspaces",
         {},
-        async ({ }) => {
+        async () => {
           try {
             console.info("Getting workspaces");
             const workspace = await api.workspaces.getWorkspaces();

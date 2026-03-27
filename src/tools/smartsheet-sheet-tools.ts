@@ -53,7 +53,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       async ({ url, include, pageSize, page }) => {
         try {
           console.info(`Getting sheet with URL: ${url}`);
-          const match = url.match(/\/sheets\/([^?\/]+)/);
+          const match = url.match(/\/sheets\/([^?/]+)/);
           const directIdToken = match ? match[1] : null;
           if (!directIdToken) {
             return {

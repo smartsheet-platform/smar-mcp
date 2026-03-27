@@ -214,7 +214,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               cells: z.array(
                 z.object({
                   columnId: z.number().or(z.string()).describe("Column ID"),
-                  value: z.any().optional().describe("Cell value"),
+                  value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional().describe("Cell value"),
                   formula: z.string().optional().describe("Cell formula"),
                   format: z.string().optional().describe("Cell format"),
                 })
@@ -263,7 +263,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               cells: z.array(
                 z.object({
                   columnId: z.number().or(z.string()).describe("Column ID"),
-                  value: z.any().optional().describe("Cell value"),
+                  value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional().describe("Cell value"),
                   formula: z.string().optional().describe("Cell formula"),
                   format: z.string().optional().describe("Cell format"),
                 })

@@ -9,7 +9,7 @@ export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
       "create_update_request",
       "Creates an update request for a sheet",
       {
-        sheetId: z.string().describe("The ID of the sheet"),
+        sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet"),
         rowIds: z.array(z.number()).optional().describe("Array of row IDs to include in the update request"),
         columnIds: z.array(z.number()).optional().describe("Array of column IDs to include in the update request"),
         includeAttachments: z.boolean().optional().describe("Whether to include attachments in the update request"),

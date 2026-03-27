@@ -42,7 +42,7 @@ export function getWorkspaceTools(server: McpServer, api: SmartsheetAPI) {
         "get_workspace",
         "Retrieves the current state of a Workspace, including its contents which can be sheets, reports, or other folders",
         {
-          workspaceId: z.string().describe("The ID of the workspace to retrieve")
+          workspaceId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the workspace to retrieve")
         },
         async ({ workspaceId}) => {
           try {

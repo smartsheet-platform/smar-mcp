@@ -73,7 +73,7 @@ export class SmartsheetAPI {
           });
         }
         
-        console.info(`API Request: ${method} ${url.toString()}`);
+        console.info(`API Request: ${method} ${endpoint}`);
         
         const response = await axios({
           method,
@@ -99,7 +99,7 @@ export class SmartsheetAPI {
           await new Promise(resolve => setTimeout(resolve, delay));
           retries++;
         } else {
-          console.error(`API Error: ${error.message}`, { error });
+          console.error(`API Error: ${error.message}`, this.sanitizeError(error));
           throw this.formatError(error);
         }
       }
@@ -108,6 +108,18 @@ export class SmartsheetAPI {
     throw new Error('Maximum retries exceeded');
   }
   
+  /**
+   * Sanitizes an error object for safe logging by stripping sensitive fields
+   * such as Authorization headers and tokens.
+   */
+  private sanitizeError(error: any): Record<string, unknown> {
+    return {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    };
+  }
+
   /**
    * Formats an error for consistent error handling
    * @param error Error to format

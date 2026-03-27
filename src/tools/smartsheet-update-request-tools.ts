@@ -19,7 +19,7 @@ export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
         ccMe: z.boolean().optional().describe("Whether to CC the sender on the update request email"),
         sendTo: z.array(
           z.object({
-            email: z.string().describe("Email address of the recipient")
+            email: z.string().email("Must be a valid email address").describe("Email address of the recipient")
           })
         ).describe("Array of recipients for the update request"),
       },

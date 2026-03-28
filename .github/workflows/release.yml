@@ -35,8 +35,7 @@ jobs:
         run: npm run build
         
       - name: Test
-        # Skip tests for now as they need to be updated for TypeScript
-        run: echo "Tests temporarily skipped"
+        run: npm test
         
       - name: Release
         env:

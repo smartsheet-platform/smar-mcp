@@ -11,6 +11,8 @@ import { OAuthClientInformationFull, OAuthTokenRevocationRequest, OAuthTokens } 
 import { SmartsheetAPI } from "./apis/smartsheet-api.js";
 import { config } from "dotenv";
 import { randomUUID, randomBytes, createHmac, timingSafeEqual } from "crypto";
+import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { dirname } from "path";
 import express, { Request, Response } from "express";
 import { getDiscussionTools } from "./tools/smartsheet-discussion-tools.js";
 import { getFolderTools } from "./tools/smartsheet-folder-tools.js";
@@ -127,6 +129,7 @@ interface PendingAuthorization {
   clientId: string;
   redirectUri: string;
   codeChallenge: string;
+  state?: string;
   expiresAt: number;
 }
 
@@ -170,6 +173,7 @@ class PersonalOAuthProvider implements OAuthServerProvider {
       clientId: client.client_id,
       redirectUri: params.redirectUri,
       codeChallenge: params.codeChallenge,
+      state: params.state,
       expiresAt: Date.now() + 10 * 60 * 1000, // 10 minute window to click Authorize
     });
 
@@ -222,18 +226,50 @@ class PersonalOAuthProvider implements OAuthServerProvider {
     if (!entry || entry.expiresAt < Date.now()) throw new Error("Invalid or expired code");
     this.pendingCodes.delete(authorizationCode);
 
-    const ttl = 365 * 24 * 3600; // 1 year
-    const token = jwtSign({
+    const now = Math.floor(Date.now() / 1000);
+    const accessTtl  = 365 * 24 * 3600;       // 1 year
+    const refreshTtl = 10 * 365 * 24 * 3600;  // 10 years
+
+    const access_token = jwtSign({
       sub: client.client_id,
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + ttl,
+      iat: now,
+      exp: now + accessTtl,
+    });
+    const refresh_token = jwtSign({
+      sub: client.client_id,
+      typ: "refresh",
+      iat: now,
+      exp: now + refreshTtl,
     });
 
-    return { access_token: token, token_type: "bearer", expires_in: ttl };
+    return { access_token, token_type: "bearer", expires_in: accessTtl, refresh_token };
   }
 
-  async exchangeRefreshToken(): Promise<OAuthTokens> {
-    throw new Error("Refresh tokens not supported");
+  async exchangeRefreshToken(
+    client: OAuthClientInformationFull,
+    refreshToken: string
+  ): Promise<OAuthTokens> {
+    const payload = jwtVerify(refreshToken);
+    if (payload.typ !== "refresh") throw new Error("Not a refresh token");
+    if (payload.sub !== client.client_id) throw new Error("Token client mismatch");
+
+    const now = Math.floor(Date.now() / 1000);
+    const accessTtl  = 365 * 24 * 3600;
+    const refreshTtl = 10 * 365 * 24 * 3600;
+
+    const access_token = jwtSign({
+      sub: client.client_id,
+      iat: now,
+      exp: now + accessTtl,
+    });
+    const refresh_token = jwtSign({
+      sub: client.client_id,
+      typ: "refresh",
+      iat: now,
+      exp: now + refreshTtl,
+    });
+
+    return { access_token, token_type: "bearer", expires_in: accessTtl, refresh_token };
   }
 
   async verifyAccessToken(token: string): Promise<AuthInfo> {
@@ -251,6 +287,58 @@ class PersonalOAuthProvider implements OAuthServerProvider {
     const code = randomUUID();
     this.pendingCodes.set(code, { ...params, expiresAt: Date.now() + 5 * 60 * 1000 });
     return code;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Persistent session store
+//
+// Sessions survive server restarts. When a client re-initializes after a 404,
+// we reuse the same session ID so the session appears continuous from the
+// client's perspective. Keyed by sessionId; indexed by clientId for lookup
+// on initialize.
+// ---------------------------------------------------------------------------
+
+const SESSIONS_FILE = process.env.SESSIONS_FILE ?? "/var/lib/smar-mcp/sessions.json";
+
+interface PersistedSession {
+  clientId: string;
+  createdAt: number;
+  lastSeen: number;
+}
+
+function loadSessions(): { byId: Map<string, PersistedSession>; byClient: Map<string, string> } {
+  const byId = new Map<string, PersistedSession>();
+  const byClient = new Map<string, string>(); // clientId → sessionId
+  try {
+    const raw = JSON.parse(readFileSync(SESSIONS_FILE, "utf8")) as Record<string, PersistedSession>;
+    for (const [id, s] of Object.entries(raw)) {
+      byId.set(id, s);
+      byClient.set(s.clientId, id);
+    }
+  } catch {
+    // first run or unreadable — start fresh
+  }
+  return { byId, byClient };
+}
+
+function saveSessions(byId: Map<string, PersistedSession>): void {
+  try {
+    mkdirSync(dirname(SESSIONS_FILE), { recursive: true });
+    writeFileSync(SESSIONS_FILE, JSON.stringify(Object.fromEntries(byId), null, 2), "utf8");
+  } catch (err) {
+    console.warn("Failed to persist sessions:", err);
+  }
+}
+
+function clientIdFromRequest(req: Request): string | undefined {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith("Bearer ")) return undefined;
+  try {
+    const payload = jwtVerify(auth.slice(7));
+    return typeof payload.sub === "string" ? payload.sub : undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -294,7 +382,7 @@ async function runHttp(api: SmartsheetAPI) {
       }
       provider.pendingAuthorizations.delete(csrf_token);
 
-      const { clientId, redirectUri, codeChallenge } = pending;
+      const { clientId, redirectUri, codeChallenge, state } = pending;
 
       // Validate that the redirect_uri matches the registered client
       const registeredClient = provider.clientsStore.getClient(clientId);
@@ -308,7 +396,6 @@ async function runHttp(api: SmartsheetAPI) {
 
       const code = provider.issueCode({ clientId, redirectUri, codeChallenge });
 
-      const state = req.body.state as string | undefined;
       const redirectUrl = new URL(redirectUri);
       redirectUrl.searchParams.set("code", code);
       if (state) redirectUrl.searchParams.set("state", state);
@@ -319,41 +406,52 @@ async function runHttp(api: SmartsheetAPI) {
     }
   });
 
-  // MCP endpoint — one transport per session
+  // MCP endpoint — persistent sessions survive server restarts
+  const { byId: persistedSessions, byClient: clientSessionMap } = loadSessions();
   const transports = new Map<string, StreamableHTTPServerTransport>();
-  const transportCreatedAt = new Map<string, number>();
-
-  // Periodically evict MCP sessions older than 24 hours
-  setInterval(() => {
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    for (const [id, createdAt] of transportCreatedAt) {
-      if (createdAt < cutoff) {
-        transports.delete(id);
-        transportCreatedAt.delete(id);
-      }
-    }
-  }, 5 * 60 * 1000).unref();
 
   app.all("/mcp", async (req: Request, res: Response) => {
     const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
+    // Existing live session — fast path
     if (sessionId && transports.has(sessionId)) {
+      const ps = persistedSessions.get(sessionId);
+      if (ps) { ps.lastSeen = Date.now(); saveSessions(persistedSessions); }
       await transports.get(sessionId)!.handleRequest(req, res, req.body);
       return;
     }
 
+    // Stale or unknown session ID — return 404 so the client reinitializes
+    if (sessionId) {
+      res.status(404).json({
+        jsonrpc: "2.0",
+        error: { code: -32001, message: "Session not found" },
+        id: null,
+      });
+      return;
+    }
+
+    // No session ID — this must be an initialize request.
+    // Reuse the persisted session ID for this client if one exists, so the
+    // client gets back the same session ID it had before the restart.
+    const clientId = clientIdFromRequest(req);
+    const reuseId  = clientId ? clientSessionMap.get(clientId) : undefined;
+
     const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(),
+      sessionIdGenerator: () => reuseId ?? randomUUID(),
       onsessioninitialized: (id) => {
         transports.set(id, transport);
-        transportCreatedAt.set(id, Date.now());
+        const now = Date.now();
+        if (clientId) {
+          const existing = persistedSessions.get(id);
+          persistedSessions.set(id, { clientId, createdAt: existing?.createdAt ?? now, lastSeen: now });
+          clientSessionMap.set(clientId, id);
+          saveSessions(persistedSessions);
+        }
       },
     });
     transport.onclose = () => {
-      if (transport.sessionId) {
-        transports.delete(transport.sessionId);
-        transportCreatedAt.delete(transport.sessionId);
-      }
+      if (transport.sessionId) transports.delete(transport.sessionId);
     };
 
     const server = buildMcpServer(api);

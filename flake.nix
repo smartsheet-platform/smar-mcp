@@ -25,7 +25,7 @@
       installPhase = ''
         runHook preInstall
         mkdir -p $out/lib/smar-mcp
-        cp -r build $out/lib/smar-mcp/
+        cp -r build node_modules $out/lib/smar-mcp/
         mkdir -p $out/bin
         cat > $out/bin/smar-mcp <<EOF
         #!${pkgs.bash}/bin/bash

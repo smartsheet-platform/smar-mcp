@@ -29,6 +29,46 @@ describe('SmartsheetAPI - HTTPS enforcement', () => {
     expect(() => new SmartsheetAPI(TEST_TOKEN, 'ftp://api.smartsheet.com/2.0'))
       .toThrow('SMARTSHEET_ENDPOINT must use HTTPS');
   });
+
+  it('should reject uppercase HTTP scheme', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'HTTP://api.smartsheet.com/2.0'))
+      .toThrow('SMARTSHEET_ENDPOINT must use HTTPS');
+  });
+
+  it('should reject mixed-case HTTPS scheme (not canonical)', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'Https://api.smartsheet.com/2.0'))
+      .toThrow('SMARTSHEET_ENDPOINT must use HTTPS');
+  });
+
+  it('should reject a bare domain without scheme', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'api.smartsheet.com/2.0'))
+      .toThrow('SMARTSHEET_ENDPOINT must use HTTPS');
+  });
+
+  it('should reject a URL with https embedded but not as the scheme', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'http://https://api.smartsheet.com/2.0'))
+      .toThrow('SMARTSHEET_ENDPOINT must use HTTPS');
+  });
+
+  it('should reject missing endpoint (empty string triggers different error)', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, ''))
+      .toThrow('SMARTSHEET_ENDPOINT environment variable is not set');
+  });
+
+  it('should reject undefined endpoint', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, undefined))
+      .toThrow('SMARTSHEET_ENDPOINT environment variable is not set');
+  });
+
+  it('should accept HTTPS URLs with ports', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'https://api.smartsheet.com:443/2.0'))
+      .not.toThrow();
+  });
+
+  it('should accept HTTPS URLs with custom paths', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'https://proxy.internal/smartsheet/2.0'))
+      .not.toThrow();
+  });
 });
 
 describe('SmartsheetAPI - token leakage prevention', () => {

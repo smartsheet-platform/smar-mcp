@@ -170,6 +170,26 @@ Creates a new sheet.
 - `columns` (array, required): Array of column objects
 - `folderId` (string, optional): ID of the folder where the sheet should be created
 
+### create_sheet_in_workspace_from_template
+
+Creates a new sheet in a workspace from a template, copying its structure and optionally its data.
+
+**Parameters:**
+- `workspaceId` (string, required): The ID of the destination workspace
+- `name` (string, required): Name for the new sheet
+- `templateId` (string, required): The ID of the template sheet to use
+- `include` (string, optional): Comma-separated elements to copy from the template (e.g., `data,attachments,discussions,cellLinks,forms`). Omit to copy structure only.
+
+### create_sheet_in_folder_from_template
+
+Creates a new sheet in a folder from a template, copying its structure and optionally its data.
+
+**Parameters:**
+- `folderId` (string, required): The ID of the destination folder
+- `name` (string, required): Name for the new sheet
+- `templateId` (string, required): The ID of the template sheet to use
+- `include` (string, optional): Comma-separated elements to copy from the template (e.g., `data,attachments,discussions,cellLinks,forms`). Omit to copy structure only.
+
 ### get_sheet_summary
 
 Gets the summary of a sheet, including all summary fields and their values.
@@ -241,7 +261,7 @@ This table outlines the Smartsheet API endpoints, whether they are currently cov
 | `/folders/{folderId}/copy`                    | No                   | POST               | N/A                                                        | Yes               | Copies a folder.                                                        |
 | `/folders/{folderId}/folders`                 | Yes                  | POST               | `create_folder` (POST)                                     | Yes               | Manages sub-folders (create). List via `get_folder`.                  |
 | `/folders/{folderId}/move`                    | No                   | POST               | N/A                                                        | Yes               | Moves a folder.                                                         |
-| `/folders/{folderId}/sheets`                  | Yes                  | POST               | `create_sheet` (POST with folderId). List via `get_folder`. | Yes               | Manages sheets within a folder.                                         |
+| `/folders/{folderId}/sheets`                  | Yes                  | POST               | `create_sheet` (POST with folderId), `create_sheet_in_folder_from_template` (POST with fromId). List via `get_folder`. | Yes               | Manages sheets within a folder.                                         |
 | `/folders/{folderId}/sheets/import`           | No                   | POST               | N/A                                                        | Yes               | Imports a sheet into a folder.                                          |
 | `/folders/personal`                           | No                   | GET                | N/A                                                        | Yes               | Accesses personal folders (Smartsheet specific, likely `GET /home/folders`). |
 | `/groups`                                     | No                   | GET, POST          | N/A                                                        | Consider          | List operation. Response size can vary.                                 |
@@ -338,7 +358,7 @@ This table outlines the Smartsheet API endpoints, whether they are currently cov
 | `/workspaces/{workspaceId}/folders`           | Yes                  | POST               | `create_workspace_folder` (POST). List via `get_workspace`. | Yes              | Manages folders within a workspace.                                     |
 | `/workspaces/{workspaceId}/shares`            | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage workspace shares.                                           |
 | `/workspaces/{workspaceId}/shares/{shareId}`  | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific workspace share.                             |
-| `/workspaces/{workspaceId}/sheets`            | No                   | GET                | N/A                                                        | Consider          | List sheets in workspace. List via `get_workspace`.                     |
+| `/workspaces/{workspaceId}/sheets`            | Yes                  | GET, POST          | `create_sheet_in_workspace_from_template` (POST with fromId). List via `get_workspace`. | Consider          | Create sheet from template in workspace. List not directly exposed.     |
 | `/workspaces/{workspaceId}/sheets/import`     | No                   | POST               | N/A                                                        | Yes               | Imports a sheet into a workspace.                                       |
 
 *Note: The `create_version_backup` tool is a workflow using multiple underlying API calls and is not listed as a direct endpoint coverer but its constituent calls are.*

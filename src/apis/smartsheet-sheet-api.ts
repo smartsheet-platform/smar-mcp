@@ -184,6 +184,42 @@ export class SmartsheetSheetAPI {
   }
   
   /**
+   * Creates a new sheet in a workspace from a template
+   * @param workspaceId Workspace ID
+   * @param name Name for the new sheet
+   * @param templateId ID of the template sheet to use
+   * @param include Optional comma-separated list of elements to include from template (e.g., 'data,attachments,discussions,cellLinks,forms')
+   * @returns New sheet data
+   */
+  async createSheetInWorkspaceFromTemplate(
+    workspaceId: string,
+    name: string,
+    templateId: string,
+    include?: string
+  ): Promise<any> {
+    const data: any = { name, fromId: templateId };
+    return this.api.request('POST', `/workspaces/${workspaceId}/sheets`, data, include ? { include } : undefined);
+  }
+
+  /**
+   * Creates a new sheet in a folder from a template
+   * @param folderId Folder ID
+   * @param name Name for the new sheet
+   * @param templateId ID of the template sheet to use
+   * @param include Optional comma-separated list of elements to include from template (e.g., 'data,attachments,discussions,cellLinks,forms')
+   * @returns New sheet data
+   */
+  async createSheetInFolderFromTemplate(
+    folderId: string,
+    name: string,
+    templateId: string,
+    include?: string
+  ): Promise<any> {
+    const data: any = { name, fromId: templateId };
+    return this.api.request('POST', `/folders/${folderId}/sheets`, data, include ? { include } : undefined);
+  }
+
+  /**
    * Gets the summary fields of a sheet
    * @param sheetId Sheet ID
    * @param include Optional comma-separated list of elements to include (e.g., 'writerInfo')

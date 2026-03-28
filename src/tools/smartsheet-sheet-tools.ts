@@ -554,6 +554,60 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, flags: Shee
         console.warn("Delete summary fields is disabled. Set ALLOW_DELETE_SUMMARY_FIELDS=true or ALLOW_DELETE_TOOLS=true to enable it.");
       }
 
+      // Tool: Create Sheet in Workspace from Template
+      server.tool(
+        "create_sheet_in_workspace_from_template",
+        "Creates a new sheet in a workspace from a template, copying its structure and optionally its data",
+        {
+          workspaceId: z.string().describe("The ID of the destination workspace"),
+          name: z.string().describe("Name for the new sheet"),
+          templateId: z.string().describe("The ID of the template sheet to use"),
+          include: z.string().optional().describe("Comma-separated elements to copy from template (e.g., 'data,attachments,discussions,cellLinks,forms'). Omit to copy structure only."),
+        },
+        async ({ workspaceId, name, templateId, include }) => {
+          try {
+            console.info(`Creating sheet "${name}" in workspace ${workspaceId} from template ${templateId}`);
+            const result = await api.sheets.createSheetInWorkspaceFromTemplate(workspaceId, name, templateId, include);
+            return {
+              content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+            };
+          } catch (error: any) {
+            console.error(`Failed to create sheet "${name}" in workspace ${workspaceId} from template ${templateId}`, { error });
+            return {
+              content: [{ type: "text", text: `Failed to create sheet from template: ${error.message}` }],
+              isError: true
+            };
+          }
+        }
+      );
+
+      // Tool: Create Sheet in Folder from Template
+      server.tool(
+        "create_sheet_in_folder_from_template",
+        "Creates a new sheet in a folder from a template, copying its structure and optionally its data",
+        {
+          folderId: z.string().describe("The ID of the destination folder"),
+          name: z.string().describe("Name for the new sheet"),
+          templateId: z.string().describe("The ID of the template sheet to use"),
+          include: z.string().optional().describe("Comma-separated elements to copy from template (e.g., 'data,attachments,discussions,cellLinks,forms'). Omit to copy structure only."),
+        },
+        async ({ folderId, name, templateId, include }) => {
+          try {
+            console.info(`Creating sheet "${name}" in folder ${folderId} from template ${templateId}`);
+            const result = await api.sheets.createSheetInFolderFromTemplate(folderId, name, templateId, include);
+            return {
+              content: [{ type: "text", text: JSON.stringify(result, null, 2) }]
+            };
+          } catch (error: any) {
+            console.error(`Failed to create sheet "${name}" in folder ${folderId} from template ${templateId}`, { error });
+            return {
+              content: [{ type: "text", text: `Failed to create sheet from template: ${error.message}` }],
+              isError: true
+            };
+          }
+        }
+      );
+
       // Tool: Create Sheet
       server.tool(
         "create_sheet",

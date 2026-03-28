@@ -71,6 +71,42 @@ describe('SmartsheetAPI - HTTPS enforcement', () => {
   });
 });
 
+describe('SmartsheetAPI - strict equality checks', () => {
+  it('should reject empty string accessToken', () => {
+    expect(() => new SmartsheetAPI('', TEST_BASE_URL))
+      .toThrow('SMARTSHEET_API_KEY environment variable is not set');
+  });
+
+  it('should reject undefined accessToken', () => {
+    expect(() => new SmartsheetAPI(undefined, TEST_BASE_URL))
+      .toThrow('SMARTSHEET_API_KEY environment variable is not set');
+  });
+
+  it('should reject empty string baseUrl', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, ''))
+      .toThrow('SMARTSHEET_ENDPOINT environment variable is not set');
+  });
+
+  it('should reject undefined baseUrl', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, undefined))
+      .toThrow('SMARTSHEET_ENDPOINT environment variable is not set');
+  });
+
+  it('should not treat non-empty falsy-coercible values as empty', () => {
+    // With strict equality, '0' and 'false' are not equal to ''
+    // These should fail on HTTPS check, not the empty-string check
+    expect(() => new SmartsheetAPI(TEST_TOKEN, '0'))
+      .toThrow('SMARTSHEET_ENDPOINT must use HTTPS');
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'false'))
+      .toThrow('SMARTSHEET_ENDPOINT must use HTTPS');
+  });
+
+  it('should accept valid token and HTTPS URL', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, TEST_BASE_URL))
+      .not.toThrow();
+  });
+});
+
 describe('SmartsheetAPI - token leakage prevention', () => {
   let errorSpy: jest.SpyInstance;
   let infoSpy: jest.SpyInstance;

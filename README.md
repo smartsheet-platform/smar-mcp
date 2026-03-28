@@ -138,7 +138,7 @@ Adds new rows to a sheet.
 
 ### delete_rows
 
-Deletes rows from a sheet. This tool is only available when the ALLOW_DELETE_TOOLS environment variable is set to 'true'.
+Deletes rows from a sheet. Available when `ALLOW_DELETE_ROWS=true`, or when `ALLOW_DELETE_TOOLS=true` and `ALLOW_DELETE_ROWS` is unset.
 
 **Parameters:**
 - `sheetId` (string, required): The ID of the sheet
@@ -169,6 +169,62 @@ Creates a new sheet.
 - `name` (string, required): Name for the new sheet
 - `columns` (array, required): Array of column objects
 - `folderId` (string, optional): ID of the folder where the sheet should be created
+
+### create_sheet_in_workspace_from_template
+
+Creates a new sheet in a workspace from a template, copying its structure and optionally its data.
+
+**Parameters:**
+- `workspaceId` (string, required): The ID of the destination workspace
+- `name` (string, required): Name for the new sheet
+- `templateId` (string, required): The ID of the template sheet to use
+- `include` (string, optional): Comma-separated elements to copy from the template (e.g., `data,attachments,discussions,cellLinks,forms`). Omit to copy structure only.
+
+### create_sheet_in_folder_from_template
+
+Creates a new sheet in a folder from a template, copying its structure and optionally its data.
+
+**Parameters:**
+- `folderId` (string, required): The ID of the destination folder
+- `name` (string, required): Name for the new sheet
+- `templateId` (string, required): The ID of the template sheet to use
+- `include` (string, optional): Comma-separated elements to copy from the template (e.g., `data,attachments,discussions,cellLinks,forms`). Omit to copy structure only.
+
+### get_sheet_summary
+
+Gets the summary of a sheet, including all summary fields and their values.
+
+**Parameters:**
+- `sheetId` (string, required): The ID of the sheet
+- `include` (string, optional): Comma-separated elements to include (e.g., `format`, `writerInfo`)
+- `exclude` (string, optional): Comma-separated elements to exclude (e.g., `displayValue`, `image`, `imageAltText`)
+
+### add_summary_fields
+
+Adds new summary fields to a sheet.
+
+**Parameters:**
+- `sheetId` (string, required): The ID of the sheet
+- `fields` (array, required): Array of summary field objects to add. Each object requires `title` and `type` (e.g., `TEXT_NUMBER`, `DATE`, `CHECKBOX`, `CONTACT_LIST`, `PICKLIST`); optional fields: `objectValue`, `formula`, `locked`
+- `renameIfConflict` (boolean, optional): If true, rename the field if one with the same name already exists
+
+### update_summary_fields
+
+Updates existing summary fields on a sheet.
+
+**Parameters:**
+- `sheetId` (string, required): The ID of the sheet
+- `fields` (array, required): Array of summary field objects to update. Each object requires `id`; optional fields: `title`, `type`, `objectValue`, `formula`, `locked`
+- `renameIfConflict` (boolean, optional): If true, rename the field if one with the same name already exists
+
+### delete_summary_fields
+
+Deletes summary fields from a sheet. Available when `ALLOW_DELETE_SUMMARY_FIELDS=true`, or when `ALLOW_DELETE_TOOLS=true` and `ALLOW_DELETE_SUMMARY_FIELDS` is unset.
+
+**Parameters:**
+- `sheetId` (string, required): The ID of the sheet
+- `fieldIds` (array, required): Array of summary field IDs to delete
+- `ignoreFieldsNotFound` (boolean, optional): If true, don't throw an error if a field ID doesn't exist
 
 ### create_version_backup
 
@@ -205,7 +261,7 @@ This table outlines the Smartsheet API endpoints, whether they are currently cov
 | `/folders/{folderId}/copy`                    | No                   | POST               | N/A                                                        | Yes               | Copies a folder.                                                        |
 | `/folders/{folderId}/folders`                 | Yes                  | POST               | `create_folder` (POST)                                     | Yes               | Manages sub-folders (create). List via `get_folder`.                  |
 | `/folders/{folderId}/move`                    | No                   | POST               | N/A                                                        | Yes               | Moves a folder.                                                         |
-| `/folders/{folderId}/sheets`                  | Yes                  | POST               | `create_sheet` (POST with folderId). List via `get_folder`. | Yes               | Manages sheets within a folder.                                         |
+| `/folders/{folderId}/sheets`                  | Yes                  | POST               | `create_sheet` (POST with folderId), `create_sheet_in_folder_from_template` (POST with fromId). List via `get_folder`. | Yes               | Manages sheets within a folder.                                         |
 | `/folders/{folderId}/sheets/import`           | No                   | POST               | N/A                                                        | Yes               | Imports a sheet into a folder.                                          |
 | `/folders/personal`                           | No                   | GET                | N/A                                                        | Yes               | Accesses personal folders (Smartsheet specific, likely `GET /home/folders`). |
 | `/groups`                                     | No                   | GET, POST          | N/A                                                        | Consider          | List operation. Response size can vary.                                 |
@@ -267,8 +323,8 @@ This table outlines the Smartsheet API endpoints, whether they are currently cov
 | `/sheets/{sheetId}/shares`                    | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage sheet shares.                                               |
 | `/sheets/{sheetId}/shares/{shareId}`          | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific sheet share.                                 |
 | `/sheets/{sheetId}/sort`                      | No                   | POST               | N/A                                                        | Yes               | Sorts a sheet.                                                          |
-| `/sheets/{sheetId}/summary`                   | No                   | GET                | N/A                                                        | Yes               | Get sheet summary.                                                      |
-| `/sheets/{sheetId}/summary/fields`            | No                   | GET, POST, PUT     | N/A                                                        | Yes               | List/Add/Update sheet summary fields.                                   |
+| `/sheets/{sheetId}/summary`                   | Yes                  | GET                | `get_sheet_summary` (GET)                                  | Yes               | Get sheet summary.                                                      |
+| `/sheets/{sheetId}/summary/fields`            | Yes                  | POST, PUT, DELETE  | `add_summary_fields` (POST), `update_summary_fields` (PUT), `delete_summary_fields` (DELETE) | Yes | Full CRUD for sheet summary fields.                  |
 | `/sheets/{sheetId}/summary/fields/{fieldId}/images` | No             | GET, POST, DELETE  | N/A                                                        | Consider          | Manage images for a sheet summary field. Involves binary data.          |
 | `/sheets/{sheetId}/updaterequests`            | Yes                  | GET, POST          | `create_update_request` (POST). List not directly exposed. | Consider          | List/Manage update requests.                                            |
 | `/sheets/{sheetId}/updaterequests/{updateRequestId}` | No            | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific update request.                              |
@@ -302,7 +358,7 @@ This table outlines the Smartsheet API endpoints, whether they are currently cov
 | `/workspaces/{workspaceId}/folders`           | Yes                  | POST               | `create_workspace_folder` (POST). List via `get_workspace`. | Yes              | Manages folders within a workspace.                                     |
 | `/workspaces/{workspaceId}/shares`            | No                   | GET, POST          | N/A                                                        | Consider          | List/Manage workspace shares.                                           |
 | `/workspaces/{workspaceId}/shares/{shareId}`  | No                   | GET, PUT, DELETE   | N/A                                                        | Yes               | Get/Update/Delete specific workspace share.                             |
-| `/workspaces/{workspaceId}/sheets`            | No                   | GET                | N/A                                                        | Consider          | List sheets in workspace. List via `get_workspace`.                     |
+| `/workspaces/{workspaceId}/sheets`            | Yes                  | GET, POST          | `create_sheet_in_workspace_from_template` (POST with fromId). List via `get_workspace`. | Consider          | Create sheet from template in workspace. List not directly exposed.     |
 | `/workspaces/{workspaceId}/sheets/import`     | No                   | POST               | N/A                                                        | Yes               | Imports a sheet into a workspace.                                       |
 
 *Note: The `create_version_backup` tool is a workflow using multiple underlying API calls and is not listed as a direct endpoint coverer but its constituent calls are.*
@@ -343,10 +399,42 @@ const result = await use_mcp_tool({
 // }
 ```
 
+## Security
+
+### HTTP Mode: Restrict /mcp to Anthropic Egress IPs
+
+When running in HTTP mode (`PORT` is set), the `/mcp` endpoint should be IP-restricted at the reverse proxy layer to Anthropic's egress CIDR block (`160.79.104.0/21`). This prevents unauthorized clients from reaching the MCP endpoint even if they obtain a valid token.
+
+Example Caddy snippet:
+
+```caddyfile
+@anthropic_egress {
+    remote_ip 160.79.104.0/21
+}
+handle /mcp {
+    reverse_proxy @anthropic_egress localhost:{$PORT}
+    respond "Forbidden" 403
+}
+```
+
+### JWT Signing Key
+
+If `JWT_SIGNING_KEY` is not set, an ephemeral key is generated at startup and all issued tokens are invalidated when the process restarts. Set `JWT_SIGNING_KEY` to a stable hex-encoded 32-byte value (e.g. `openssl rand -hex 32`) to make tokens survive restarts.
+
+### CSRF Protection
+
+The OAuth consent form is protected by a per-request server-side CSRF token. The token is generated in `/authorize`, stored in memory, and validated when the form is submitted to `/oauth/approve`. Replay attacks are mitigated by the token's 10-minute expiry.
+
 ## Environment Variables
 
 - `SMARTSHEET_API_KEY`: Your Smartsheet API token (required)
-- `ALLOW_DELETE_TOOLS`: Set to 'true' to enable deletion operations like delete_rows (default: false)
+- `SMARTSHEET_ENDPOINT`: The Smartsheet API base URL (required, e.g. `https://api.smartsheet.com/2.0`)
+- `PORT`: When set, activates HTTP server mode on the given port. Omit to run in stdio mode (default).
+- `ISSUER_URL`: Public HTTPS base URL of the server (required in HTTP mode, e.g. `https://mcp.example.com`). Used to construct OAuth discovery and endpoint URLs.
+- `JWT_SIGNING_KEY`: Hex-encoded 32-byte key used to sign OAuth access tokens in HTTP mode. If unset, an ephemeral key is generated at startup and tokens are invalidated on restart.
+- `ALLOW_DELETE_TOOLS`: Set to `true` to enable all deletion operations (default: `false`). Acts as the general/lower-order flag.
+- `ALLOW_DELETE_ROWS`: Granular override for `delete_rows`. `true` enables even if `ALLOW_DELETE_TOOLS=false`; `false` disables even if `ALLOW_DELETE_TOOLS=true`; absent defers to `ALLOW_DELETE_TOOLS`.
+- `ALLOW_DELETE_SUMMARY_FIELDS`: Granular override for `delete_summary_fields`. Same 3-state logic as `ALLOW_DELETE_ROWS`.
 
 ## Development
 
@@ -363,17 +451,14 @@ npm run build
 
 ### Project Structure
 
-- `src/index.ts`: Main entry point and MCP tool definitions
-- `src/smartsheet-direct-api.ts`: Direct API client for Smartsheet
-- `src/smartsheet-utils.ts`: Utility functions for common operations
-- `src/smartsheet-workflows.ts`: Implementation of complex workflows
-- `src/smartsheet-types`: Classes representing Smartsheet API objects
-- `tests/`: Test files for various functionality
+- `src/index.ts`: Main entry point and server bootstrap
+- `src/apis/`: API client classes for each Smartsheet resource area
+- `src/tools/`: MCP tool definitions and handlers
+- `src/smartsheet-types/`: Classes representing Smartsheet API objects
 - `scripts/`: Utility scripts
-- `examples/`: Example usage files
-- `.env`: Environment variables
+- `.env`: Environment variables (not committed)
 - `.env.example`: Template for environment variables
-- `claude_desktop_config-example.json`: Example claude desktop config to connect with the tool - Set your Smartsheet key in the env setting. 
+- `claude_desktop_config-example.json`: Example Claude Desktop config — set your API key in the env section
 
 ### Testing 
 

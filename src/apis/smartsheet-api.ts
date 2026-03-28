@@ -34,11 +34,11 @@ export class SmartsheetAPI {
     this.search = new SmartsheetSearchAPI(this);
     this.discussions = new SmartsheetDiscussionAPI(this);
     
-    if (this.accessToken == '') {
+    if (this.accessToken === '') {
       throw new Error('SMARTSHEET_API_KEY environment variable is not set');
     } 
 
-    if (this.baseUrl == '') {
+    if (this.baseUrl === '') {
       throw new Error('SMARTSHEET_ENDPOINT environment variable is not set');
     }
 
@@ -95,9 +95,12 @@ export class SmartsheetAPI {
         // Check if rate limited
         if (error.response?.status === 429 && retries < maxRetries) {
           const retryAfter = error.response.headers['retry-after'] || 1;
-          const delay = Math.max(
-            parseInt(retryAfter, 10) * 1000,
-            Math.pow(2, retries) * 1000 + Math.random() * 1000
+          const delay = Math.min(
+              Math.max(
+                  parseInt(retryAfter, 10) * 1000,
+                  Math.pow(2, retries) * 1000 + Math.random() * 1000
+              ),
+              60000
           );
           console.error(`[Rate Limit] Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));

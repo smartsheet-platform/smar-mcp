@@ -41,6 +41,10 @@ export class SmartsheetAPI {
     if (this.baseUrl == '') {
       throw new Error('SMARTSHEET_ENDPOINT environment variable is not set');
     }
+
+    if (!this.baseUrl.startsWith('https://')) {
+      throw new Error('SMARTSHEET_ENDPOINT must use HTTPS');
+    }
   }
 
   /**

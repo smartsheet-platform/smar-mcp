@@ -14,6 +14,23 @@ function createAPI(): SmartsheetAPI {
   return new SmartsheetAPI(TEST_TOKEN, TEST_BASE_URL);
 }
 
+describe('SmartsheetAPI - HTTPS enforcement', () => {
+  it('should reject HTTP base URLs', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'http://api.smartsheet.com/2.0'))
+      .toThrow('SMARTSHEET_ENDPOINT must use HTTPS');
+  });
+
+  it('should accept HTTPS base URLs', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'https://api.smartsheet.com/2.0'))
+      .not.toThrow();
+  });
+
+  it('should reject non-URL base URLs', () => {
+    expect(() => new SmartsheetAPI(TEST_TOKEN, 'ftp://api.smartsheet.com/2.0'))
+      .toThrow('SMARTSHEET_ENDPOINT must use HTTPS');
+  });
+});
+
 describe('SmartsheetAPI - token leakage prevention', () => {
   let errorSpy: jest.SpyInstance;
   let infoSpy: jest.SpyInstance;

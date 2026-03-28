@@ -75,15 +75,4 @@ coverage/
 memory-bank
 projectBrief.md
 CLAUDE.local.md
-/.claude/plans/finding-01-query-param-injection.md
-/.claude/plans/finding-02-path-traversal.md
-/.claude/plans/finding-03-email-validation.md
-/.claude/plans/finding-04-token-leakage-logging.md
-/.claude/plans/finding-05-zany-cell-values.md
-/.claude/plans/finding-06-https-enforcement.md
-/.claude/plans/finding-07-ci-skips-tests.md
-/.claude/plans/finding-08-unbounded-retry.md
-/.claude/plans/finding-09-loose-equality.md
-/.claude/plans/finding-10-unpinned-ci-actions.md
-/.claude/plans/finding-11-12-13-dependency-vulns.md
-/.claude/plans/security-review-remediation.md
+/.claude/plans/*

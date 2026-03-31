@@ -42,7 +42,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         "search_in_sheet",
         "Search cell data and summary fields for a specific sheet",
         {
-            sheetId: z.string().describe("The ID of the sheet to retrieve"),
+            sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet to retrieve"),
             query: z.string().describe("Text to search for in sheet names, cell data, or summary fields"),
         },
         async ({ sheetId, query }) => {
@@ -83,7 +83,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         async ({ url, query }) => {
         try {
             console.info(`Searching for sheet with URL: ${url} with query: ${query}`);
-            const match = url.match(/\/sheets\/([^?\/]+)/);
+            const match = url.match(/\/sheets\/([^?/]+)/);
             const directIdToken = match ? match[1] : null;
             if (!directIdToken) {
                 return {
@@ -126,7 +126,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         "what_am_i_assigned_to_by_sheet_id",
         "Search a sheet by ID to find assigned tasks",
         {
-            sheetId: z.string().describe("The ID of the sheet to retrieve"),
+            sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet to retrieve"),
         },
         async ({ sheetId }) => {
         try {
@@ -165,7 +165,7 @@ export function getSearchTools(server: McpServer, api: SmartsheetAPI) {
         async ({ url }) => {
         try {
             const user = await api.users.getCurrentUser();
-            const match = url.match(/\/sheets\/([^?\/]+)/);
+            const match = url.match(/\/sheets\/([^?/]+)/);
             const directIdToken = match ? match[1] : null;
             if (!directIdToken) {
                 return {

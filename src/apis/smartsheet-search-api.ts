@@ -14,7 +14,7 @@ export class SmartsheetSearchAPI {
    * @returns Search results
    */
   async searchSheet(sheetId: string, query: string): Promise<any> {
-    return this.api.request('GET', `/search/sheets/${sheetId}?query=${query}`);
+    return this.api.request('GET', `/search/sheets/${sheetId}`, undefined, { query });
   }
 
   /**
@@ -23,7 +23,7 @@ export class SmartsheetSearchAPI {
    * @returns Search results
    */
   async searchSheets(query: string): Promise<any> {
-    return this.api.request('GET', `/search?query=${query}&scopes=sheetNames,cellData,summaryFields`);
+    return this.api.request('GET', '/search', undefined, { query, scopes: 'sheetNames,cellData,summaryFields' });
   }
 
   /**
@@ -32,7 +32,7 @@ export class SmartsheetSearchAPI {
    * @returns Search results
    */
   async searchFolders(query: string): Promise<any> {
-    return this.api.request('GET', `/search?query=${query}&scopes=folderNames`);
+    return this.api.request('GET', '/search', undefined, { query, scopes: 'folderNames' });
   }
 
   /**
@@ -41,7 +41,7 @@ export class SmartsheetSearchAPI {
    * @returns Search results
    */
   async searchWorkspaces(query: string): Promise<any> {
-    return this.api.request('GET', `/search?query=${query}&scopes=workspaceNames`);
+    return this.api.request('GET', '/search', undefined, { query, scopes: 'workspaceNames' });
   }
 
   /**
@@ -50,7 +50,7 @@ export class SmartsheetSearchAPI {
    * @returns Search results
    */
   async searchReports(query: string): Promise<any> {
-    return this.api.request('GET', `/search?query=${query}&scopes=reportNames`);
+    return this.api.request('GET', '/search', undefined, { query, scopes: 'reportNames' });
   }
 
   /**
@@ -59,7 +59,7 @@ export class SmartsheetSearchAPI {
    * @returns Search results
    */
   async searchDashboards(query: string): Promise<any> {
-    return this.api.request('GET', `/search?query=${query}&scopes=sightNames`);
+    return this.api.request('GET', '/search', undefined, { query, scopes: 'sightNames' });
   }
   
 }

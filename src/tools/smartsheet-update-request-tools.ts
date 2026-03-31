@@ -9,7 +9,7 @@ export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
       "create_update_request",
       "Creates an update request for a sheet",
       {
-        sheetId: z.string().describe("The ID of the sheet"),
+        sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet"),
         rowIds: z.array(z.number()).optional().describe("Array of row IDs to include in the update request"),
         columnIds: z.array(z.number()).optional().describe("Array of column IDs to include in the update request"),
         includeAttachments: z.boolean().optional().describe("Whether to include attachments in the update request"),
@@ -19,7 +19,7 @@ export function getUpdateRequestTools(server: McpServer, api: SmartsheetAPI) {
         ccMe: z.boolean().optional().describe("Whether to CC the sender on the update request email"),
         sendTo: z.array(
           z.object({
-            email: z.string().describe("Email address of the recipient")
+            email: z.string().email("Must be a valid email address").describe("Email address of the recipient")
           })
         ).describe("Array of recipients for the update request"),
       },

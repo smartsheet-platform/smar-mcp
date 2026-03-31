@@ -8,7 +8,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       "get_sheet",
       "Retrieves the current state of a sheet, including rows, columns, and cells",
       {
-        sheetId: z.string().describe("The ID of the sheet to retrieve"),
+        sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet to retrieve"),
         include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'format,formulas')"),
         pageSize: z.number().optional().describe("Number of rows to return per page"),
         page: z.number().optional().describe("Page number to return"),
@@ -53,7 +53,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       async ({ url, include, pageSize, page }) => {
         try {
           console.info(`Getting sheet with URL: ${url}`);
-          const match = url.match(/\/sheets\/([^?\/]+)/);
+          const match = url.match(/\/sheets\/([^?/]+)/);
           const directIdToken = match ? match[1] : null;
           if (!directIdToken) {
             return {
@@ -95,7 +95,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         "get_sheet_version",
         "Gets the current version number of a sheet",
         {
-          sheetId: z.string().describe("The ID of the sheet"),
+          sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet"),
         },
         async ({ sheetId }) => {
           try {
@@ -130,9 +130,9 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         "get_cell_history",
         "Retrieves the history of changes for a specific cell",
         {
-          sheetId: z.string().describe("The ID of the sheet"),
-          rowId: z.string().describe("The ID of the row"),
-          columnId: z.string().describe("The ID of the column"),
+          sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet"),
+          rowId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the row"),
+          columnId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the column"),
           include: z.string().optional().describe("Optional parameter to include additional information"),
           pageSize: z.number().optional().describe("Number of history entries to return per page"),
           page: z.number().optional().describe("Page number to return"),
@@ -170,8 +170,8 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         "get_row",
         "Retrieves a specific row from a sheet",
         {
-          sheetId: z.string().describe("The ID of the sheet"),
-          rowId: z.string().describe("The ID of the row"),
+          sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet"),
+          rowId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the row"),
           include: z.string().optional().describe("Comma-separated list of elements to include (e.g., 'format,formulas')"),
         },
         async ({ sheetId, rowId, include }) => {
@@ -207,14 +207,14 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         "update_rows",
         "Updates rows in a sheet, including cell values, formatting, and formulae",
         {
-          sheetId: z.string().describe("The ID of the sheet"),
+          sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet"),
           rows: z.array(
             z.object({
-              id: z.string().describe("Row ID"),
+              id: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("Row ID"),
               cells: z.array(
                 z.object({
                   columnId: z.number().or(z.string()).describe("Column ID"),
-                  value: z.any().optional().describe("Cell value"),
+                  value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional().describe("Cell value"),
                   formula: z.string().optional().describe("Cell formula"),
                   format: z.string().optional().describe("Cell format"),
                 })
@@ -255,7 +255,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         "add_rows",
         "Adds new rows to a sheet",
         {
-          sheetId: z.string().describe("The ID of the sheet"),
+          sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet"),
           rows: z.array(
             z.object({
               toTop: z.boolean().optional().describe("Add row to the top of the sheet"),
@@ -263,7 +263,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               cells: z.array(
                 z.object({
                   columnId: z.number().or(z.string()).describe("Column ID"),
-                  value: z.any().optional().describe("Cell value"),
+                  value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional().describe("Cell value"),
                   formula: z.string().optional().describe("Cell formula"),
                   format: z.string().optional().describe("Cell format"),
                 })
@@ -305,8 +305,8 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
           "delete_rows",
           "Deletes rows from a sheet",
           {
-            sheetId: z.string().describe("The ID of the sheet"),
-            rowIds: z.array(z.string()).describe("Array of row IDs to delete"),
+            sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet"),
+            rowIds: z.array(z.string().regex(/^\d+$/, "Must be a numeric ID")).describe("Array of row IDs to delete"),
             ignoreRowsNotFound: z.boolean().optional().describe("If true, don't throw an error if rows are not found"),
           },
           async ({ sheetId, rowIds, ignoreRowsNotFound }) => {
@@ -345,7 +345,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         "get_sheet_location",
         "Gets the folder ID where a sheet is located",
         {
-          sheetId: z.string().describe("The ID of the sheet"),
+          sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet"),
         },
         async ({ sheetId }) => {
           try {
@@ -380,9 +380,9 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
         "copy_sheet",
         "Creates a copy of the specified sheet in the same folder",
         {
-          sheetId: z.string().describe("The ID of the sheet to copy"),
+          sheetId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the sheet to copy"),
           destinationName: z.string().describe("Name for the sheet copy"),
-          destinationFolderId: z.string().optional().describe("ID of the destination folder (same as source if not specified)"),
+          destinationFolderId: z.string().regex(/^\d+$/, "Must be a numeric ID").optional().describe("ID of the destination folder (same as source if not specified)"),
         },
         async ({ sheetId, destinationName, destinationFolderId }) => {
           try {
@@ -436,7 +436,7 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
               primary: z.boolean().optional().describe("Whether this is the primary column"),
             })
           ).describe("Array of column objects"),
-          folderId: z.string().optional().describe("ID of the folder where the sheet should be created"),
+          folderId: z.string().regex(/^\d+$/, "Must be a numeric ID").optional().describe("ID of the folder where the sheet should be created"),
         },
         async ({ name, columns, folderId }) => {
           try {

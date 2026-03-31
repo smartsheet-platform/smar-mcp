@@ -41,7 +41,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
         "get_user",
         "Gets a user's information by ID",
         {
-        userId: z.string().describe("ID of the user to get")
+        userId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("ID of the user to get")
         },
         async ({ userId }) => {
         try {

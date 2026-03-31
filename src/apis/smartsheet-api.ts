@@ -34,12 +34,16 @@ export class SmartsheetAPI {
     this.search = new SmartsheetSearchAPI(this);
     this.discussions = new SmartsheetDiscussionAPI(this);
     
-    if (this.accessToken == '') {
+    if (this.accessToken === '') {
       throw new Error('SMARTSHEET_API_KEY environment variable is not set');
     } 
 
-    if (this.baseUrl == '') {
+    if (this.baseUrl === '') {
       throw new Error('SMARTSHEET_ENDPOINT environment variable is not set');
+    }
+
+    if (!this.baseUrl.startsWith('https://')) {
+      throw new Error('SMARTSHEET_ENDPOINT must use HTTPS');
     }
   }
 
@@ -73,7 +77,7 @@ export class SmartsheetAPI {
           });
         }
         
-        console.info(`API Request: ${method} ${url.toString()}`);
+        console.info(`API Request: ${method} ${endpoint}`);
         
         const response = await axios({
           method,
@@ -91,15 +95,18 @@ export class SmartsheetAPI {
         // Check if rate limited
         if (error.response?.status === 429 && retries < maxRetries) {
           const retryAfter = error.response.headers['retry-after'] || 1;
-          const delay = Math.max(
-            parseInt(retryAfter, 10) * 1000,
-            Math.pow(2, retries) * 1000 + Math.random() * 1000
+          const delay = Math.min(
+              Math.max(
+                  parseInt(retryAfter, 10) * 1000,
+                  Math.pow(2, retries) * 1000 + Math.random() * 1000
+              ),
+              60000
           );
           console.error(`[Rate Limit] Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           retries++;
         } else {
-          console.error(`API Error: ${error.message}`, { error });
+          console.error(`API Error: ${error.message}`, this.sanitizeError(error));
           throw this.formatError(error);
         }
       }
@@ -108,6 +115,18 @@ export class SmartsheetAPI {
     throw new Error('Maximum retries exceeded');
   }
   
+  /**
+   * Sanitizes an error object for safe logging by stripping sensitive fields
+   * such as Authorization headers and tokens.
+   */
+  private sanitizeError(error: any): Record<string, unknown> {
+    return {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    };
+  }
+
   /**
    * Formats an error for consistent error handling
    * @param error Error to format

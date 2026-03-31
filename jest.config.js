@@ -10,7 +10,8 @@ export default {
   ],
   transform: {
     '^.+\\.ts$': ['ts-jest', {
-      useESM: true
+      useESM: true,
+      diagnostics: false,
     }]
   },
   moduleNameMapper: {

@@ -1,6 +1,6 @@
 {
 	"name": "@smartsheet/smar-mcp",
-	"version": "1.6.0",
+	"version": "1.6.1",
 	"description": "A Model Context Protocol (MCP) server for interacting with the Smartsheet API. This server provides tools for searching, retrieving, and updating Smartsheet sheets through the MCP protocol.",
 	"main": "build/index.js",
 	"type": "module",
@@ -47,14 +47,14 @@
 	},
 	"license": "MIT",
 	"engines": {
-		"node": ">=16.0.0",
-		"npm": ">=7.0.0"
+		"node": ">=25.8.2",
+		"npm": ">=11.11.1"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.12.0",
-		"axios": "^1.8.4",
-		"dotenv": "^16.4.7",
-		"zod": "^3.24.2"
+		"@modelcontextprotocol/sdk": "^1.27.1",
+		"axios": "^1.14.0",
+		"dotenv": "^17.3.1",
+		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^17.8.1",
@@ -62,9 +62,10 @@
 		"@semantic-release/changelog": "^6.0.3",
 		"@semantic-release/git": "^10.0.1",
 		"@semantic-release/npm": "^12.0.1",
+		"@types/jest": "^30.0.0",
 		"@types/node": "^22.13.10",
-		"@typescript-eslint/eslint-plugin": "^6.0.0",
-		"@typescript-eslint/parser": "^6.0.0",
+		"@typescript-eslint/eslint-plugin": "^8.0.0",
+		"@typescript-eslint/parser": "^8.0.0",
 		"eslint": "^8.57.0",
 		"husky": "^8.0.3",
 		"jest": "^29.5.0",

@@ -9,7 +9,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
         "get_folder",
         "Retrieves the current state of a folder, including its contents which can be sheets, reports, or other folders",
         {
-        folderId: z.string().describe("The ID of the folder to retrieve")
+        folderId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the folder to retrieve")
         },
         async ({ folderId}) => {
         try {
@@ -44,7 +44,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
         "create_folder",
         "Creates a new folder in a folder",
         {
-        folderId: z.string().describe("The ID of the folder to create the folder in"),
+        folderId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the folder to create the folder in"),
         folderName: z.string().describe("The name of the new folder")
         },
         async ({ folderId, folderName }) => {
@@ -80,7 +80,7 @@ export function getFolderTools(server: McpServer, api: SmartsheetAPI) {
         "create_workspace_folder",
         "Creates a new folder in a workspace",
         {
-        workspaceId: z.string().describe("The ID of the workspace to create the folder in"),
+        workspaceId: z.string().regex(/^\d+$/, "Must be a numeric ID").describe("The ID of the workspace to create the folder in"),
         folderName: z.string().describe("The name of the new folder")
         },
         async ({ workspaceId, folderName }) => {

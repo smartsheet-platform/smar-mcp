@@ -1,44 +1,36 @@
-name: Release
+name: CI
+
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
-      - ci*
-
+      - main
 
 jobs:
-  release:
-    name: Release
+  build-and-test:
+    name: Build & Test
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          fetch-depth: 0
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: 25
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Build
         run: npm run build
-        
+
       - name: Test
         run: npm test
-        
-      - name: Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release

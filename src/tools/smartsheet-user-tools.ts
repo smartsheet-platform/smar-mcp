@@ -8,6 +8,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
     server.tool(
         "get_current_user",
         "Gets the current user's information",
+        {},
         async () => {
         try {
             console.info("Getting current user");
@@ -74,6 +75,7 @@ export function getUserTools(server: McpServer, api: SmartsheetAPI) {
     server.tool(
         "list_users",
         "Lists all users",
+        {},
         async () => {
             try {
                 console.info("Listing all users");

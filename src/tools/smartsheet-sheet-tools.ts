@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SmartsheetAPI } from "../apis/smartsheet-api.js";
 import { z } from "zod";
+import { parseSmartsheetUrl, validateRegionMatch } from "../utils/url-utils.js";
 
 export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDeleteTools: boolean) {
 
@@ -53,20 +54,31 @@ export function getSheetTools(server: McpServer, api: SmartsheetAPI, allowDelete
       async ({ url, include, pageSize, page }) => {
         try {
           console.info(`Getting sheet with URL: ${url}`);
-          const match = url.match(/\/sheets\/([^?/]+)/);
-          const directIdToken = match ? match[1] : null;
-          if (!directIdToken) {
+          const parsed = parseSmartsheetUrl(url);
+          if (!parsed) {
             return {
               content: [
                 {
                   type: "text",
-                  text: `Failed to get sheet: Invalid URL format`
+                  text: `Failed to get sheet: Invalid URL format. Expected a Smartsheet URL containing /sheets/{id}`
                 }
               ],
               isError: true
             };
           }
-          const sheet = await api.sheets.getSheetByDirectIdToken(directIdToken, include, undefined, pageSize, page);
+          const regionError = validateRegionMatch(parsed.region, api.region);
+          if (regionError) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Failed to get sheet: ${regionError}`
+                }
+              ],
+              isError: true
+            };
+          }
+          const sheet = await api.sheets.getSheetByDirectIdToken(parsed.directIdToken, include, undefined, pageSize, page);
           
           return {
             content: [

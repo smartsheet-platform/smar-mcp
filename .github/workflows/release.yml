@@ -36,7 +36,29 @@ jobs:
         
       - name: Test
         run: npm test
-        
+
+      - name: Verify NPM_TOKEN
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "${NODE_AUTH_TOKEN}" ]; then
+            echo "::error title=Missing NPM_TOKEN::The NPM_TOKEN repository secret is not set. semantic-release requires it to publish to npm. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          # Use a registry-scoped .npmrc so npm whoami picks up the token without
+          # leaking it into the global config. Fail fast with a readable error if
+          # the token is invalid/expired so downstream semantic-release output
+          # stays focused on real release issues.
+          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > .npmrc.preflight
+          if ! NPM_CONFIG_USERCONFIG="$(pwd)/.npmrc.preflight" npm whoami --registry=https://registry.npmjs.org/ > /tmp/npm_whoami.txt 2>&1; then
+            echo "::error title=Invalid NPM_TOKEN::npm whoami failed with the configured NPM_TOKEN. The token is missing publish rights, expired, or revoked. Generate a new automation token (https://docs.npmjs.com/creating-and-viewing-access-tokens) with publish scope and update the NPM_TOKEN repository secret."
+            cat /tmp/npm_whoami.txt
+            rm -f .npmrc.preflight
+            exit 1
+          fi
+          echo "NPM_TOKEN is valid for npm user: $(cat /tmp/npm_whoami.txt)"
+          rm -f .npmrc.preflight
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
